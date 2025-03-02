@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="CSEG/App.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/MainWindow.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/Screens/Startup/StartupScreenView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/Screens/Startup/StartupSettingsElementView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/Screens/StartupScreenView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/Screens/Viewer/ViewerScreenView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/Screens/ViewerScreenView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/SettingsScreenView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/SimulationScreenView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/StartupScreenView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/StartupSettingsElementView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/StartupView.axaml" value="CSEG/CSEG.csproj" />
+        <entry key="CSEG/Views/ViewerScreenView.axaml" value="CSEG/CSEG.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,128 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewModels="clr-namespace:NEXUS.Growth.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Growth.Views.ViewerScreenView"
+             x:DataType="viewModels:ViewerScreenViewModel">
+    <SplitView OpenPaneLength="380" IsPaneOpen="{Binding IsPaneOpened}" DisplayMode="Inline">
+        
+        <SplitView.Pane>
+            
+            <DockPanel>
+                
+                <UniformGrid DockPanel.Dock="Bottom" Columns="3" Margin="8">
+                    <Button Margin="0 0 4 0" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Открыть"/>
+                            <avalonia:MaterialIcon Kind="FolderEyeOutline"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="4 0" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Импорт"/>
+                            <avalonia:MaterialIcon Kind="FolderMoveOutline"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="4 0 0 0" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Удалить"/>
+                            <avalonia:MaterialIcon Kind="FolderRemoveOutline" Foreground="Crimson"/>
+                        </StackPanel>
+                    </Button>
+                </UniformGrid>
+
+                <controls:TabView Name="Tabs"
+                                  CanDragTabs="False" 
+                                  CanReorderTabs="False" 
+                                  TabWidthMode="Compact"
+                                  IsAddTabButtonVisible="False"
+                                  BorderThickness="1 0 1 1"
+                                  BorderBrush="{DynamicResource TabViewBorderBrush}"
+                                  VerticalAlignment="Stretch"
+                                  Margin="8 0">
+                    <controls:TabView.Styles>
+                        <Style Selector="controls|TabViewItem">
+                            <Setter Property="IsClosable" Value="False"/>
+                        </Style>
+                    </controls:TabView.Styles>
+                    
+                    <controls:TabViewItem>
+                        <controls:TabViewItem.Header>
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4">
+                                <avalonia:MaterialIcon Kind="FolderClockOutline"/>
+                                <TextBlock Text="Недавние результаты"/>
+                                <controls:InfoBadge Value="{Binding LastProcesses.Count}"/>
+                            </StackPanel>
+                        </controls:TabViewItem.Header>
+                        <controls:TabViewItem.Content>
+                                <ListBox ItemsSource="{Binding LastProcesses}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate DataType="viewModels:ProcessDirectoryViewModel">
+                                            <Grid Margin="4">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <avalonia:MaterialIcon Width="20" Height="20" Kind="PeriodicTable"/>
+                                                        <TextBlock FontSize="14" Text="{Binding ElementName}"/>
+                                                    </StackPanel>
+                                                    <avalonia:MaterialIcon Kind="ArrowRightBold" Width="20" Height="20"/>
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <avalonia:MaterialIcon Width="20" Height="20" Kind="PeriodicTable"/>
+                                                        <TextBlock FontSize="14" Text="{Binding SubstrateElementName}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4">
+                                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                                        <avalonia:MaterialIcon Width="20" Height="20" Kind="Variable"/>
+                                                        <TextBlock FontSize="14" Text="{Binding Process}"/>
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <avalonia:MaterialIcon Width="20" Height="20" Kind="Calendar"/>
+                                                        <TextBlock FontSize="14" Text="{Binding Date}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="4">
+                                                    <avalonia:MaterialIcon Width="20" Height="20" Kind="Folder"/>
+                                                    <TextBlock FontSize="14" Text="{Binding Folder}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                        </controls:TabViewItem.Content>
+                    </controls:TabViewItem>
+                    
+                </controls:TabView>
+
+            </DockPanel>
+
+        </SplitView.Pane>  
+        
+        <DockPanel LastChildFill="True">
+            <ToggleButton Width="26" VerticalAlignment="Stretch" Margin="0 8" Padding="0" 
+                          IsChecked="{Binding IsPaneOpened}">
+                
+                <Grid>
+                    
+                    <avalonia:MaterialIcon Kind="ChevronRight" IsVisible="{Binding !IsPaneOpened}"/>
+                    
+                    <avalonia:MaterialIcon Kind="ChevronLeft" Foreground="White" IsVisible="{Binding IsPaneOpened}"/>
+                    
+                </Grid>
+                
+            </ToggleButton>
+            <Panel>
+                
+            </Panel>
+        </DockPanel>    
+        
+    </SplitView>
+</UserControl>
