@@ -10,7 +10,7 @@
         x:DataType="vm:MainWindowViewModel"
         MinWidth="800"
         MinHeight="600"
-        Icon="/Assets/cseg-logo.ico"
+        Icon="/Assets/GrowthSimulation.ico"
         Title="CSEG">
 
     <Design.DataContext>

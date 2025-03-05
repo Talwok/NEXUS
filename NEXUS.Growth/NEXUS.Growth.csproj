@@ -6,7 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <ApplicationIcon>Assets\cseg-logo.ico</ApplicationIcon>
+        <ApplicationIcon>Assets\GrowthSimulation.ico</ApplicationIcon>
         <IsPackable>false</IsPackable>
         <Title>CSEG</Title>
         <Authors>Alex Bembel, Vitaly Anofriev</Authors>
@@ -23,7 +23,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\cseg-logo.ico" />
+        <None Remove="Assets\GrowthSimulation.ico" />
+        <AvaloniaResource Include="Assets\GrowthSimulation.ico" />
     </ItemGroup>
 
     <ItemGroup>

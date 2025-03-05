@@ -21,6 +21,7 @@
         <entry key="NEXUS.Epitaxial/Views/StartupScreenView.axaml" value="NEXUS.Epitaxial/NEXUS.Epitaxial.csproj" />
         <entry key="NEXUS.Epitaxial/Views/StartupSettingsElementView.axaml" value="NEXUS.Epitaxial/NEXUS.Epitaxial.csproj" />
         <entry key="NEXUS.Fractal/MainWindow.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Growth/App.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Growth/Views/MainWindow.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Growth/Views/SettingsScreenView.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Growth/Views/SimulationScreenView.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
