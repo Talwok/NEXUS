@@ -23,7 +23,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\cseg-logo.ico"/>
+        <AvaloniaResource Include="Assets\cseg-logo.ico" />
     </ItemGroup>
 
     <ItemGroup>
@@ -83,6 +83,10 @@
       <None Update="Assets\Startup\start.xml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
     
 </Project>

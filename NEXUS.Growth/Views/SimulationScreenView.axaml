@@ -6,5 +6,5 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Growth.Views.SimulationScreenView"
              x:DataType="startup1:SimulationScreenViewModel">
-    <NumericUpDown Value="{Binding SimulationService.SimulationsCount}"/>
+    <NumericUpDown Value="{Binding SimulationsCount}"/>
 </UserControl>

@@ -1,20 +1,31 @@
-﻿using Avalonia;
+﻿using System.ComponentModel;
+using System.Linq;
+using Avalonia;
+using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Growth.Services;
+using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;
 
-public class SettingsScreenViewModel : ScreenViewModelBase
+public class SettingsScreenViewModel : StatefulViewModelBase
 {
-    public SettingsScreenViewModel()
+    public SettingsScreenViewModel() : base("SettingsState.json")
     {
-        if (Application.Current is App app)
+        PropertyChanged += OnPropertyChanged;
+    }
+    
+    [Reactive]
+    public bool IsDarkThemeToggled { get; set; }
+    
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(IsDarkThemeToggled))
         {
-            SettingsService = app.ServiceProvider.GetService<SettingsService>();
+            Application.Current.RequestedThemeVariant = IsDarkThemeToggled ? ThemeVariant.Dark : ThemeVariant.Light;
         }
 
+        if(!IsDeserializing)
+            _ = Save(this);
     }
-
-    public SettingsService? SettingsService { get; }
-    
 }

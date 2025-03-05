@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -13,7 +14,7 @@ namespace NEXUS.Growth;
 
 public partial class App : Application
 {
-    private MainWindow _mainWindow;
+    private static MainWindow _mainWindow;
 
     public override void Initialize()
     {
@@ -31,8 +32,18 @@ public partial class App : Application
         serviceCollection.AddSingleton<StartupService>();
         serviceCollection.AddSingleton<SimulationService>();
         serviceCollection.AddSingleton<ViewerService>();
-
+        
+        serviceCollection.AddSingleton<StatefulViewModelBase, SettingsScreenViewModel>();
+        serviceCollection.AddSingleton<StatefulViewModelBase, SimulationScreenViewModel>();
+        serviceCollection.AddSingleton<StatefulViewModelBase, StartupScreenViewModel>();
+        serviceCollection.AddSingleton<StatefulViewModelBase, ViewerScreenViewModel>();
+        
         ServiceProvider = serviceCollection.BuildServiceProvider();
+        
+        foreach (var statefulViewModelBase in ServiceProvider.GetServices<StatefulViewModelBase>())
+        {
+            _ = statefulViewModelBase.Load();
+        }
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -50,6 +61,6 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    public IServiceProvider ServiceProvider { get; private set; } 
-    public IStorageProvider StorageProvider => _mainWindow.StorageProvider;
+    public static IServiceProvider ServiceProvider { get; private set; } 
+    public static IStorageProvider StorageProvider => _mainWindow.StorageProvider;
 }

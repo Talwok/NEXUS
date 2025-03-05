@@ -2,7 +2,6 @@
 
 namespace NEXUS.Growth.Services;
 
-public class ServiceBase : ReactiveObject
+public abstract class ServiceBase : ReactiveObject
 {
-    
 }

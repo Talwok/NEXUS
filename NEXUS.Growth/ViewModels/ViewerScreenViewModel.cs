@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Avalonia;
@@ -8,45 +9,37 @@ using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;
 
-public class ViewerScreenViewModel : ScreenViewModelBase
+public class ViewerScreenViewModel : StatefulViewModelBase
 {
     private readonly AppConfiguration _configuration;
 
-    public ViewerScreenViewModel(string filePath)
+    public ViewerScreenViewModel() : base("ViewerState.json")
     {
-        FilePath = filePath;
-        
-        if (Application.Current is App app)
-        {
-            Startup = app.ServiceProvider.GetRequiredService<StartupViewModel>();
-        }
-        
         _configuration = AppConfigurationExtensions.DeserializeDefaultsFromXml() ?? new AppConfiguration();
 
-        LastProcesses = new ObservableCollection<ProcessDirectoryViewModel>(_configuration.RecentFolders
-            .Where(folder => File.Exists($"..\\{folder}\\start.xml"))
-            .Select(folder =>
-            {
-                var options = StartOptionsExtensions.DeserializeFromXml($"..\\{folder}\\start.xml");
-                var dirInfo = new DirectoryInfo($"..\\{folder}");
-                var processDirectory = new ProcessDirectoryViewModel
-                {
-                    Process = Startup.Processes.First(p => p.Key.ToOptionsString() == options?.Options?[0].Process).Value,
-                    ElementName = options?.Options?[0].Element,
-                    SubstrateElementName = options?.Options?[0].Substrate?.Element,
-                    AtomCount = options?.Options?[0].AtomCount ?? 0,
-                    Date = dirInfo.CreationTime.ToShortDateString(),
-                    Folder = folder
-                };
-                return processDirectory;
-            }));
+        Processes = ProcessExtensions.GetDictionary();
+        
+        // LastProcesses = new ObservableCollection<ProcessDirectoryViewModel>(_configuration.RecentFolders
+        //     .Where(folder => File.Exists($"..\\{folder}\\start.xml"))
+        //     .Select(folder =>
+        //     {
+        //         var options = StartOptionsExtensions.DeserializeFromXml($"..\\{folder}\\start.xml");
+        //         var dirInfo = new DirectoryInfo($"..\\{folder}");
+        //         var processDirectory = new ProcessDirectoryViewModel
+        //         {
+        //             Process = Processes.First(p => p.Key.ToOptionsString() == options?.Options?[0].Process).Value,
+        //             ElementName = options?.Options?[0].Element,
+        //             SubstrateElementName = options?.Options?[0].Substrate?.Element,
+        //             AtomCount = options?.Options?[0].AtomCount ?? 0,
+        //             Date = dirInfo.CreationTime.ToShortDateString(),
+        //             Folder = folder
+        //         };
+        //         return processDirectory;
+        //     }));
     }
 
-    [Reactive]
-    public StartupViewModel Startup { get; set; }
+    public Dictionary<Process, string> Processes { get; }
 
-    public string FilePath { get; }
-    
     [Reactive]
     public ObservableCollection<ProcessDirectoryViewModel> LastProcesses { get; set; }
 

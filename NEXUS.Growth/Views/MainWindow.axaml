@@ -27,9 +27,9 @@
             <controls:NavigationViewItem DataContext="{Binding SimulationMenuItem}" Content="{Binding Name}" 
                                          IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
                 <controls:NavigationViewItem.InfoBadge>
-                    <controls:InfoBadge DataContext="{Binding #Navigation.DataContext}" 
-                                        IsVisible="{Binding SimulationService.SimulationsCount, DataType=vm:MainWindowViewModel}"
-                                        Value="{Binding SimulationService.SimulationsCount, DataType=vm:MainWindowViewModel}"/>
+                    <controls:InfoBadge DataContext="{Binding Screen}" 
+                                        IsVisible="{Binding SimulationsCount, DataType=vm:SimulationScreenViewModel}"
+                                        Value="{Binding SimulationsCount, DataType=vm:SimulationScreenViewModel}"/>
                 </controls:NavigationViewItem.InfoBadge>
             </controls:NavigationViewItem>
             <controls:NavigationViewItem DataContext="{Binding StartupMenuItem}" Content="{Binding Name}" 

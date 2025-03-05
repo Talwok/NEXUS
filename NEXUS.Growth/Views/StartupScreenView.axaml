@@ -60,19 +60,19 @@
                 </Button>
 
                 <TextBox Watermark="Папка с результатами"
-                         IsReadOnly="{Binding Startup.IsAutoFolderNaming}"
-                         Text="{Binding Startup.OutputFolder}">
+                         IsReadOnly="{Binding IsAutoFolderNaming}"
+                         Text="{Binding OutputFolder}">
                     <TextBox.InnerLeftContent>
                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="FolderTextOutline" 
                                                Foreground="Goldenrod"/>
                     </TextBox.InnerLeftContent>
                     <TextBox.InnerRightContent>
                         <ToggleButton Theme="{StaticResource TransparentButton}" 
-                                      IsChecked="{Binding Startup.IsAutoFolderNaming}"
+                                      IsChecked="{Binding IsAutoFolderNaming}"
                                       ToolTip.Tip="Автоматически изменять имя папки в зависимости от параметров">
                             <Grid>
-                                <avalonia:MaterialIcon Kind="AutorenewOff" IsVisible="{Binding Startup.IsAutoFolderNaming}" />
-                                <avalonia:MaterialIcon Kind="Autorenew" IsVisible="{Binding !Startup.IsAutoFolderNaming}"/>
+                                <avalonia:MaterialIcon Kind="AutorenewOff" IsVisible="{Binding IsAutoFolderNaming}" />
+                                <avalonia:MaterialIcon Kind="Autorenew" IsVisible="{Binding !IsAutoFolderNaming}"/>
                             </Grid>
                         </ToggleButton>
                     </TextBox.InnerRightContent>
@@ -138,19 +138,19 @@
                                         <WrapPanel>
                                             <views1:StartupSettingsElementView IconKind="Function" Title="Потенциал"
                                                                                 Hint="Потенциал взаимодействия">
-                                                <ComboBox ItemsSource="{Binding Startup.Potentials}"
-                                                          SelectedItem="{Binding Startup.SelectedPotential}"
+                                                <ComboBox ItemsSource="{Binding Potentials}"
+                                                          SelectedItem="{Binding SelectedPotential}"
                                                           DisplayMemberBinding="{Binding Value}"/>                                                                             
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="PeriodicTable" Title="Элемент"
                                                                                 Hint="Тип атомов">
-                                                <ComboBox ItemsSource="{Binding Startup.Elements}"
-                                                          SelectedItem="{Binding Startup.SelectedElement}"
+                                                <ComboBox ItemsSource="{Binding Elements}"
+                                                          SelectedItem="{Binding SelectedElement}"
                                                           DisplayMemberBinding="{Binding Key}"/>                                                                                         
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="ElectronFramework" Title="Число атомов">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.AtomCount}">
+                                                               Value="{Binding AtomCount}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -158,15 +158,15 @@
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="TimelineClockOutline" Title="Число временных шагов">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.TimeSteps}">
+                                                               Value="{Binding TimeSteps}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="Variable" Title="Тип процесса">
-                                                <ComboBox ItemsSource="{Binding Startup.Processes}"
-                                                          SelectedItem="{Binding Startup.SelectedProcess}"
+                                                <ComboBox ItemsSource="{Binding Processes}"
+                                                          SelectedItem="{Binding SelectedProcess}"
                                                           DisplayMemberBinding="{Binding Value}"/>    
                                             </views1:StartupSettingsElementView>
                                         </WrapPanel>
@@ -174,14 +174,14 @@
                                     <views1:StartupSettingsElementView Classes="Container" Grid.Row="1" IconKind="MountainOutline" Title="Эпитаксиальный рост">
                                             <WrapPanel>
                                                 <views1:StartupSettingsElementView IconKind="DiameterVariant" Title="Диаметр пучка">
-                                                    <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Startup.BeamDiameter}">
+                                                    <NumericUpDown Minimum="0" FormatString="0" Value="{Binding BeamDiameter}">
                                                         <NumericUpDown.InnerLeftContent>
                                                             <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight" Width="20" Height="20"/>
                                                         </NumericUpDown.InnerLeftContent>
                                                     </NumericUpDown>
                                                 </views1:StartupSettingsElementView>
                                                 <views1:StartupSettingsElementView IconKind="LightningBoltOutline" Title="Энергия пучка">
-                                                    <NumericUpDown Minimum="0" FormatString="0.0" Value="{Binding Startup.BeamEnergy}">
+                                                    <NumericUpDown Minimum="0" FormatString="0.0" Value="{Binding BeamEnergy}">
                                                         <NumericUpDown.InnerLeftContent>
                                                             <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Gauge" Width="20" Height="20"/>
                                                         </NumericUpDown.InnerLeftContent>
@@ -189,7 +189,7 @@
                                                 </views1:StartupSettingsElementView>
                                                 <views1:StartupSettingsElementView IconKind="TimerTickOutline" Title="Задержка"
                                                                                     Hint="Задержка в шагах, до вылета следующего атома">
-                                                    <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Startup.BeamDelay}">
+                                                    <NumericUpDown Minimum="0" FormatString="0" Value="{Binding BeamDelay}">
                                                         <NumericUpDown.InnerLeftContent>
                                                             <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20" Height="20"/>
                                                         </NumericUpDown.InnerLeftContent>
@@ -201,7 +201,7 @@
                                         <WrapPanel>
                                             <views1:StartupSettingsElementView IconKind="DotsHexagon" Title="Начальная плотность">
                                                 <NumericUpDown Minimum="0" FormatString="0.0" 
-                                                               Value="{Binding Startup.EvolutionInitialDensity}">
+                                                               Value="{Binding EvolutionInitialDensity}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Percent" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -209,14 +209,14 @@
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="ShapeOutline" Title="Начальная конфигурация">
                                                 <WrapPanel Classes="Element">
-                                                    <RadioButton Content="Кубическая" IsChecked="{Binding Startup.IsCubicConfiguration}"/>
-                                                    <RadioButton Content="Сферическая" IsChecked="{Binding Startup.IsSphericConfiguration}"/>
+                                                    <RadioButton Content="Кубическая" IsChecked="{Binding IsCubicConfiguration}"/>
+                                                    <RadioButton Content="Сферическая" IsChecked="{Binding IsSphericConfiguration}"/>
                                                 </WrapPanel>
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="AxisArrow" Title="Позиция">
                                                 <WrapPanel Classes="Element">
-                                                    <RadioButton Content="Центр" IsChecked="{Binding Startup.IsCenterPosition}"/>
-                                                    <RadioButton Content="Низ" IsChecked="{Binding Startup.IsBottomPosition}"/>
+                                                    <RadioButton Content="Центр" IsChecked="{Binding IsCenterPosition}"/>
+                                                    <RadioButton Content="Низ" IsChecked="{Binding IsBottomPosition}"/>
                                                 </WrapPanel>
                                             </views1:StartupSettingsElementView>
                                         </WrapPanel>
@@ -224,29 +224,29 @@
                                     <views1:StartupSettingsElementView Classes="Container" Grid.Row="3" IconKind="Temperature" Title="Температура">
                                         <WrapPanel>
                                             <views1:StartupSettingsElementView IconKind="ContainStart" Title="Начальная">
-                                                <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Startup.TemperatureInitial}">
+                                                <NumericUpDown Minimum="0" FormatString="0" Value="{Binding TemperatureInitial}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="TemperatureCelsius" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="DotsHorizontal" Title="Промежуточная" 
-                                                IsCheckable="True" IsChecked="{Binding Startup.TemperatureIntermediateEnable, Mode=TwoWay}">
-                                                <NumericUpDown IsEnabled="{Binding Startup.TemperatureIntermediateEnable}" Minimum="0" FormatString="0" Value="{Binding Startup.TemperatureIntermediate}">
+                                                IsCheckable="True" IsChecked="{Binding TemperatureIntermediateEnable, Mode=TwoWay}">
+                                                <NumericUpDown IsEnabled="{Binding TemperatureIntermediateEnable}" Minimum="0" FormatString="0" Value="{Binding TemperatureIntermediate}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="TemperatureCelsius" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="ContainEnd" Title="Конечная">
-                                                <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Startup.TemperatureEnd}">
+                                                <NumericUpDown Minimum="0" FormatString="0" Value="{Binding TemperatureEnd}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="TemperatureCelsius" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="Restart" Title="Число циклов">
-                                                <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Startup.Cycles}">
+                                                <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Cycles}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -254,9 +254,9 @@
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView IconKind="ChartArc" Title="Доля от цикла" 
                                                 Hint="Доля цикла в процентах между начальной и промежуточной температурами">
-                                                <NumericUpDown IsEnabled="{Binding Startup.TemperatureIntermediateEnable}" 
+                                                <NumericUpDown IsEnabled="{Binding TemperatureIntermediateEnable}" 
                                                                Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.TemperatureIntermediatePercent}">
+                                                               Value="{Binding TemperatureIntermediatePercent}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Percent" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -301,22 +301,22 @@
                                     <views1:StartupSettingsElementView Classes="Container" Grid.Row="0" IconKind="CardBulletedOutline" Title="Общие">
                                         <StackPanel>
                                             <views1:StartupSettingsElementView Title="Подвижная коробка" VerticalAlignment="Center"
-                                                IsCheckable="True" IsChecked="{Binding Startup.IsMotileBox, Mode=TwoWay}"/>
+                                                IsCheckable="True" IsChecked="{Binding IsMotileBox, Mode=TwoWay}"/>
                                             <views1:StartupSettingsElementView Title="Тип">
                                                 <WrapPanel>
-                                                    <RadioButton Content="Открытый" IsChecked="{Binding Startup.IsOpenedType}"/>
-                                                    <RadioButton Content="Закрытый" IsChecked="{Binding Startup.IsClosedType}"/>
-                                                    <RadioButton Content="Периодический" IsChecked="{Binding Startup.IsPeriodicType}"/>
+                                                    <RadioButton Content="Открытый" IsChecked="{Binding IsOpenedType}"/>
+                                                    <RadioButton Content="Закрытый" IsChecked="{Binding IsClosedType}"/>
+                                                    <RadioButton Content="Периодический" IsChecked="{Binding IsPeriodicType}"/>
                                                 </WrapPanel>
                                             </views1:StartupSettingsElementView>
                                         </StackPanel>
                                     </views1:StartupSettingsElementView>
-                                    <views1:StartupSettingsElementView Classes="Container" Grid.Row="1" IconKind="CubeOutline" Title="Куб" IsCheckable="True" IsChecked="{Binding Startup.IsCubicCell}">
+                                    <views1:StartupSettingsElementView Classes="Container" Grid.Row="1" IconKind="CubeOutline" Title="Куб" IsCheckable="True" IsChecked="{Binding IsCubicCell}">
                                         <WrapPanel>
                                             <views1:StartupSettingsElementView IconKind="AxisXArrow" Title="Ширина"
                                                                                 Hint="Ширина ячеек в ангстремах">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.BoxWidth}">
+                                                               Value="{Binding BoxWidth}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -325,7 +325,7 @@
                                             <views1:StartupSettingsElementView IconKind="AxisYArrow" Title="Глубина"
                                                                                 Hint="Глубина ячеек в ангстремах">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.BoxDepth}">
+                                                               Value="{Binding BoxDepth}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -335,7 +335,7 @@
                                                                                 Title="Высота"
                                                                                 Hint="Высота ячейки в ангстремах">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.BoxHeight}">
+                                                               Value="{Binding BoxHeight}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -343,11 +343,11 @@
                                             </views1:StartupSettingsElementView>
                                         </WrapPanel>
                                     </views1:StartupSettingsElementView>
-                                    <views1:StartupSettingsElementView Classes="Container" Grid.Row="2" IconKind="Sphere" Title="Сфера" IsCheckable="True" IsChecked="{Binding Startup.IsSphericCell}">
+                                    <views1:StartupSettingsElementView Classes="Container" Grid.Row="2" IconKind="Sphere" Title="Сфера" IsCheckable="True" IsChecked="{Binding IsSphericCell}">
                                         <views1:StartupSettingsElementView IconKind="RadiusOutline" 
                                                                             Title="Радиус" 
                                                                             Hint="Радиус в ангстремах">
-                                            <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Startup.SphereRadius}">
+                                            <NumericUpDown Minimum="0" FormatString="0" Value="{Binding SphereRadius}">
                                                 <NumericUpDown.InnerLeftContent>
                                                     <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight" Width="20" Height="20"/>
                                                 </NumericUpDown.InnerLeftContent>
@@ -358,40 +358,40 @@
                                         <WrapPanel>
                                             <views1:StartupSettingsElementView Title="Тип">
                                                 <WrapPanel>
-                                                    <RadioButton Content="Отсутствует" IsChecked="{Binding Startup.IsSubstrateNone}"/>
-                                                    <RadioButton Content="Непрерывная" IsChecked="{Binding Startup.IsSubstrateContinual}"/>
-                                                    <RadioButton Content="Дискретная" IsChecked="{Binding Startup.IsSubstrateDiscrete}"/>
+                                                    <RadioButton Content="Отсутствует" IsChecked="{Binding IsSubstrateNone}"/>
+                                                    <RadioButton Content="Непрерывная" IsChecked="{Binding IsSubstrateContinual}"/>
+                                                    <RadioButton Content="Дискретная" IsChecked="{Binding IsSubstrateDiscrete}"/>
                                                 </WrapPanel>
                                             </views1:StartupSettingsElementView>
-                                            <views1:StartupSettingsElementView IsEnabled="{Binding Startup.IsSubstrateDiscrete}" IconKind="PeriodicTable" Title="Элемент"
+                                            <views1:StartupSettingsElementView IsEnabled="{Binding IsSubstrateDiscrete}" IconKind="PeriodicTable" Title="Элемент"
                                                 Hint="Тип атомов">
-                                                <ComboBox ItemsSource="{Binding Startup.Elements}"
-                                                          SelectedItem="{Binding Startup.SelectedSubstrateElement}"
+                                                <ComboBox ItemsSource="{Binding Elements}"
+                                                          SelectedItem="{Binding SelectedSubstrateElement}"
                                                           DisplayMemberBinding="{Binding Key}"/>                                                                                         
                                             </views1:StartupSettingsElementView>
-                                            <views1:StartupSettingsElementView IsEnabled="{Binding Startup.IsSubstrateDiscrete}" Title="Грань">
+                                            <views1:StartupSettingsElementView IsEnabled="{Binding IsSubstrateDiscrete}" Title="Грань">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.Face}">
+                                                               Value="{Binding Face}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
-                                            <views1:StartupSettingsElementView IsEnabled="{Binding Startup.IsSubstrateDiscrete}" IconKind="ArrowUpDown" 
+                                            <views1:StartupSettingsElementView IsEnabled="{Binding IsSubstrateDiscrete}" IconKind="ArrowUpDown" 
                                                                                 Title="Глубина атомов"
                                                                                 Hint="Глубина подвижных атомов">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.AgileItemsHeight}">
+                                                               Value="{Binding AgileItemsHeight}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
-                                            <views1:StartupSettingsElementView IsEnabled="{Binding Startup.IsSubstrateDiscrete}" IconKind="Temperature" 
+                                            <views1:StartupSettingsElementView IsEnabled="{Binding IsSubstrateDiscrete}" IconKind="Temperature" 
                                                                                 Title="Начальная температура" 
                                                                                 Hint="Начальная температура подвижных атомов">
                                                 <NumericUpDown Minimum="0" FormatString="0" 
-                                                               Value="{Binding Startup.InitialAgileTemperature}">
+                                                               Value="{Binding InitialAgileTemperature}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
@@ -433,11 +433,11 @@
                                     <views1:StartupSettingsElementView Classes="Container" Grid.Row="1" IconKind="ViewDashboardOutline" Title="Система">
 
                                         <StackPanel>
-                                            <views1:StartupSettingsElementView IconKind="Speedometer" Title="Сохранять скорости" IsCheckable="True" IsChecked="{Binding Startup.IsSavingVelocities}"/>
+                                            <views1:StartupSettingsElementView IconKind="Speedometer" Title="Сохранять скорости" IsCheckable="True" IsChecked="{Binding IsSavingVelocities}"/>
                                             <WrapPanel>
                                                 <views1:StartupSettingsElementView IconKind="TimerTick" Title="Периодичность создания конфигурационных файлов">
                                                     <NumericUpDown Minimum="0" FormatString="0.0" 
-                                                                   Value="{Binding Startup.DumpCreationFrequency}">
+                                                                   Value="{Binding DumpCreationFrequency}">
                                                         <NumericUpDown.InnerLeftContent>
                                                             <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20" Height="20"/>
                                                         </NumericUpDown.InnerLeftContent>
@@ -445,7 +445,7 @@
                                                 </views1:StartupSettingsElementView>
                                                 <views1:StartupSettingsElementView IconKind="TimerTick" Title="Периодичность сохранения параметров">
                                                     <NumericUpDown Minimum="0" FormatString="0.0" 
-                                                                   Value="{Binding Startup.DumpSavingFrequency}">
+                                                                   Value="{Binding DumpSavingFrequency}">
                                                         <NumericUpDown.InnerLeftContent>
                                                             <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20" Height="20"/>
                                                         </NumericUpDown.InnerLeftContent>
@@ -453,7 +453,7 @@
                                                 </views1:StartupSettingsElementView>
                                                 <views1:StartupSettingsElementView Title="Cn максимальное">
                                                     <NumericUpDown Minimum="0" FormatString="0.0" 
-                                                                   Value="{Binding Startup.CnMax}">
+                                                                   Value="{Binding CnMax}">
                                                         <NumericUpDown.InnerLeftContent>
                                                             <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                         </NumericUpDown.InnerLeftContent>
@@ -461,38 +461,38 @@
                                                 </views1:StartupSettingsElementView>
                                                 <views1:StartupSettingsElementView IconKind="TimerTick" Title="Временной шаг">
                                                     <NumericUpDown Minimum="0" 
-                                                        Value="{Binding Startup.TimeVerlet}">
+                                                        Value="{Binding TimeVerlet}">
                                                         <NumericUpDown.InnerLeftContent>
                                                             <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20" Height="20"/>
                                                         </NumericUpDown.InnerLeftContent>
                                                     </NumericUpDown>
                                                 </views1:StartupSettingsElementView>
                                             </WrapPanel>
-                                            <views1:StartupSettingsElementView IconKind="AngleAcute" Title="Контроль угловых моментов" IsCheckable="True" IsChecked="{Binding Startup.IsAngularMomentumControl}"/>
+                                            <views1:StartupSettingsElementView IconKind="AngleAcute" Title="Контроль угловых моментов" IsCheckable="True" IsChecked="{Binding IsAngularMomentumControl}"/>
                                         </StackPanel>
                                         </views1:StartupSettingsElementView>
                                     <views1:StartupSettingsElementView Classes="Container" Grid.Row="2" IconKind="ThermostatBox" Title="Термостат">
                                         <WrapPanel>
                                             <views1:StartupSettingsElementView Title="Порог коррекции Максвелла" 
-                                                IsCheckable="True" IsChecked="{Binding Startup.IsMaxwellCorrection}">
+                                                IsCheckable="True" IsChecked="{Binding IsMaxwellCorrection}">
                                                 <NumericUpDown Minimum="0" 
-                                                               Value="{Binding Startup.MaxwellCorrectionThreshold}">
+                                                               Value="{Binding MaxwellCorrectionThreshold}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView Title="Параметр термостата Берендсена"
-                                                IsCheckable="True" IsChecked="{Binding Startup.IsBerendsenThermostate}">
+                                                IsCheckable="True" IsChecked="{Binding IsBerendsenThermostate}">
                                                 <NumericUpDown Minimum="0" FormatString="0.0" 
-                                                               Value="{Binding Startup.BerendsenThermostateParameter}">
+                                                               Value="{Binding BerendsenThermostateParameter}">
                                                     <NumericUpDown.InnerLeftContent>
                                                         <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20" Height="20"/>
                                                     </NumericUpDown.InnerLeftContent>
                                                 </NumericUpDown>
                                             </views1:StartupSettingsElementView>
                                             <views1:StartupSettingsElementView Title="3D термостат"
-                                                IsCheckable="True" IsChecked="{Binding Startup.Is3dThermostate}"/>
+                                                IsCheckable="True" IsChecked="{Binding Is3dThermostate}"/>
                                         </WrapPanel>
                                     </views1:StartupSettingsElementView>
                                         

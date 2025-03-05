@@ -10,7 +10,7 @@
     <StackPanel Spacing="8" Margin="16">
         <ToggleSwitch OnContent="Включить" 
                       OffContent="Выключить" 
-                      IsChecked="{Binding SettingsService.IsDarkThemeToggled}">
+                      IsChecked="{Binding IsDarkThemeToggled}">
             <ToggleSwitch.Content>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <avalonia:MaterialIcon Kind="Flashlight"/>

@@ -1,19 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia;
 using Avalonia.Platform.Storage;
-using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Growth.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;
 
-public class StartupScreenViewModel : ScreenViewModelBase
+public class StartupScreenViewModel : StatefulViewModelBase
 {
     private bool _cellsChanging;
 
@@ -24,40 +21,195 @@ public class StartupScreenViewModel : ScreenViewModelBase
             "*.xml"
         }
     };
+    
 
-    private readonly AppConfiguration _configuration;
-
-    public StartupScreenViewModel()
+    public StartupScreenViewModel() : base("StartupState.json") 
     {
-        if (Application.Current is App app)
-        {
-            Startup = app.ServiceProvider.GetRequiredService<StartupViewModel>();
-        }
-
-        this.PropertyChanged += OnPropertyChanged;
-
+        Elements = ElementsHelper.GetElements().ToDictionary(item => $"{item.Name}, {item.Title}");
+        Potentials = PotentialExtensions.GetDictionary();
+        Processes = ProcessExtensions.GetDictionary();
+        
+        SelectedPotential = Potentials.First();
+        SelectedElement = Elements.First();
+        SelectedSubstrateElement = Elements.First();
+        SelectedProcess = Processes.First();
+        
         SearchOutputFolderCommand = ReactiveCommand.CreateFromTask(SearchOutputFolderAsync);
         SaveStartOptionsCommand = ReactiveCommand.CreateFromTask(SaveStartOptionsAsync); 
         LoadStartOptionsCommand = ReactiveCommand.CreateFromTask(LoadStartOptionsAsync);
-        StartProcessCommand = ReactiveCommand.Create(StartProcess);
-        SetStartOptions(StartOptionsExtensions.DeserializeDefaultsFromXml());
+        //StartProcessCommand = ReactiveCommand.Create(StartProcess);
 
-        _configuration = AppConfigurationExtensions.DeserializeDefaultsFromXml() ?? new AppConfiguration();
-
-        SetAppConfiguration(_configuration);
+        this.PropertyChanged += OnPropertyChanged;
     }
+    
+    
+    public Dictionary<Potential, string> Potentials { get; }
+
+    [Reactive] 
+    public KeyValuePair<Potential, string> SelectedPotential { get; set; }
+    
+    public Dictionary<string, Element> Elements { get; }
 
     [Reactive]
-    public StartupViewModel Startup { get; set; }
+    public KeyValuePair<string, Element>? SelectedElement { get; set; }
 
-    private void StartProcess()
+    public Dictionary<Process, string> Processes { get; }
+
+    [Reactive] 
+    public KeyValuePair<Process, string> SelectedProcess { get; set; }
+    
+    [Reactive]
+    public string? OutputFolder { get; set; }
+    
+    [Reactive]
+    public double AtomCount { get; set; }
+
+    [Reactive]
+    public double TimeSteps { get; set; }
+
+    [Reactive]
+    public double BeamDiameter { get; set; }
+
+    [Reactive]
+    public double BeamEnergy { get; set; }
+
+    [Reactive]
+    public double BeamDelay { get; set; }
+
+    [Reactive]
+    public double EvolutionInitialDensity { get; set; }
+
+    [Reactive] 
+    public bool IsCubicConfiguration { get; set; } = true;
+
+    [Reactive]
+    public bool IsSphericConfiguration { get; set; }
+
+    [Reactive] 
+    public bool IsCenterPosition { get; set; } = true;
+
+    [Reactive]
+    public bool IsBottomPosition { get; set; }
+
+    [Reactive]
+    public double TemperatureInitial { get; set; }
+    
+    [Reactive]
+    public double TemperatureEnd { get; set; }
+    
+    [Reactive]
+    public double Cycles { get; set; }
+
+    [Reactive]
+    public bool TemperatureIntermediateEnable { get; set; }
+
+    [Reactive]
+    public double TemperatureIntermediatePercent { get; set; }
+
+    [Reactive]
+    public double TemperatureIntermediate { get; set; }
+
+    [Reactive] 
+    public bool IsOpenedType { get; set; } = true;
+    
+    [Reactive]
+    public bool IsClosedType { get; set; }
+    
+    [Reactive]
+    public bool IsPeriodicType { get; set; }
+    
+    [Reactive]
+    public bool IsMotileBox { get; set; }
+
+    [Reactive]
+    public double BoxWidth { get; set; }
+    
+    [Reactive]
+    public double BoxDepth { get; set; }
+    
+    [Reactive]
+    public double BoxHeight { get; set; }
+
+    [Reactive]
+    public double SphereRadius { get; set; }
+
+    [Reactive]
+    public bool IsSubstrateNone { get; set; } = true;
+    
+    [Reactive]
+    public bool IsSubstrateContinual { get; set; }
+    
+    [Reactive]
+    public bool IsSubstrateDiscrete { get; set; }
+    
+    [Reactive] 
+    public KeyValuePair<string, Element>? SelectedSubstrateElement { get; set; }
+
+    [Reactive]
+    public double Face { get; set; }
+
+    [Reactive]
+    public double AgileItemsHeight { get; set; }
+    
+    [Reactive]
+    public double InitialAgileTemperature { get; set; }
+
+    [Reactive]
+    public bool IsCubicCell { get; set; }
+
+    [Reactive] 
+    public bool IsSphericCell { get; set; } = true;
+
+    [Reactive] 
+    public bool IsSavingVelocities { get; set; } = true;
+
+    [Reactive]
+    public bool IsAngularMomentumControl { get; set; }
+
+    [Reactive]
+    public double DumpCreationFrequency { get; set; }
+    
+    [Reactive]
+    public double DumpSavingFrequency { get; set; }
+
+    [Reactive]
+    public double CnMax { get; set; }
+
+    [Reactive]
+    public double TimeVerlet { get; set; }
+    
+    [Reactive]
+    public bool IsMaxwellCorrection { get; set; }
+    
+    [Reactive]
+    public bool IsBerendsenThermostate { get; set; }
+
+    [Reactive]
+    public bool Is3dThermostate { get; set; }
+    
+    [Reactive]
+    public double MaxwellCorrectionThreshold { get; set; }
+    
+    [Reactive]
+    public double BerendsenThermostateParameter { get; set; }
+
+    [Reactive]
+    public bool IsAutoFolderNaming { get; set; }
+    
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (Startup.OutputFolder != null)
+        if(!IsDeserializing)
+            _ = Save(this);
+    }
+    
+    /*private void StartProcess()
+    {
+        if (OutputFolder != null)
         {
-            var outputFolder = $"..\\{Startup.OutputFolder}";
+            var outputFolder = $"..\\{OutputFolder}";
             var elementsFolder = "Assets\\Elements";
-            var elementFileName = Startup.SelectedElement?.Value.FileName;
-            var substrateElementFileName = Startup.SelectedSubstrateElement?.Value.FileName;
+            var elementFileName = SelectedElement?.Value.FileName;
+            var substrateElementFileName = SelectedSubstrateElement?.Value.FileName;
 
             if(Directory.Exists(outputFolder))
                 Directory.Delete(outputFolder, true);
@@ -68,7 +220,7 @@ public class StartupScreenViewModel : ScreenViewModelBase
             
             GetStartOptions().SerializeToXml(stream);
             
-            _configuration.RecentFolders.Add(Startup.OutputFolder);
+            _configuration.RecentFolders.Add(OutputFolder);
             _configuration.SerializeDefaultsToXml();
 
             if (elementFileName != null && !File.Exists(Path.Combine(outputFolder, $"{elementFileName}.conf")))
@@ -89,285 +241,57 @@ public class StartupScreenViewModel : ScreenViewModelBase
 
     private AppConfiguration GetAppConfiguration()
     {
-        _configuration.IsStartupAutoFolderNaming = Startup.IsAutoFolderNaming;
+        _configuration.IsStartupAutoFolderNaming = IsAutoFolderNaming;
         return _configuration;
-    }
+    }*/
 
     private void SetAppConfiguration(AppConfiguration config)
     {
-        Startup.IsAutoFolderNaming = config.IsStartupAutoFolderNaming;
-    }
-    
-    private void SetStartOptions(StartOptions? options)
-    {
-        if (options?.Options != null)
-        {
-            var option = options.Options.FirstOrDefault();
-            
-            if (option != null)
-            {
-                Startup.SelectedProcess = Startup.Processes.First(p => p.Key.ToOptionsString() == option.Process);
-                Startup.SelectedPotential = Startup.Potentials.First(p => p.Key.ToOptionsString() == option.Potential);
-                Startup.SelectedElement = Startup.Elements.First(e => e.Value.FileName == option.Element);
-                Startup.AtomCount = option.AtomCount;
-                Startup.TimeSteps = option.TimeSteps;
-                Startup.TemperatureInitial = option.TemperatureInitial;
-                Startup.TemperatureIntermediateEnable = option.TemperatureIntermediateEnable;
-                Startup.TemperatureIntermediate = option.TemperatureIntermediate;
-                Startup.TemperatureIntermediatePercent = option.TemperatureIntermediatePercent;
-                Startup.TemperatureEnd = option.TemperatureEnd;
-                Startup.Cycles = option.Cycles;
-            }
-            
-            if (option?.Epitaxy != null)
-            {
-                Startup.BeamDiameter = option.Epitaxy.Diameter;
-                Startup.BeamEnergy = option.Epitaxy.Energy;
-                Startup.BeamDelay = option.Epitaxy.Delay;
-            }
-
-            if (option?.Evolution != null)
-            {
-                Startup.EvolutionInitialDensity = option.Evolution.InitialDensity;
-                Startup.IsCubicConfiguration = option.Evolution.InitialConfiguration == "cube";
-                Startup.IsSphericConfiguration = option.Evolution.InitialConfiguration == "sphere";
-                Startup.IsCenterPosition = option.Evolution.InitialPosition == "centered";
-                Startup.IsBottomPosition = option.Evolution.InitialPosition == "bottom";
-            }
-            
-            if (option?.Substrate != null)
-            {
-                Startup.AgileItemsHeight = option.Substrate.AgileHeight;
-                Startup.InitialAgileTemperature = option.Substrate.AgileTemperature;
-                Startup.Face = option.Substrate.Face;
-                Startup.IsSubstrateNone = option.Substrate.Type == "none";
-                Startup.IsSubstrateContinual = option.Substrate.Type == "continual";
-                Startup.IsSubstrateDiscrete = option.Substrate.Type == "discrete";
-                Startup.SelectedSubstrateElement = Startup.Elements.First(e => e.Value.FileName == option.Substrate.Element);
-            }
-
-            if (option?.Box != null)
-            {
-                Startup.IsMotileBox = option.Box.Motile;
-                Startup.BoxWidth = option.Box.Width;
-                Startup.BoxDepth = option.Box.Depth;
-                Startup.BoxHeight = option.Box.Height;
-                Startup.SphereRadius = option.Box.Radius;
-                Startup.IsClosedType = option.Box.System == "closed";
-                Startup.IsOpenedType = option.Box.System == "opened";
-                Startup.IsPeriodicType = option.Box.System == "periodic";
-                Startup.IsCubicCell = option.Box.Geometry == "cube";
-                Startup.IsSphericCell = option.Box.Geometry == "sphere";
-            }
-
-            if (option?.System != null)
-            {
-                Startup.CnMax = option.System.CnMax;
-                Startup.TimeVerlet = option.System.TimeVerlet;
-                Startup.IsSavingVelocities = option.System.SaveVelocities;
-                Startup.IsAngularMomentumControl = option.System.AngularMomentumControl;
-                Startup.DumpCreationFrequency = option.System.DumpFrequency;
-                Startup.DumpSavingFrequency = option.System.DumpSummaryFrequency;
-                Startup.IsMaxwellCorrection = option.System.ThermostateMaxwell;
-                Startup.MaxwellCorrectionThreshold = option.System.ThermostateMaxwellThreshold;
-                Startup.IsBerendsenThermostate = option.System.ThermostateBerendsen;
-                Startup.BerendsenThermostateParameter = option.System.ThermostateBerendsenParameter;
-                Startup.Is3dThermostate = option.System.Thermostate3DMode;
-            }
-        }
-    }
-    
-    private StartOptions GetStartOptions()
-    {
-        var epitaxy = new Epitaxy
-        {
-            Diameter = Startup.BeamDiameter,
-            Energy = Startup.BeamEnergy,
-            Delay = Startup.BeamDelay
-        };
-
-        var evolution = new Evolution
-        {
-            InitialDensity = Startup.EvolutionInitialDensity,
-            InitialConfiguration = Startup.IsCubicConfiguration ? "cube" : "sphere",
-            InitialPosition = Startup.IsCenterPosition ? "centered" : "bottom"
-        };
-
-        var substrate = new Substrate
-        {
-            Element = Startup.SelectedSubstrateElement?.Value.FileName,
-            AgileHeight = Startup.AgileItemsHeight,
-            AgileTemperature = Startup.InitialAgileTemperature,
-            Face = Startup.Face
-        };
-
-        if (Startup.IsSubstrateNone)
-        {
-            substrate.Type = "none";
-        }
-        else if (Startup.IsSubstrateContinual)
-        {
-            substrate.Type = "continual";
-        }
-        else if (Startup.IsSubstrateDiscrete)
-        {
-            substrate.Type = "discrete";
-        }
-
-        var box = new Box
-        {
-            Motile = Startup.IsMotileBox,
-            Width = Startup.BoxWidth,
-            Depth = Startup.BoxDepth,
-            Height = Startup.BoxHeight,
-            Radius = Startup.SphereRadius
-        };
-        
-        if (Startup.IsClosedType)
-        {
-            box.System = "closed";
-        }
-        else if (Startup.IsOpenedType)
-        {
-            box.System = "opened";
-        }
-        else if (Startup.IsPeriodicType)
-        {
-            box.System = "periodic";
-        }
-        
-        if (Startup.IsCubicCell)
-        {
-            box.Geometry = "cube";
-        }
-        else if (Startup.IsSphericCell)
-        {
-            box.Geometry = "sphere";
-        }
-
-        var system = new SystemSettings
-        {
-            CnMax = Startup.CnMax,
-            TimeVerlet = Startup.TimeVerlet,
-            SaveVelocities = Startup.IsSavingVelocities,
-            AngularMomentumControl = Startup.IsAngularMomentumControl,
-            DumpFrequency = Startup.DumpCreationFrequency,
-            DumpSummaryFrequency = Startup.DumpSavingFrequency,
-            OutputMethod = "standard",
-            ThermostateMaxwell = Startup.IsMaxwellCorrection,
-            ThermostateMaxwellThreshold = Startup.MaxwellCorrectionThreshold,
-            ThermostateBerendsen = Startup.IsBerendsenThermostate,
-            ThermostateBerendsenParameter = Startup.BerendsenThermostateParameter,
-            Thermostate3DMode = Startup.Is3dThermostate
-        };
-        
-        var option = new StartOption
-        {
-            Process = Startup.SelectedProcess.Key.ToOptionsString(),
-            Potential = Startup.SelectedPotential.Key.ToOptionsString(),
-            Element = Startup.SelectedElement?.Value.FileName,
-            AtomCount = Startup.AtomCount,
-            TimeSteps = Startup.TimeSteps,
-            TemperatureInitial = Startup.TemperatureInitial,
-            TemperatureIntermediateEnable = Startup.TemperatureIntermediateEnable,
-            TemperatureIntermediate = Startup.TemperatureIntermediate,
-            TemperatureEnd = Startup.TemperatureEnd,
-            Cycles = Startup.Cycles,
-            Epitaxy = epitaxy,
-            Evolution = evolution,
-            Substrate = substrate,
-            Box = box,
-            System = system
-        };
-        
-        var options = new StartOptions { Options = [ option ] };
-        
-        return options;
+        IsAutoFolderNaming = config.IsStartupAutoFolderNaming;
     }
     
     private async Task LoadStartOptionsAsync()
     {
-        if (Application.Current is App app)
-        {
-            var startOptionsFile = (await app.StorageProvider.OpenFilePickerAsync(
-                new FilePickerOpenOptions
-                {
-                    Title = "Выберите файл для загрузки настроек", 
-                    AllowMultiple = false, 
-                    FileTypeFilter = [_startOptionsFileType],
-                })).FirstOrDefault();
-
-            if (startOptionsFile != null)
+        var startOptionsFile = (await App.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
             {
-                SetStartOptions(StartOptionsExtensions.DeserializeFromXml(await startOptionsFile.OpenReadAsync()));
-            }
+                Title = "Выберите файл для загрузки настроек", 
+                AllowMultiple = false, 
+                FileTypeFilter = [_startOptionsFileType],
+            })).FirstOrDefault();
+
+        if (startOptionsFile != null)
+        {
+            
         }
     }
 
     private async Task SaveStartOptionsAsync()
     {
-        if (Application.Current is App app)
+        var startOptionsFile = await App.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            var startOptionsFile = await app.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
-            {
-                Title = "Выберите папку и название файла для сохранения настроек",
-                FileTypeChoices = new List<FilePickerFileType> { _startOptionsFileType },
-                ShowOverwritePrompt = true
-            });
+            Title = "Выберите папку и название файла для сохранения настроек",
+            FileTypeChoices = new List<FilePickerFileType> { _startOptionsFileType },
+            ShowOverwritePrompt = true
+        });
             
-            if (startOptionsFile != null)
-            {
-                var options = GetStartOptions();
-                options.SerializeToXml(await startOptionsFile.OpenWriteAsync());
-            }
-        }
-    }
-
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        var configNames = new string[]
+        if (startOptionsFile != null)
         {
-            nameof(Startup.IsPaneOpened),
-            nameof(Startup.IsAutoFolderNaming),   
-        };
-
-        if (configNames.Contains(e.PropertyName))
-        {
-            GetAppConfiguration().SerializeDefaultsToXml();
-        }
-        
-        if (e.PropertyName == nameof(Startup.IsCubicCell) && !_cellsChanging)
-        {
-            _cellsChanging = true;
-            Startup.IsSphericCell = !Startup.IsCubicCell;
-            _cellsChanging = false;
-        }
-        else if (e.PropertyName == nameof(Startup.IsSphericCell) && !_cellsChanging)
-        {
-            _cellsChanging = true;
-            Startup.IsCubicCell = !Startup.IsSphericCell;
-            _cellsChanging = false;
-        }
-        else
-        {
-            
+           
         }
     }
 
     private async Task SearchOutputFolderAsync()
     {
-        if (Application.Current is App app)
+        var folders = await App.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            var folders = await app.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-            {
-                Title = "Выберите папку для сохранения результатов",
-                AllowMultiple = false
-            });
+            Title = "Выберите папку для сохранения результатов",
+            AllowMultiple = false
+        });
 
-            if (folders.Count >= 1)
-            {
-                Startup.OutputFolder = folders.First().Path.LocalPath;
-            }
+        if (folders.Count >= 1)
+        {
+            OutputFolder = folders.First().Path.LocalPath;
         }
     }
 

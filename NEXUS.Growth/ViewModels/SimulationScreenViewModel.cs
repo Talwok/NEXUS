@@ -1,18 +1,21 @@
-﻿using Avalonia;
-using Microsoft.Extensions.DependencyInjection;
-using NEXUS.Growth.Services;
+﻿using System.ComponentModel;
+using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;
 
-public class SimulationScreenViewModel : ScreenViewModelBase
+public class SimulationScreenViewModel : StatefulViewModelBase
 {
-    public SimulationScreenViewModel()
+    public SimulationScreenViewModel() : base("SimulationsState.json")
     {
-        if (Application.Current is App app)
-        {
-            SimulationService = app.ServiceProvider.GetRequiredService<SimulationService>();
-        }
+        PropertyChanged += OnPropertyChanged;
     }
+        
+    [Reactive]
+    public int SimulationsCount { get; set; }
 
-    public SimulationService SimulationService { get; set; }
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if(!IsDeserializing)
+            _ = Save(this);
+    }
 }
