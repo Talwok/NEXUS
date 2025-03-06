@@ -1,10 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
-namespace NEXUS.Growth.ViewModels;
+namespace NEXUS.ViewModels;
 
 public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
 {

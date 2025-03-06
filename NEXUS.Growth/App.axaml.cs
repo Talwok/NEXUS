@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Growth.Services;
 using NEXUS.Growth.ViewModels;
 using NEXUS.Growth.Views;
+using NEXUS.ViewModels;
 
 namespace NEXUS.Growth;
 

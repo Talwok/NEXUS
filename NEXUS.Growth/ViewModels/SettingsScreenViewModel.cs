@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Growth.Services;
+using NEXUS.ViewModels;
 using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;

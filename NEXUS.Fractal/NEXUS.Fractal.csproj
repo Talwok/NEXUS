@@ -36,4 +36,8 @@
     <ItemGroup>
       <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="ViewModels\" />
+    </ItemGroup>
 </Project>

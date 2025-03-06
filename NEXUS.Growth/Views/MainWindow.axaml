@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         xmlns:vm="clr-namespace:NEXUS.Growth.ViewModels"
-        xmlns:converters="clr-namespace:NEXUS.Growth.Converters"
+        xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NEXUS.Growth.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"

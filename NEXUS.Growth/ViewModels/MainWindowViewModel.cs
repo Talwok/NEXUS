@@ -1,6 +1,7 @@
 ﻿using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Extensions;
+using NEXUS.ViewModels;
 using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;

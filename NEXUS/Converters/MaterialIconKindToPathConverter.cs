@@ -1,12 +1,10 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Material.Icons;
 
-namespace NEXUS.Growth.Converters;
+namespace NEXUS.Converters;
 
-//MaterialIconDataProvider.GetData(kind)
 public class MaterialIconKindToPathConverter : IValueConverter
 {
     public static MaterialIconKindToPathConverter Instance = new();

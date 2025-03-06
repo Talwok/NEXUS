@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using NEXUS.Starter.Views;
 
 namespace NEXUS.Starter;
 

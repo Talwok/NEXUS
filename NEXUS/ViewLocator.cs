@@ -1,9 +1,9 @@
-using System;
+using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using NEXUS.Fractal.ViewModels;
+using NEXUS.ViewModels;
 
-namespace NEXUS.Fractal;
+namespace NEXUS;
 
 public class ViewLocator : IDataTemplate
 {
@@ -11,10 +11,10 @@ public class ViewLocator : IDataTemplate
     {
         if (data is null)
             return null;
-
+        
         var name = data.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
-        var type = Type.GetType(name);
-
+        var type = Assembly.GetEntryAssembly()?.GetType(name);
+        
         if (type != null)
         {
             var control = (Control)Activator.CreateInstance(type)!;

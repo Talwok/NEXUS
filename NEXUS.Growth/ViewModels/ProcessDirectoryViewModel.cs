@@ -1,4 +1,5 @@
-﻿using ReactiveUI.Fody.Helpers;
+﻿using NEXUS.ViewModels;
+using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;
 

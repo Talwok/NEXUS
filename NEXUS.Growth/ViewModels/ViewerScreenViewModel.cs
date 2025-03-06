@@ -5,6 +5,7 @@ using System.Linq;
 using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Growth.Models;
+using NEXUS.ViewModels;
 using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;

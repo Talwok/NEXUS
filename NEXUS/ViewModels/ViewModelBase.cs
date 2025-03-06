@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace NEXUS.Growth.ViewModels;
+namespace NEXUS.ViewModels;
 
 public abstract class ViewModelBase : ReactiveObject
 {

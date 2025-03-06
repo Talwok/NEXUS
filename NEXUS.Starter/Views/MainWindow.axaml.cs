@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace NEXUS.Starter;
+namespace NEXUS.Starter.Views;
 
 public partial class MainWindow : Window
 {

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Platform.Storage;
 using NEXUS.Growth.Models;
+using NEXUS.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
