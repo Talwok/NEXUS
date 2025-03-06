@@ -2,24 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:NEXUS.Styles.Control.Custom"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             xmlns:views="clr-namespace:NEXUS.Growth.Views"
-             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="110"
-             x:Class="NEXUS.Growth.Views.StartupSettingsElementView">
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Styles.Control.Custom.CompositionElement">
     <UserControl.Styles>
-        <Style Selector="FlyoutPresenter">
-            <Setter Property="BorderBrush" Value="CornflowerBlue"/>
-        </Style>
-        <Style Selector="TextBlock.Title">
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-        <Style Selector="avalonia|MaterialIcon">
-            <Setter Property="Foreground" Value="CornflowerBlue"/>
-            <Setter Property="Width" Value="30"/>
-            <Setter Property="Height" Value="30"/>
-            
-        </Style>
-        <Style Selector="views|StartupSettingsElementView.Container">
+        <Style Selector="views|CompositionElement.Container">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
@@ -28,7 +16,7 @@
                                        Width="2"
                                        HorizontalAlignment="Left"
                                        StrokeThickness="2" 
-                                       Stroke="CornflowerBlue"/>
+                                       Stroke="{StaticResource SystemAccentColor}"/>
                             <DockPanel HorizontalAlignment="Stretch">
                                 <DockPanel DockPanel.Dock="Top" LastChildFill="False">
                                     <avalonia:MaterialIcon DockPanel.Dock="Left"
@@ -66,8 +54,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style Selector="views|StartupSettingsElementView">
+        <Style Selector="views|CompositionElement">
             <Setter Property="Margin" Value="8"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
@@ -108,5 +97,4 @@
             </Setter>
         </Style>
     </UserControl.Styles>
-    
 </UserControl>

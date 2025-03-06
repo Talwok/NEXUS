@@ -1,0 +1,44 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NEXUS.Growth.ViewModels"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:custom="clr-namespace:NEXUS.Styles.Control.Custom;assembly=NEXUS.Styles"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Growth.Views.StartupScreenContinueView"
+             x:DataType="viewModels:StartupScreenViewModel">
+    <DockPanel LastChildFill="False">
+        <StackPanel DockPanel.Dock="Top">
+            <custom:CompositionElement IconKind="FileTable" Title="Расположение файла конфигурации">
+            </custom:CompositionElement>
+            <TextBox Margin="8 0" Watermark="Путь к файлу">
+                <TextBox.InnerLeftContent>
+                    <avalonia:MaterialIcon Kind="FileText" Margin="6 0 0 0" Foreground="Goldenrod" />
+                </TextBox.InnerLeftContent>
+                <TextBox.InnerRightContent>
+                    <Button Theme="{StaticResource TransparentButton}" Width="50">
+                        <avalonia:MaterialIcon Kind="FileSearch" Margin="6 0" />
+                    </Button>
+                </TextBox.InnerRightContent>
+            </TextBox>
+            <custom:CompositionElement IconKind="ContainStart" Title="Начать с">
+                <ComboBox>
+                </ComboBox>
+            </custom:CompositionElement>
+        </StackPanel>
+        <DockPanel DockPanel.Dock="Bottom" LastChildFill="False">
+            <Button DockPanel.Dock="Right" VerticalAlignment="Bottom" Margin="8">
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+
+                    <TextBlock Text="Продолжить" />
+
+                    <avalonia:MaterialIcon Kind="PlayBoxOutline" Foreground="Green" />
+
+                </StackPanel>
+
+            </Button>
+        </DockPanel>
+    </DockPanel>
+</UserControl>

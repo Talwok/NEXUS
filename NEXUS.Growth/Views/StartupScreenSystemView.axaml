@@ -1,0 +1,103 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NEXUS.Growth.ViewModels"
+             xmlns:custom="clr-namespace:NEXUS.Styles.Control.Custom;assembly=NEXUS.Styles"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Growth.Views.StartupScreenSystemView"
+             x:DataType="viewModels:StartupScreenViewModel">
+    <ScrollViewer>
+        <Grid Margin="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <custom:CompositionElement Classes="Container" Grid.Row="1" IconKind="ViewDashboardOutline"
+                                       Title="Система">
+
+                <StackPanel>
+                    <custom:CompositionElement IconKind="Speedometer" Title="Сохранять скорости"
+                                               IsCheckable="True"
+                                               IsChecked="{Binding IsSavingVelocities}" />
+                    <WrapPanel>
+                        <custom:CompositionElement IconKind="TimerTick"
+                                                   Title="Периодичность создания конфигурационных файлов">
+                            <NumericUpDown Minimum="0" FormatString="0.0"
+                                           Value="{Binding DumpCreationFrequency}">
+                                <NumericUpDown.InnerLeftContent>
+                                    <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20"
+                                                           Height="20" />
+                                </NumericUpDown.InnerLeftContent>
+                            </NumericUpDown>
+                        </custom:CompositionElement>
+                        <custom:CompositionElement IconKind="TimerTick"
+                                                   Title="Периодичность сохранения параметров">
+                            <NumericUpDown Minimum="0" FormatString="0.0"
+                                           Value="{Binding DumpSavingFrequency}">
+                                <NumericUpDown.InnerLeftContent>
+                                    <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20"
+                                                           Height="20" />
+                                </NumericUpDown.InnerLeftContent>
+                            </NumericUpDown>
+                        </custom:CompositionElement>
+                        <custom:CompositionElement Title="Cn максимальное">
+                            <NumericUpDown Minimum="0" FormatString="0.0"
+                                           Value="{Binding CnMax}">
+                                <NumericUpDown.InnerLeftContent>
+                                    <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                           Height="20" />
+                                </NumericUpDown.InnerLeftContent>
+                            </NumericUpDown>
+                        </custom:CompositionElement>
+                        <custom:CompositionElement IconKind="TimerTick" Title="Временной шаг">
+                            <NumericUpDown Minimum="0"
+                                           Value="{Binding TimeVerlet}">
+                                <NumericUpDown.InnerLeftContent>
+                                    <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20"
+                                                           Height="20" />
+                                </NumericUpDown.InnerLeftContent>
+                            </NumericUpDown>
+                        </custom:CompositionElement>
+                    </WrapPanel>
+                    <custom:CompositionElement IconKind="AngleAcute" Title="Контроль угловых моментов"
+                                               IsCheckable="True"
+                                               IsChecked="{Binding IsAngularMomentumControl}" />
+                </StackPanel>
+            </custom:CompositionElement>
+            <custom:CompositionElement Classes="Container" Grid.Row="2" IconKind="ThermostatBox"
+                                       Title="Термостат">
+                <WrapPanel>
+                    <custom:CompositionElement Title="Порог коррекции Максвелла"
+                                               IsCheckable="True"
+                                               IsChecked="{Binding IsMaxwellCorrection}">
+                        <NumericUpDown Minimum="0"
+                                       Value="{Binding MaxwellCorrectionThreshold}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement Title="Параметр термостата Берендсена"
+                                               IsCheckable="True"
+                                               IsChecked="{Binding IsBerendsenThermostate}">
+                        <NumericUpDown Minimum="0" FormatString="0.0"
+                                       Value="{Binding BerendsenThermostateParameter}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement Title="3D термостат"
+                                               IsCheckable="True" IsChecked="{Binding Is3dThermostate}" />
+                </WrapPanel>
+            </custom:CompositionElement>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

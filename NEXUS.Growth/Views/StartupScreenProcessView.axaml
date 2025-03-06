@@ -1,0 +1,172 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NEXUS.Growth.ViewModels"
+             xmlns:custom="clr-namespace:NEXUS.Styles.Control.Custom;assembly=NEXUS.Styles"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Growth.Views.StartupScreenProcessView"
+             x:DataType="viewModels:StartupScreenViewModel">
+    <ScrollViewer>
+        <Grid Margin="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <custom:CompositionElement Classes="Container" Grid.Row="0" IconKind="CardBulletedOutline"
+                                       Title="Общие">
+                <WrapPanel>
+                    <custom:CompositionElement IconKind="Function" Title="Потенциал"
+                                               Hint="Потенциал взаимодействия">
+                        <ComboBox ItemsSource="{Binding Potentials}"
+                                  SelectedItem="{Binding SelectedPotential}"
+                                  DisplayMemberBinding="{Binding Value}" />
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="PeriodicTable" Title="Элемент"
+                                               Hint="Тип атомов">
+                        <ComboBox ItemsSource="{Binding Elements}"
+                                  SelectedItem="{Binding SelectedElement}"
+                                  DisplayMemberBinding="{Binding Key}" />
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="ElectronFramework" Title="Число атомов">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding AtomCount}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="TimelineClockOutline"
+                                               Title="Число временных шагов">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding TimeSteps}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="Variable" Title="Тип процесса">
+                        <ComboBox ItemsSource="{Binding Processes}"
+                                  SelectedItem="{Binding SelectedProcess}"
+                                  DisplayMemberBinding="{Binding Value}" />
+                    </custom:CompositionElement>
+                </WrapPanel>
+            </custom:CompositionElement>
+            <custom:CompositionElement Classes="Container" Grid.Row="1" IconKind="MountainOutline"
+                                       Title="Эпитаксиальный рост">
+                <WrapPanel>
+                    <custom:CompositionElement IconKind="DiameterVariant" Title="Диаметр пучка">
+                        <NumericUpDown Minimum="0" FormatString="0" Value="{Binding BeamDiameter}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight"
+                                                       Width="20" Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="LightningBoltOutline" Title="Энергия пучка">
+                        <NumericUpDown Minimum="0" FormatString="0.0" Value="{Binding BeamEnergy}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Gauge" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="TimerTickOutline" Title="Задержка"
+                                               Hint="Задержка в шагах, до вылета следующего атома">
+                        <NumericUpDown Minimum="0" FormatString="0" Value="{Binding BeamDelay}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Timelapse" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                </WrapPanel>
+            </custom:CompositionElement>
+            <custom:CompositionElement Classes="Container" Grid.Row="2" IconKind="Molecule"
+                                       Title="Эволюция системы">
+                <WrapPanel>
+                    <custom:CompositionElement IconKind="DotsHexagon" Title="Начальная плотность">
+                        <NumericUpDown Minimum="0" FormatString="0.0"
+                                       Value="{Binding EvolutionInitialDensity}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Percent" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="ShapeOutline" Title="Начальная конфигурация">
+                        <WrapPanel Classes="Element">
+                            <RadioButton Content="Кубическая"
+                                         IsChecked="{Binding IsCubicConfiguration}" />
+                            <RadioButton Content="Сферическая"
+                                         IsChecked="{Binding IsSphericConfiguration}" />
+                        </WrapPanel>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="AxisArrow" Title="Позиция">
+                        <WrapPanel Classes="Element">
+                            <RadioButton Content="Центр" IsChecked="{Binding IsCenterPosition}" />
+                            <RadioButton Content="Низ" IsChecked="{Binding IsBottomPosition}" />
+                        </WrapPanel>
+                    </custom:CompositionElement>
+                </WrapPanel>
+            </custom:CompositionElement>
+            <custom:CompositionElement Classes="Container" Grid.Row="3" IconKind="Temperature"
+                                       Title="Температура">
+                <WrapPanel>
+                    <custom:CompositionElement IconKind="ContainStart" Title="Начальная">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding TemperatureInitial}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="TemperatureCelsius"
+                                                       Width="20" Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="DotsHorizontal" Title="Промежуточная"
+                                               IsCheckable="True"
+                                               IsChecked="{Binding TemperatureIntermediateEnable, Mode=TwoWay}">
+                        <NumericUpDown IsEnabled="{Binding TemperatureIntermediateEnable}" Minimum="0"
+                                       FormatString="0" Value="{Binding TemperatureIntermediate}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="TemperatureCelsius"
+                                                       Width="20" Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="ContainEnd" Title="Конечная">
+                        <NumericUpDown Minimum="0" FormatString="0" Value="{Binding TemperatureEnd}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="TemperatureCelsius"
+                                                       Width="20" Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="Restart" Title="Число циклов">
+                        <NumericUpDown Minimum="0" FormatString="0" Value="{Binding Cycles}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="ChartArc" Title="Доля от цикла"
+                                               Hint="Доля цикла в процентах между начальной и промежуточной температурами">
+                        <NumericUpDown IsEnabled="{Binding TemperatureIntermediateEnable}"
+                                       Minimum="0" FormatString="0"
+                                       Value="{Binding TemperatureIntermediatePercent}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Percent" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                </WrapPanel>
+            </custom:CompositionElement>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

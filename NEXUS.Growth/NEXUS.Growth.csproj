@@ -25,18 +25,50 @@
     <ItemGroup>
         <None Remove="Assets\GrowthSimulation.ico" />
         <AvaloniaResource Include="Assets\GrowthSimulation.ico" />
+        <None Remove="Assets\Fonts\JetBrainsMono-Bold.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-BoldItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-ExtraBold.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-ExtraBoldItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-ExtraLight.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-ExtraLightItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-Italic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-Light.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-LightItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-Medium.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-MediumItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-Regular.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-SemiBold.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-SemiBoldItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-Thin.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMono-ThinItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-Bold.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-BoldItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-ExtraBold.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-ExtraBoldItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-ExtraLight.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-ExtraLightItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-Italic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-Light.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-LightItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-Medium.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-MediumItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-Regular.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-SemiBold.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-SemiBoldItalic.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-Thin.ttf" />
+        <None Remove="Assets\Fonts\JetBrainsMonoNL-ThinItalic.ttf" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.2.3" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
+        <PackageReference Include="Avalonia" Version="11.2.5" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.5" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.5" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.3" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.3" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.5" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.5" />
         <PackageReference Include="FluentAvaloniaUI" Version="2.2.0" />
-        <PackageReference Include="Material.Icons.Avalonia" Version="2.1.10" />
+        <PackageReference Include="Material.Icons.Avalonia" Version="2.3.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
         <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     </ItemGroup>
@@ -44,10 +76,6 @@
     <ItemGroup>
       <Compile Update="Views\StartupScreenView.axaml.cs">
         <DependentUpon>StartupScreenView.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\StartupSettingsElementView.axaml.cs">
-        <DependentUpon>StartupSettingsElementView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
       <Compile Update="Views\ViewerScreenView.axaml.cs">
@@ -87,6 +115,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NEXUS.Styles\NEXUS.Styles.csproj" />
       <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
     

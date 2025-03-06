@@ -1,0 +1,138 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NEXUS.Growth.ViewModels"
+             xmlns:custom="clr-namespace:NEXUS.Styles.Control.Custom;assembly=NEXUS.Styles"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Growth.Views.StartupScreenSceneView"
+             x:DataType="viewModels:StartupScreenViewModel">
+    <ScrollViewer>
+        <Grid Margin="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <custom:CompositionElement Classes="Container" Grid.Row="0" IconKind="CardBulletedOutline"
+                                       Title="Общие">
+                <StackPanel>
+                    <custom:CompositionElement Title="Подвижная коробка" VerticalAlignment="Center"
+                                               IsCheckable="True"
+                                               IsChecked="{Binding IsMotileBox, Mode=TwoWay}" />
+                    <custom:CompositionElement Title="Тип">
+                        <WrapPanel>
+                            <RadioButton Content="Открытый" IsChecked="{Binding IsOpenedType}" />
+                            <RadioButton Content="Закрытый" IsChecked="{Binding IsClosedType}" />
+                            <RadioButton Content="Периодический" IsChecked="{Binding IsPeriodicType}" />
+                        </WrapPanel>
+                    </custom:CompositionElement>
+                </StackPanel>
+            </custom:CompositionElement>
+            <custom:CompositionElement Classes="Container" Grid.Row="1" IconKind="CubeOutline"
+                                       Title="Куб" IsCheckable="True" IsChecked="{Binding IsCubicCell}">
+                <WrapPanel>
+                    <custom:CompositionElement IconKind="AxisXArrow" Title="Ширина"
+                                               Hint="Ширина ячеек в ангстремах">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding BoxWidth}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight"
+                                                       Width="20" Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="AxisYArrow" Title="Глубина"
+                                               Hint="Глубина ячеек в ангстремах">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding BoxDepth}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight"
+                                                       Width="20" Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IconKind="AxisZArrow"
+                                               Title="Высота"
+                                               Hint="Высота ячейки в ангстремах">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding BoxHeight}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight"
+                                                       Width="20" Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                </WrapPanel>
+            </custom:CompositionElement>
+            <custom:CompositionElement Classes="Container" Grid.Row="2" IconKind="Sphere" Title="Сфера"
+                                       IsCheckable="True" IsChecked="{Binding IsSphericCell}">
+                <custom:CompositionElement IconKind="RadiusOutline"
+                                           Title="Радиус"
+                                           Hint="Радиус в ангстремах">
+                    <NumericUpDown Minimum="0" FormatString="0" Value="{Binding SphereRadius}">
+                        <NumericUpDown.InnerLeftContent>
+                            <avalonia:MaterialIcon Margin="8 0 0 0" Kind="ArrowLeftRight" Width="20"
+                                                   Height="20" />
+                        </NumericUpDown.InnerLeftContent>
+                    </NumericUpDown>
+                </custom:CompositionElement>
+            </custom:CompositionElement>
+            <custom:CompositionElement Classes="Container" Grid.Row="3" IconKind="Grain"
+                                       Title="Подложка">
+                <WrapPanel>
+                    <custom:CompositionElement Title="Тип">
+                        <WrapPanel>
+                            <RadioButton Content="Отсутствует" IsChecked="{Binding IsSubstrateNone}" />
+                            <RadioButton Content="Непрерывная"
+                                         IsChecked="{Binding IsSubstrateContinual}" />
+                            <RadioButton Content="Дискретная" IsChecked="{Binding IsSubstrateDiscrete}" />
+                        </WrapPanel>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IsEnabled="{Binding IsSubstrateDiscrete}"
+                                               IconKind="PeriodicTable" Title="Элемент"
+                                               Hint="Тип атомов">
+                        <ComboBox ItemsSource="{Binding Elements}"
+                                  SelectedItem="{Binding SelectedSubstrateElement}"
+                                  DisplayMemberBinding="{Binding Key}" />
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IsEnabled="{Binding IsSubstrateDiscrete}" Title="Грань">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding Face}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IsEnabled="{Binding IsSubstrateDiscrete}"
+                                               IconKind="ArrowUpDown"
+                                               Title="Глубина атомов"
+                                               Hint="Глубина подвижных атомов">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding AgileItemsHeight}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                    <custom:CompositionElement IsEnabled="{Binding IsSubstrateDiscrete}"
+                                               IconKind="Temperature"
+                                               Title="Начальная температура"
+                                               Hint="Начальная температура подвижных атомов">
+                        <NumericUpDown Minimum="0" FormatString="0"
+                                       Value="{Binding InitialAgileTemperature}">
+                            <NumericUpDown.InnerLeftContent>
+                                <avalonia:MaterialIcon Margin="8 0 0 0" Kind="Numeric" Width="20"
+                                                       Height="20" />
+                            </NumericUpDown.InnerLeftContent>
+                        </NumericUpDown>
+                    </custom:CompositionElement>
+                </WrapPanel>
+            </custom:CompositionElement>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

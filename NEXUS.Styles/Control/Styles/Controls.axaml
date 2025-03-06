@@ -1,0 +1,12 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        <StyleInclude Source="MaterialIcon.axaml" />
+        <StyleInclude Source="ComboBox.axaml" />
+        <StyleInclude Source="TextBlock.axaml" />
+        <StyleInclude Source="TextBox.axaml" />
+        <StyleInclude Source="ToolTip.axaml" />
+        <StyleInclude Source="WrapPanel.axaml" />
+        <StyleInclude Source="NumericUpDown.axaml" />
+        <StyleInclude Source="FlyoutPresenter.axaml" />
+
+</Styles>

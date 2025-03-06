@@ -8,10 +8,10 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NEXUS.Growth.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        MinWidth="800"
-        MinHeight="600"
+        MinWidth="600"
+        MinHeight="400"
         Icon="/Assets/GrowthSimulation.ico"
-        Title="CSEG">
+        Title="NEXUS Growth Simulation">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>

@@ -1,0 +1,9 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <x:Double x:Key="NexusWrapPanelWidth">300</x:Double>
+    </Styles.Resources>
+    <Style Selector="WrapPanel.Element">
+        <Setter Property="Width" Value="{StaticResource NexusWrapPanelWidth}"/>
+    </Style>
+</Styles>

@@ -1,0 +1,10 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <x:Double x:Key="NexusTextBoxFontSize">14</x:Double>
+    </Styles.Resources>
+    <Style Selector="TextBox">
+        <Setter Property="FontSize" Value="{StaticResource NexusTextBoxFontSize}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+</Styles>
