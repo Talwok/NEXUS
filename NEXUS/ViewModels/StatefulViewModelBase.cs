@@ -8,6 +8,10 @@ public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
     [JsonIgnore]
     public bool IsDeserializing { get; private set; }
 
+    public bool ValidateState() => 
+        File.Exists(fileName) 
+        && File.ReadAllText(fileName).Length != 0;
+
     public async Task Save(object obj)
     {
         try

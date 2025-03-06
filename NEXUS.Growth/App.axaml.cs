@@ -39,6 +39,8 @@ public partial class App : Application
         serviceCollection.AddSingleton<StatefulViewModelBase, StartupScreenViewModel>();
         serviceCollection.AddSingleton<StatefulViewModelBase, ViewerScreenViewModel>();
         
+        serviceCollection.AddSingleton<MainWindowViewModel>();
+        
         ServiceProvider = serviceCollection.BuildServiceProvider();
         
         foreach (var statefulViewModelBase in ServiceProvider.GetServices<StatefulViewModelBase>())
@@ -48,12 +50,16 @@ public partial class App : Application
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var dataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            
+            dataContext.TrySetArgs(
+                desktop.Args == null 
+                || desktop.Args.Length == 0 
+                    ? string.Empty : desktop.Args?[0]);
+            
             _mainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(
-                    desktop.Args == null || desktop.Args.Length == 0 
-                        ? string.Empty 
-                        : desktop.Args?[0])
+                DataContext = dataContext 
             };
 
             desktop.MainWindow = _mainWindow;

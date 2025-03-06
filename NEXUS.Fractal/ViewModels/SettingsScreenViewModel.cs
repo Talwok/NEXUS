@@ -4,7 +4,7 @@ using Avalonia.Styling;
 using NEXUS.ViewModels;
 using ReactiveUI.Fody.Helpers;
 
-namespace NEXUS.Growth.ViewModels;
+namespace NEXUS.Fractal.ViewModels;
 
 public class SettingsScreenViewModel : StatefulViewModelBase
 {
@@ -15,7 +15,6 @@ public class SettingsScreenViewModel : StatefulViewModelBase
     
     [Reactive]
     public bool IsDarkThemeToggled { get; set; } = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
-
     
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

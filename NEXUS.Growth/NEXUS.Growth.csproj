@@ -70,6 +70,7 @@
         <PackageReference Include="FluentAvaloniaUI" Version="2.2.0" />
         <PackageReference Include="Material.Icons.Avalonia" Version="2.3.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.2" />
         <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     </ItemGroup>
 
