@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace NEXUS.Fractal;
+namespace NEXUS.Fractal.Views;
 
 public partial class MainWindow : Window
 {
