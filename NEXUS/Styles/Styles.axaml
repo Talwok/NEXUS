@@ -4,7 +4,7 @@
     <Styles.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://NEXUS.Styles/Resources/Colors.axaml" />
+                <ResourceInclude Source="Resources/Colors.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
         
@@ -12,7 +12,7 @@
     
         
     <!-- Контролы -->
-    <StyleInclude Source="avares://NEXUS.Styles/Control/Styles/Controls.axaml" />
-    <StyleInclude Source="avares://NEXUS.Styles/Control/Custom/Controls.axaml" />
+    <StyleInclude Source="Control/Styles/Controls.axaml" />
+    <StyleInclude Source="Control/Custom/Controls.axaml" />
     
 </Styles>

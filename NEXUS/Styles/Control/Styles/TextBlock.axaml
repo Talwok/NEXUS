@@ -4,7 +4,7 @@
         <x:Double x:Key="NexusTextBlockFontSize">14</x:Double>
     </Styles.Resources>
     <Style Selector="TextBlock">
-        <Setter Property="FontFamily" Value="avares://NEXUS.Styles/Fonts/JetBrainsMono-Regular.ttf#JetBrains Mono"/>
+        <Setter Property="FontFamily" Value="avares://NEXUS/Styles/Fonts/JetBrainsMono-Regular.ttf#JetBrains Mono"/>
         <Setter Property="FontSize" Value="{StaticResource NexusTextBlockFontSize}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>

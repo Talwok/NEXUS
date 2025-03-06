@@ -13,12 +13,12 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://NEXUS.Styles/Resources/Colors.axaml"/>
+                <ResourceInclude Source="avares://NEXUS/Styles/Resources/Colors.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>
-        <StyleInclude Source="avares://NEXUS.Styles/Styles.axaml"/>
+        <StyleInclude Source="avares://NEXUS/Styles/Styles.axaml"/>
         <styling:FluentAvaloniaTheme/>
         <material:MaterialIconStyles />
     </Application.Styles>

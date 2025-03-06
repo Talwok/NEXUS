@@ -28,6 +28,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NEXUS.Styles\NEXUS.Styles.csproj" />
+      <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
 </Project>

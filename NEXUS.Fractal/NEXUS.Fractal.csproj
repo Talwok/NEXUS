@@ -27,13 +27,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NEXUS.Styles\NEXUS.Styles.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Compile Update="Views\MainWindow.axaml.cs">
         <DependentUpon>MainWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
 </Project>

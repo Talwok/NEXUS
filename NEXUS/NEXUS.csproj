@@ -7,9 +7,52 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Avalonia" Version="11.2.5" />
+      <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
+      <PackageReference Include="Avalonia.Diagnostics" Version="11.2.5" />
+      <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.5" />
+      <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.5" />
+      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.5" />
+      <PackageReference Include="FluentAvaloniaUI" Version="2.2.0" />
+      <PackageReference Include="Material.Icons.Avalonia" Version="2.3.0" />
       <PackageReference Include="protobuf-net" Version="3.2.46" />
       <PackageReference Include="ReactiveUI" Version="20.1.63" />
       <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+    </ItemGroup>
+  
+    <ItemGroup>
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-Bold.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-BoldItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-ExtraBold.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-ExtraBoldItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-ExtraLight.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-ExtraLightItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-Italic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-Light.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-LightItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-Medium.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-MediumItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-Regular.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-SemiBold.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-SemiBoldItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-Thin.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMono-ThinItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-Bold.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-BoldItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-ExtraBold.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-ExtraBoldItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-ExtraLight.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-ExtraLightItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-Italic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-Light.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-LightItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-Medium.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-MediumItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-Regular.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-SemiBold.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-SemiBoldItalic.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-Thin.ttf" />
+      <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-ThinItalic.ttf" />
     </ItemGroup>
 
 </Project>
