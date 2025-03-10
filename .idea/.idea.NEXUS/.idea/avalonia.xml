@@ -22,6 +22,8 @@
         <entry key="NEXUS.Epitaxial/Views/StartupSettingsElementView.axaml" value="NEXUS.Epitaxial/NEXUS.Epitaxial.csproj" />
         <entry key="NEXUS.Fractal/App.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/MainWindow.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Views/ChartsScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Views/ImagesScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/MainWindow.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/SettingsScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Growth/App.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
@@ -37,6 +39,8 @@
         <entry key="NEXUS.Growth/Views/ViewerScreenView.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Starter/App.axaml" value="NEXUS.Starter/NEXUS.Starter.csproj" />
         <entry key="NEXUS.Starter/MainWindow.axaml" value="NEXUS.Starter/NEXUS.Starter.csproj" />
+        <entry key="NEXUS.Starter/Views/MainWindow.axaml" value="NEXUS.Starter/NEXUS.Starter.csproj" />
+        <entry key="NEXUS.Starter/Views/StartupScreenView.axaml" value="NEXUS.Starter/NEXUS.Starter.csproj" />
         <entry key="NEXUS.Styles/Control/Custom/CompositionElement.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Styles/Control/Custom/Controls.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Styles/Control/Styles/FlyoutPresenter.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
@@ -60,6 +64,7 @@
         <entry key="NEXUS.Styles/Resources/Colors.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Styles/Styles.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/TextBlock.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Views/CommonSettingsView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
       </map>
     </option>
   </component>

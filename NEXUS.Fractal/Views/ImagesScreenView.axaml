@@ -4,8 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NEXUS.Fractal.Views.SettingsScreenView"
-             x:DataType="viewModels:SettingsScreenViewModel">
-    
-    <ContentControl Content="{Binding CommonSettings}"></ContentControl>
+             x:Class="NEXUS.Fractal.Views.ImagesScreenView"
+             x:DataType="viewModels:ImagesScreenViewModel">
+    Images
 </UserControl>

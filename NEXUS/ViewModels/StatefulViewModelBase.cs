@@ -1,26 +1,33 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.ViewModels;
 
 public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
 {
     [JsonIgnore]
-    public bool IsDeserializing { get; private set; }
+    protected bool IsDeserializing { get; private set; }
+    
+    [JsonIgnore]
+    protected bool IsDeserialized { get; private set; }
 
-    public bool ValidateState() => 
+    protected bool ValidateState() => 
         File.Exists(fileName) 
         && File.ReadAllText(fileName).Length != 0;
-
-    public async Task Save(object obj)
+    
+    protected async Task Save(object obj)
     {
         try
         {
+            if (Path.GetDirectoryName(fileName) is {} dir && !Directory.Exists(dir)) 
+                Directory.CreateDirectory(dir);
+            
             await File.WriteAllTextAsync(fileName, JsonSerializer.Serialize(obj));
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine($"{GetType().Name} save failed: {e.Message}");
         }
     }
 
@@ -29,6 +36,10 @@ public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
         try
         {
             IsDeserializing = true;
+
+            if(!ValidateState())
+                return;
+            
             await using var fileStream = new FileStream(fileName, FileMode.OpenOrCreate);
             var obj = await JsonSerializer.DeserializeAsync(fileStream, GetType());
             
@@ -41,10 +52,12 @@ public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
             
                 propertyInfo.SetValue(this, propertyValue);
             }
+
+            IsDeserialized = true;
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine($"{GetType().Name} load failed: {e.Message}");
         }
         finally
         {

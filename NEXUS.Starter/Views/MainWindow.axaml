@@ -10,12 +10,11 @@
         Icon="../Assets/NEXUS.ico"
         Title="NEXUS">
     <DockPanel Margin="20">
-        <DockPanel DockPanel.Dock="Top"  >
+        <DockPanel DockPanel.Dock="Top" LastChildFill="False">
             <Border DockPanel.Dock="Left" CornerRadius="10" ClipToBounds="True">
-                <Image Height="100" Source="../Assets/NEXUS.ico"/>
+                <Image Height="60" Source="../Assets/NEXUS.ico"/>
             </Border>
-            <Rectangle DockPanel.Dock="Bottom" Fill="{StaticResource SystemAccentColor}" Height="5" Margin="10"/>
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="0 17">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" >
                 <Button VerticalAlignment="Top">
                     <avalonia:MaterialIcon Kind="Github"/>
                 </Button>
@@ -23,8 +22,13 @@
                     <avalonia:MaterialIcon Kind="Web"/>
                 </Button>
             </StackPanel>
-            <TextBlock Foreground="{StaticResource SystemAccentColor}" FontSize="70" Margin="10 0" FontWeight="Bold" Text="NEXUS"/>
-            <TextBlock VerticalAlignment="Top" Margin="0 20" FontWeight="Bold" Text="1.0.0"/>
+            <TextBlock DockPanel.Dock="Left" Foreground="{StaticResource SystemAccentColor}" FontSize="40" Margin="10 0" FontWeight="Bold" Text="NEXUS"/>
+            <Border Background="{StaticResource SystemAccentColor}" 
+                    DockPanel.Dock="Left" 
+                    VerticalAlignment="Center"
+                    CornerRadius="10">
+                <TextBlock Margin="8 6"  FontWeight="Bold" Text="1.0.0"/>
+            </Border>
             
         </DockPanel>
         <DockPanel Margin="0 10 0 0" LastChildFill="False" DockPanel.Dock="Bottom">
@@ -53,7 +57,7 @@
         <ListBox>
           <DockPanel Margin="0 10">
               <Border CornerRadius="10" ClipToBounds="True">
-                <Image Height="60" Source="../Assets/FractalSurface.ico"/>
+                <Image Height="50" Source="../Assets/FractalSurface.ico"/>
               </Border>
               <Border Background="{StaticResource SystemAccentColor}" 
                       DockPanel.Dock="Right" 
@@ -62,14 +66,14 @@
                   <TextBlock Margin="8 6"  FontWeight="Bold" Text="1.0.0"/>
               </Border>
               <StackPanel VerticalAlignment="Center" Margin="20 0" Spacing="8">
-                  <TextBlock FontSize="18" FontWeight="Bold" Text="Fractal Surface"/>
-                  <TextBlock FontWeight="Bold" Text="Исследование фрактальной размерности изображений"/>
+                  <TextBlock FontSize="14" FontWeight="Bold" Foreground="{StaticResource SystemAccentColor}" Text="Fractal Surface"/>
+                  <TextBlock FontSize="12" FontWeight="Bold" Text="Исследование фрактальной размерности изображений"/>
               </StackPanel>
 
           </DockPanel>
           <DockPanel Margin="0 10">
-              <Border CornerRadius="10" ClipToBounds="True">
-                <Image Height="60" Source="../Assets/GrowthSimulation.ico"/>
+              <Border DockPanel.Dock="Left" CornerRadius="10" ClipToBounds="True">
+                <Image Height="50" Source="../Assets/GrowthSimulation.ico"/>
               </Border>
               <Border Background="{StaticResource SystemAccentColor}" 
                       DockPanel.Dock="Right" 
@@ -78,8 +82,8 @@
                   <TextBlock Margin="8 6" FontWeight="Bold" Text="1.0.0"/>
               </Border>
               <StackPanel VerticalAlignment="Center" Margin="20 0" Spacing="8">
-                  <TextBlock FontSize="18" FontWeight="Bold" Text="Growth Simulation"/>
-                  <TextBlock FontWeight="Bold" Text="Симуляция эпитаксиального и эволюционного роста"/>
+                  <TextBlock FontSize="14" Foreground="{StaticResource SystemAccentColor}" FontWeight="Bold" Text="Growth Simulation"/>
+                  <TextBlock FontSize="12" FontWeight="Bold" Text="Симуляция эпитаксиального и эволюционного роста"/>
               </StackPanel>
           </DockPanel>
       </ListBox>  

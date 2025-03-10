@@ -1,30 +1,22 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text.Json.Serialization;
 using Avalonia;
 using Avalonia.Styling;
+using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using NEXUS.Extensions;
 using NEXUS.ViewModels;
 using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Growth.ViewModels;
 
-public class SettingsScreenViewModel : StatefulViewModelBase
-{
-    public SettingsScreenViewModel() : base("SettingsState.json")
+public class SettingsScreenViewModel : ViewModelBase
+{ 
+    public SettingsScreenViewModel(IEnumerable<StatefulViewModelBase> statefulViewModels)
     {
-        PropertyChanged += OnPropertyChanged;
+        CommonSettingsViewModel = statefulViewModels.First<CommonSettingsViewModel>();
     }
-    
-    [Reactive]
-    public bool IsDarkThemeToggled { get; set; } = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
 
-    
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(IsDarkThemeToggled))
-        {
-            Application.Current.RequestedThemeVariant = IsDarkThemeToggled ? ThemeVariant.Dark : ThemeVariant.Light;
-        }
-
-        if(!IsDeserializing)
-            _ = Save(this);
-    }
+    public CommonSettingsViewModel CommonSettingsViewModel { get; }
 }

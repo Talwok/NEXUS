@@ -12,32 +12,33 @@
         MinHeight="400"
         Icon="/Assets/FractalSurface.ico"
         Title="NEXUS Fractal Surface">
-    
     <controls:NavigationView PaneDisplayMode="LeftCompact" 
                              IsPaneOpen="False" 
                              IsPaneToggleButtonVisible="False"
                              IsSettingsVisible="False"
                              SelectionChanged="NavigationView_OnSelectionChanged"
                              Name="Navigation">
-        <!--<controls:NavigationView.MenuItems>
-            <controls:NavigationViewItem DataContext="{Binding SimulationMenuItem}" Content="{Binding Name}" 
+        <controls:NavigationView.MenuItems>
+            <controls:NavigationViewItem DataContext="{Binding ImagesMenuItem}" Content="{Binding Name}" 
                                          IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
                 <controls:NavigationViewItem.InfoBadge>
                     <controls:InfoBadge DataContext="{Binding Screen}" 
-                                        IsVisible="{Binding SimulationsCount, DataType=vm:SimulationScreenViewModel}"
-                                        Value="{Binding SimulationsCount, DataType=vm:SimulationScreenViewModel}"/>
+                                        IsVisible="{Binding TotalImages, DataType=viewModels:ImagesScreenViewModel}"
+                                        Value="{Binding TotalImages, DataType=viewModels:ImagesScreenViewModel}"/>
                 </controls:NavigationViewItem.InfoBadge>
             </controls:NavigationViewItem>
-            <controls:NavigationViewItem DataContext="{Binding StartupMenuItem}" Content="{Binding Name}" 
-                                         IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}"/>
-            <controls:NavigationViewItem DataContext="{Binding ViewerMenuItem}" Content="{Binding Name}" 
-                                         IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}"/>
-        </controls:NavigationView.MenuItems>-->
+            <controls:NavigationViewItem DataContext="{Binding ChartsMenuItem}" Content="{Binding Name}" 
+                                         IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
+                <controls:NavigationViewItem.InfoBadge>
+                    <controls:InfoBadge DataContext="{Binding Screen}" 
+                                        IsVisible="{Binding TotalCharts, DataType=viewModels:ChartsScreenViewModel}"
+                                        Value="{Binding TotalCharts, DataType=viewModels:ChartsScreenViewModel}"/>
+                </controls:NavigationViewItem.InfoBadge>
+            </controls:NavigationViewItem>
+        </controls:NavigationView.MenuItems>
         <controls:NavigationView.FooterMenuItems>
             <controls:NavigationViewItem DataContext="{Binding SettingsMenuItem}" Content="{Binding Name}" 
                                          IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}"/>
         </controls:NavigationView.FooterMenuItems>
-
     </controls:NavigationView>
-
 </Window>

@@ -1,10 +1,13 @@
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using NEXUS.Extensions;
 using NEXUS.Fractal.ViewModels;
 using NEXUS.Fractal.Views;
 using NEXUS.ViewModels;
@@ -26,7 +29,13 @@ public partial class App : Application
 
         ServiceCollection serviceCollection = new ServiceCollection();
 
-        serviceCollection.AddSingleton<StatefulViewModelBase, SettingsScreenViewModel>();
+        serviceCollection.AddSingleton<Application>(this);
+
+        serviceCollection.AddCommon();
+        
+        serviceCollection.AddSingleton<StatefulViewModelBase, ImagesScreenViewModel>();
+        serviceCollection.AddSingleton<StatefulViewModelBase, ChartsScreenViewModel>();
+        serviceCollection.AddSingleton<SettingsScreenViewModel>();
         
         serviceCollection.AddSingleton<MainWindowViewModel>();
         

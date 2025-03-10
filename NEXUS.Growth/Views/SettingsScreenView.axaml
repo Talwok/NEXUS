@@ -2,21 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:viewModels="clr-namespace:NEXUS.Growth.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Growth.Views.SettingsScreenView"
              x:DataType="viewModels:SettingsScreenViewModel">
-    <StackPanel Spacing="8" Margin="16">
-        <ToggleSwitch OnContent="Включить" 
-                      OffContent="Выключить" 
-                      IsChecked="{Binding IsDarkThemeToggled}">
-            <ToggleSwitch.Content>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <avalonia:MaterialIcon Kind="Flashlight"/>
-                    <TextBlock Text="Тёмная тема"/>
-                </StackPanel>
-            </ToggleSwitch.Content>
-        </ToggleSwitch>
-    </StackPanel>
+    <ContentControl Content="{Binding CommonSettingsViewModel}"/>
 </UserControl>

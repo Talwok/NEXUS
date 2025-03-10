@@ -11,7 +11,7 @@ namespace NEXUS.Growth.ViewModels;
 
 public class MainWindowViewModel : MainViewModel<MainArguments>
 {
-    public MainWindowViewModel(IEnumerable<StatefulViewModelBase> viewModels)
+    public MainWindowViewModel(IEnumerable<StatefulViewModelBase> viewModels, SettingsScreenViewModel settings)
     {
         var viewModelBases = viewModels.ToList();
         
@@ -37,7 +37,7 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
         {
             Name = "Настройки",
             Icon = MaterialIconKind.SettingsOutline,
-            Screen = viewModelBases.First<SettingsScreenViewModel>()
+            Screen = settings
         };
         
         /*ScreenViewModel = ViewerHelper.IsFileValid(filePath)

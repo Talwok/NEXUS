@@ -6,6 +6,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using NEXUS.Extensions;
 using NEXUS.Growth.Services;
 using NEXUS.Growth.ViewModels;
 using NEXUS.Growth.Views;
@@ -28,13 +29,17 @@ public partial class App : Application
 
         ServiceCollection serviceCollection = new ServiceCollection();
 
+        serviceCollection.AddSingleton<Application>(this);
+
+        serviceCollection.AddCommon();
+        
         serviceCollection.AddSingleton<StartupViewModel>();
         serviceCollection.AddSingleton<SettingsService>();
         serviceCollection.AddSingleton<StartupService>();
         serviceCollection.AddSingleton<SimulationService>();
         serviceCollection.AddSingleton<ViewerService>();
         
-        serviceCollection.AddSingleton<StatefulViewModelBase, SettingsScreenViewModel>();
+        serviceCollection.AddSingleton<SettingsScreenViewModel>();
         serviceCollection.AddSingleton<StatefulViewModelBase, SimulationScreenViewModel>();
         serviceCollection.AddSingleton<StatefulViewModelBase, StartupScreenViewModel>();
         serviceCollection.AddSingleton<StatefulViewModelBase, ViewerScreenViewModel>();

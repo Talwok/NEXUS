@@ -1,8 +1,9 @@
-﻿using NEXUS.ViewModels;
+﻿using NEXUS.Starter.Models;
+using NEXUS.ViewModels;
 
 namespace NEXUS.Starter.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : MainViewModel<MainArguments>
 {
     
 }
