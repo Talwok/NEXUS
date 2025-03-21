@@ -1,0 +1,61 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Views.ImageFileView"
+             x:DataType="viewModels:ImageFileViewModel">
+    <Design.PreviewWith>
+        <viewModels:ImageFileViewModel/>
+    </Design.PreviewWith>
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Right">
+            <Button DockPanel.Dock="Top" ToolTip.Tip="Обрезка">
+                <avalonia:MaterialIcon Kind="Crop"/>
+            </Button>
+            <ToggleButton x:Name="ZoomButton" ToolTip.Tip="Включить/Выключить увеличение" IsChecked="True" DockPanel.Dock="Top">
+                <avalonia:MaterialIcon Kind="Magnify"/>
+            </ToggleButton>
+            <ToggleButton x:Name="PanButton" ToolTip.Tip="Включить/Выключить ручное позиционирование" IsChecked="True" DockPanel.Dock="Top" >
+                <avalonia:MaterialIcon Kind="Pan"/>
+            </ToggleButton>
+            <Button DockPanel.Dock="Top" ToolTip.Tip="Восстановить начальные позицию и увеличение" Click="ButtonRestoreZoom_OnClick" >
+                <avalonia:MaterialIcon Kind="BackupRestore"/>
+            </Button>
+            <Button DockPanel.Dock="Top" ToolTip.Tip="Увеличить" Click="ButtonZoomIn_OnClick" IsEnabled="{Binding #ZoomButton.IsChecked}" >
+                <avalonia:MaterialIcon Kind="ZoomInOutline"/>
+            </Button>
+            <Button DockPanel.Dock="Bottom" ToolTip.Tip="Уменьшить" Click="ButtonZoomOut_OnClick" IsEnabled="{Binding #ZoomButton.IsChecked}" >
+                <avalonia:MaterialIcon Kind="ZoomOutOutline"/>
+            </Button>
+            <Slider x:Name="ZoomSlider" 
+                    Minimum="1" 
+                    Maximum="15"
+                    Value="1"
+                    ValueChanged="ZoomSlider_OnValueChanged"
+                    ToolTip.Tip="Шкала увеличения"
+                    IsEnabled="{Binding #ZoomButton.IsChecked}" Orientation="Vertical" />
+        </DockPanel>
+        <ScrollViewer x:Name="ScrollViewer" 
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+            <ZoomBorder Name="ZoomBorder" Stretch="None" ZoomSpeed="1.2"
+                        EnablePan="{Binding #PanButton.IsChecked}"
+                        EnableZoom="{Binding #ZoomButton.IsChecked}"
+                        MinZoomX="{Binding #ZoomSlider.Minimum}"
+                        MinZoomY="{Binding #ZoomSlider.Minimum}"
+                        MaxZoomX="{Binding #ZoomSlider.Maximum}"
+                        MaxZoomY="{Binding #ZoomSlider.Maximum}"
+                        ZoomChanged="ZoomBorder_OnZoomChanged"
+                        EnableConstrains="True"
+                        PanButton="Left"
+                        ClipToBounds="True" Focusable="True"
+                        VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Image x:Name="Image" Source="{Binding Path, Converter={x:Static converters:PathToBitmapConverter.Instance}}"/>
+            </ZoomBorder>  
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

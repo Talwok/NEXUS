@@ -18,8 +18,8 @@
         </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>
-        <StyleInclude Source="avares://NEXUS/Styles/Styles.axaml"/>
         <styling:FluentAvaloniaTheme/>
         <material:MaterialIconStyles />
+        <StyleInclude Source="avares://NEXUS/Styles/Styles.axaml"/>
     </Application.Styles>
 </Application>

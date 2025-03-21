@@ -110,8 +110,8 @@
             <ToggleButton Width="26" VerticalAlignment="Stretch" Margin="0 8" Padding="0" 
                           IsChecked="{Binding IsPaneOpened}">
                 <Grid>
-                    <avalonia:MaterialIcon Foreground="{StaticResource TextControlForeground}" Kind="ChevronRight" IsVisible="{Binding !IsPaneOpened}"/>
-                    <avalonia:MaterialIcon Foreground="{StaticResource TextControlForeground}" Kind="ChevronLeft" IsVisible="{Binding IsPaneOpened}"/>
+                    <avalonia:MaterialIcon  Kind="ChevronRight" IsVisible="{Binding !IsPaneOpened}"/>
+                    <avalonia:MaterialIcon  Kind="ChevronLeft" IsVisible="{Binding IsPaneOpened}"/>
                 </Grid>
             </ToggleButton>
             <Panel>

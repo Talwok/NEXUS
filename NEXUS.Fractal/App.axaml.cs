@@ -8,16 +8,16 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Extensions;
+using NEXUS.Fractal.Services;
 using NEXUS.Fractal.ViewModels;
 using NEXUS.Fractal.Views;
 using NEXUS.ViewModels;
+using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 namespace NEXUS.Fractal;
 
 public partial class App : Application
 {
-    private static MainWindow _mainWindow;
-
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -27,17 +27,27 @@ public partial class App : Application
     {
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
 
-        ServiceCollection serviceCollection = new ServiceCollection();
+        var serviceCollection = new ServiceCollection();
 
         serviceCollection.AddSingleton<Application>(this);
 
         serviceCollection.AddCommon();
+
+        serviceCollection.AddSingleton<ImageService>(); 
+        serviceCollection.AddSingleton<ChartService>(); 
+        serviceCollection.AddSingleton<InfoService>();
+        serviceCollection.AddSingleton<CalculationService>();
         
-        serviceCollection.AddSingleton<StatefulViewModelBase, ImagesScreenViewModel>();
-        serviceCollection.AddSingleton<StatefulViewModelBase, ChartsScreenViewModel>();
+        serviceCollection.AddSingleton<ImagesScreenViewModel>();
+        serviceCollection.AddSingleton<ChartsScreenViewModel>();
         serviceCollection.AddSingleton<SettingsScreenViewModel>();
         
         serviceCollection.AddSingleton<MainWindowViewModel>();
+
+        var mainWindow = new MainWindow();
+        
+        serviceCollection.AddSingleton(mainWindow.StorageProvider);
+        serviceCollection.AddSingleton(mainWindow);
         
         ServiceProvider = serviceCollection.BuildServiceProvider();
         
@@ -55,18 +65,13 @@ public partial class App : Application
                 || desktop.Args.Length == 0 
                     ? string.Empty : desktop.Args?[0]);
             
-            _mainWindow = new MainWindow
-            {
-                DataContext = dataContext 
-            };
-
-            desktop.MainWindow = _mainWindow;
+            mainWindow.DataContext = dataContext;
+            
+            desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();
     }
     
-    
     public static IServiceProvider ServiceProvider { get; private set; } 
-    public static IStorageProvider StorageProvider => _mainWindow.StorageProvider;
 }

@@ -12,4 +12,9 @@
         <Setter Property="Height" Value="{StaticResource NexusMaterialIconHeigth}" />
     </Style>
     
+    <!-- Стиль для иконки внутри ToggleButton -->
+    <Style Selector="ToggleButton:checked avalonia|MaterialIcon">
+        <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" />
+    </Style>
+    
 </Styles>

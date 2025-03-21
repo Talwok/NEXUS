@@ -3,9 +3,9 @@ using NEXUS.ViewModels;
 
 namespace NEXUS.Extensions;
 
-public static partial class ServiceCollectionExtensions
+public static partial class ServiceCollection
 {
-    public static ServiceCollection AddCommon(this ServiceCollection serviceCollection)
+    public static Microsoft.Extensions.DependencyInjection.ServiceCollection AddCommon(this Microsoft.Extensions.DependencyInjection.ServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<StatefulViewModelBase, CommonSettingsViewModel>();
         

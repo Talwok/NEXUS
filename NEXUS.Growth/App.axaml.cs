@@ -11,6 +11,7 @@ using NEXUS.Growth.Services;
 using NEXUS.Growth.ViewModels;
 using NEXUS.Growth.Views;
 using NEXUS.ViewModels;
+using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 namespace NEXUS.Growth;
 

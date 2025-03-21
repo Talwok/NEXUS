@@ -1,0 +1,20 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Views.InfoMessageView"
+             x:DataType="viewModels:InfoMessageViewModel">
+    
+    <controls:InfoBar x:Name="Infoline"
+                      Title="{Binding Title}"
+                      IsOpen="{Binding IsOpen}"
+                      Message="{Binding Message}"
+                      IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}"
+                      Severity="{Binding Severity}"
+                      IsClosable="True"
+                      IsIconVisible="True"/>
+</UserControl>

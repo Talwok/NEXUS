@@ -1,38 +1,37 @@
-﻿using System.Collections.Generic;
-using Material.Icons;
-using NEXUS.Extensions;
+﻿using Material.Icons;
 using NEXUS.Fractal.Models;
+using NEXUS.Fractal.Services;
 using NEXUS.ViewModels;
 
 namespace NEXUS.Fractal.ViewModels;
 
-public class MainWindowViewModel : MainViewModel<MainArguments>
+public class MainWindowViewModel(
+    ImagesScreenViewModel images,
+    ChartsScreenViewModel charts,
+    SettingsScreenViewModel settings,
+    InfoService infoService)
+    : MainViewModel<MainArguments>
 {
-    public MainWindowViewModel(IEnumerable<StatefulViewModelBase> viewModels, SettingsScreenViewModel settings)
+    public ScreenMenuItem ChartsMenuItem { get; } = new()
     {
-        ImagesMenuItem = new ScreenMenuItem
-        {
-            Name = "Изображения",
-            Icon = MaterialIconKind.Images,
-            Screen = viewModels.First<ImagesScreenViewModel>()
-        };
-        ChartsMenuItem = new ScreenMenuItem
-        {
-            Name = "Графики",
-            Icon = MaterialIconKind.ChartBoxOutline,
-            Screen = viewModels.First<ChartsScreenViewModel>()
-        };
-        SettingsMenuItem = new ScreenMenuItem
-        {
-            Name = "Настройки",
-            Icon = MaterialIconKind.SettingsOutline,
-            Screen = settings
-        };
-    }
+        Name = "Графики",
+        Icon = MaterialIconKind.ChartBoxOutline,
+        Screen = charts
+    };
 
-    public ScreenMenuItem ChartsMenuItem { get; }
+    public ScreenMenuItem ImagesMenuItem { get; } = new()
+    {
+        Name = "Изображения",
+        Icon = MaterialIconKind.Images,
+        Screen = images
+    };
 
-    public ScreenMenuItem ImagesMenuItem { get; }
+    public ScreenMenuItem SettingsMenuItem { get; } = new()
+    {
+        Name = "Настройки",
+        Icon = MaterialIconKind.SettingsOutline,
+        Screen = settings
+    };
 
-    public ScreenMenuItem SettingsMenuItem { get; }
+    public InfoService InfoService { get; } = infoService;
 }
