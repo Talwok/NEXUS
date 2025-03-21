@@ -57,5 +57,9 @@
       <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-Thin.ttf" />
       <AvaloniaResource Include="Styles\Fonts\JetBrainsMonoNL-ThinItalic.ttf" />
     </ItemGroup>
+  
+    <ItemGroup>
+      <Folder Include="Parsers\" />
+    </ItemGroup>
 
 </Project>
