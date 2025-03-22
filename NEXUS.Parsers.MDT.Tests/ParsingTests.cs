@@ -17,7 +17,7 @@ public class Tests
     public void LoadingTest(string mdtFileName)
     {
         var sw = Stopwatch.StartNew();
-        var data = new NtMdt(new KaitaiStream(File.ReadAllBytes(mdtFileName)));
+        var data = new Mdt(new KaitaiStream(File.ReadAllBytes(mdtFileName)));
         sw.Stop();
         Assert.Pass();
     }

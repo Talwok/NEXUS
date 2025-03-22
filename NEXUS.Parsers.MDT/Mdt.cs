@@ -21,14 +21,13 @@ namespace NEXUS.Parsers.MDT
     /// <remarks>
     /// Reference: <a href="https://svn.code.sf.net/p/gwyddion/code/trunk/gwyddion/modules/file/nt-mdt.c">Source</a>
     /// </remarks>
-    public partial class NtMdt : KaitaiStruct
+    public class Mdt : KaitaiStruct
     {
-        public static NtMdt FromFile(string fileName)
+        public static Mdt FromFile(string fileName)
         {
-            return new NtMdt(new KaitaiStream(fileName));
+            return new Mdt(new KaitaiStream(fileName));
         }
-
-
+        
         public enum AdcMode
         {
             Height = 0,
@@ -55,14 +54,14 @@ namespace NEXUS.Parsers.MDT
 
         public enum XmlScanLocation
         {
-            Hlt = 0,
-            Hlb = 1,
-            Hrt = 2,
-            Hrb = 3,
-            Vlt = 4,
-            Vlb = 5,
-            Vrt = 6,
-            Vrb = 7,
+            HorizontalLeftTop = 0,
+            HorizontalLeftBottom = 1,
+            HorizontalRightTop = 2,
+            HorizontalRightBottom = 3,
+            VerticalLeftTop = 4,
+            VerticalLeftBottom = 5,
+            VerticalRightTop = 6,
+            VerticalRightBottom = 7,
         }
 
         public enum DataType
@@ -192,13 +191,13 @@ namespace NEXUS.Parsers.MDT
             SpectroVarsMinSize = 38,
             ScanVarsMinSize = 77,
         }
-        public NtMdt(KaitaiStream p__io, KaitaiStruct p__parent = null, NtMdt p__root = null) : base(p__io)
+        public Mdt(KaitaiStream io, KaitaiStruct parent = null, Mdt root = null) : base(io)
         {
-            m_parent = p__parent;
-            m_root = p__root ?? this;
-            _read();
+            m_parent = parent;
+            m_root = root ?? this;
+            read();
         }
-        private void _read()
+        private void read()
         {
             _signature = m_io.ReadBytes(4);
             if (!((KaitaiStream.ByteArrayCompare(Signature, new byte[] { 1, 176, 147, 255 }) == 0)))
@@ -212,22 +211,22 @@ namespace NEXUS.Parsers.MDT
             _wrondDoc = m_io.ReadBytes(1);
             __raw_frames = m_io.ReadBytes((long)Size);
             var io___raw_frames = new KaitaiStream(__raw_frames);
-            _frames = new Framez(io___raw_frames, this, m_root);
+            _framesValue = new Frames(io___raw_frames, this, m_root);
         }
-        public partial class Uuid : KaitaiStruct
+        public class Uuid : KaitaiStruct
         {
             public static Uuid FromFile(string fileName)
             {
                 return new Uuid(new KaitaiStream(fileName));
             }
 
-            public Uuid(KaitaiStream p__io, NtMdt.Frame.FdMetaData p__parent = null, NtMdt p__root = null) : base(p__io)
+            public Uuid(KaitaiStream io, Frame.FdMetaData parent = null, Mdt root = null) : base(io)
             {
-                m_parent = p__parent;
-                m_root = p__root;
-                _read();
+                m_parent = parent;
+                m_root = root;
+                read();
             }
-            private void _read()
+            private void read()
             {
                 _data = new List<byte>();
                 for (var i = 0; i < 16; i++)
@@ -236,41 +235,41 @@ namespace NEXUS.Parsers.MDT
                 }
             }
             private List<byte> _data;
-            private NtMdt m_root;
-            private NtMdt.Frame.FdMetaData m_parent;
+            private Mdt m_root;
+            private Frame.FdMetaData m_parent;
             public List<byte> Data { get { return _data; } }
-            public NtMdt M_Root { get { return m_root; } }
-            public NtMdt.Frame.FdMetaData M_Parent { get { return m_parent; } }
+            public Mdt M_Root { get { return m_root; } }
+            public Frame.FdMetaData M_Parent { get { return m_parent; } }
         }
-        public partial class Framez : KaitaiStruct
+        public class Frames : KaitaiStruct
         {
-            public static Framez FromFile(string fileName)
+            public static Frames FromFile(string fileName)
             {
-                return new Framez(new KaitaiStream(fileName));
+                return new Frames(new KaitaiStream(fileName));
             }
 
-            public Framez(KaitaiStream p__io, NtMdt p__parent = null, NtMdt p__root = null) : base(p__io)
+            public Frames(KaitaiStream io, Mdt parent = null, Mdt root = null) : base(io)
             {
-                m_parent = p__parent;
-                m_root = p__root;
-                _read();
+                m_parent = parent;
+                m_root = root;
+                read();
             }
-            private void _read()
+            private void read()
             {
-                _frames = new List<Frame>();
+                _frameList = new List<Frame>();
                 for (var i = 0; i < (M_Root.LastFrame + 1); i++)
                 {
-                    _frames.Add(new Frame(m_io, this, m_root));
+                    _frameList.Add(new Frame(m_io, this, m_root));
                 }
             }
-            private List<Frame> _frames;
-            private NtMdt m_root;
-            private NtMdt m_parent;
-            public List<Frame> Frames { get { return _frames; } }
-            public NtMdt M_Root { get { return m_root; } }
-            public NtMdt M_Parent { get { return m_parent; } }
+            private List<Frame> _frameList;
+            private Mdt m_root;
+            private Mdt m_parent;
+            public List<Frame> FrameList { get { return _frameList; } }
+            public Mdt M_Root { get { return m_root; } }
+            public Mdt M_Parent { get { return m_parent; } }
         }
-        public partial class Frame : KaitaiStruct
+        public class Frame : KaitaiStruct
         {
             public static Frame FromFile(string fileName)
             {
@@ -289,33 +288,33 @@ namespace NEXUS.Parsers.MDT
                 CurvesNew = 190,
                 Curves = 201,
             }
-            public Frame(KaitaiStream p__io, NtMdt.Framez p__parent = null, NtMdt p__root = null) : base(p__io)
+            public Frame(KaitaiStream io, Frames parent = null, Mdt root = null) : base(io)
             {
-                m_parent = p__parent;
-                m_root = p__root;
-                _read();
+                m_parent = parent;
+                m_root = root;
+                read();
             }
-            private void _read()
+            private void read()
             {
                 _size = m_io.ReadU4le();
                 __raw_main = m_io.ReadBytes((Size - 4));
                 var io___raw_main = new KaitaiStream(__raw_main);
                 _main = new FrameMain(io___raw_main, this, m_root);
             }
-            public partial class Dots : KaitaiStruct
+            public class Dots : KaitaiStruct
             {
                 public static Dots FromFile(string fileName)
                 {
                     return new Dots(new KaitaiStream(fileName));
                 }
 
-                public Dots(KaitaiStream p__io, KaitaiStruct p__parent = null, NtMdt p__root = null) : base(p__io)
+                public Dots(KaitaiStream io, KaitaiStruct parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
-                    _read();
+                    m_parent = parent;
+                    m_root = root;
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
                     _fmNdots = m_io.ReadU2le();
                     if (FmNdots > 0) {
@@ -326,87 +325,87 @@ namespace NEXUS.Parsers.MDT
                     {
                         _coordinates.Add(new DotsData(m_io, this, m_root));
                     }
-                    _data = new List<DataLinez>();
+                    _data = new List<DataLines>();
                     for (ushort i = 0; i < FmNdots; i++)
                     {
-                        _data.Add(new DataLinez(i, m_io, this, m_root));
+                        _data.Add(new DataLines(i, m_io, this, m_root));
                     }
                 }
-                public partial class DotsHeader : KaitaiStruct
+                public class DotsHeader : KaitaiStruct
                 {
                     public static DotsHeader FromFile(string fileName)
                     {
                         return new DotsHeader(new KaitaiStream(fileName));
                     }
 
-                    public DotsHeader(KaitaiStream p__io, NtMdt.Frame.Dots p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public DotsHeader(KaitaiStream io, Dots parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _headerSize = m_io.ReadS4le();
                         __raw_header = m_io.ReadBytes(HeaderSize);
                         var io___raw_header = new KaitaiStream(__raw_header);
                         _value = new Header(io___raw_header, this, m_root);
                     }
-                    public partial class Header : KaitaiStruct
+                    public class Header : KaitaiStruct
                     {
                         public static Header FromFile(string fileName)
                         {
                             return new Header(new KaitaiStream(fileName));
                         }
 
-                        public Header(KaitaiStream p__io, NtMdt.Frame.Dots.DotsHeader p__parent = null, NtMdt p__root = null) : base(p__io)
+                        public Header(KaitaiStream io, DotsHeader parent = null, Mdt root = null) : base(io)
                         {
-                            m_parent = p__parent;
-                            m_root = p__root;
-                            _read();
+                            m_parent = parent;
+                            m_root = root;
+                            read();
                         }
-                        private void _read()
+                        private void read()
                         {
                             _coordSize = m_io.ReadS4le();
                             _version = m_io.ReadS4le();
-                            _xyunits = ((NtMdt.Unit) m_io.ReadS2le());
+                            _xyunits = ((Unit) m_io.ReadS2le());
                         }
                         private int _coordSize;
                         private int _version;
                         private Unit _xyunits;
-                        private NtMdt m_root;
-                        private NtMdt.Frame.Dots.DotsHeader m_parent;
+                        private Mdt m_root;
+                        private DotsHeader m_parent;
                         public int CoordSize { get { return _coordSize; } }
                         public int Version { get { return _version; } }
                         public Unit Xyunits { get { return _xyunits; } }
-                        public NtMdt M_Root { get { return m_root; } }
-                        public NtMdt.Frame.Dots.DotsHeader M_Parent { get { return m_parent; } }
+                        public Mdt M_Root { get { return m_root; } }
+                        public DotsHeader M_Parent { get { return m_parent; } }
                     }
                     private int _headerSize;
                     private Header _value;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.Dots m_parent;
+                    private Mdt m_root;
+                    private Dots m_parent;
                     private byte[] __raw_header;
                     public int HeaderSize { get { return _headerSize; } }
                     public Header Value { get { return _value; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.Dots M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public Dots M_Parent { get { return m_parent; } }
                     public byte[] M_RawHeader { get { return __raw_header; } }
                 }
-                public partial class DotsData : KaitaiStruct
+                public class DotsData : KaitaiStruct
                 {
                     public static DotsData FromFile(string fileName)
                     {
                         return new DotsData(new KaitaiStream(fileName));
                     }
 
-                    public DotsData(KaitaiStream p__io, NtMdt.Frame.Dots p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public DotsData(KaitaiStream io, Dots parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _coordX = m_io.ReadF4le();
                         _coordY = m_io.ReadF4le();
@@ -417,25 +416,25 @@ namespace NEXUS.Parsers.MDT
                     private float _coordY;
                     private int _forwardSize;
                     private int _backwardSize;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.Dots m_parent;
+                    private Mdt m_root;
+                    private Dots m_parent;
                     public float CoordX { get { return _coordX; } }
                     public float CoordY { get { return _coordY; } }
                     public int ForwardSize { get { return _forwardSize; } }
                     public int BackwardSize { get { return _backwardSize; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.Dots M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public Dots M_Parent { get { return m_parent; } }
                 }
-                public partial class DataLinez : KaitaiStruct
+                public class DataLines : KaitaiStruct
                 {
-                    public DataLinez(ushort p_index, KaitaiStream p__io, NtMdt.Frame.Dots p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public DataLines(ushort index, KaitaiStream io, Dots parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _index = p_index;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        _index = index;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _forward = new List<short>();
                         for (var i = 0; i < M_Parent.Coordinates[Index].ForwardSize; i++)
@@ -451,72 +450,72 @@ namespace NEXUS.Parsers.MDT
                     private List<short> _forward;
                     private List<short> _backward;
                     private ushort _index;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.Dots m_parent;
+                    private Mdt m_root;
+                    private Dots m_parent;
                     public List<short> Forward { get { return _forward; } }
                     public List<short> Backward { get { return _backward; } }
                     public ushort Index { get { return _index; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.Dots M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public Dots M_Parent { get { return m_parent; } }
                 }
                 private ushort _fmNdots;
                 private DotsHeader _coordHeader;
                 private List<DotsData> _coordinates;
-                private List<DataLinez> _data;
-                private NtMdt m_root;
+                private List<DataLines> _data;
+                private Mdt m_root;
                 private KaitaiStruct m_parent;
                 public ushort FmNdots { get { return _fmNdots; } }
                 public DotsHeader CoordHeader { get { return _coordHeader; } }
                 public List<DotsData> Coordinates { get { return _coordinates; } }
-                public List<DataLinez> Data { get { return _data; } }
-                public NtMdt M_Root { get { return m_root; } }
+                public List<DataLines> Data { get { return _data; } }
+                public Mdt M_Root { get { return m_root; } }
                 public KaitaiStruct M_Parent { get { return m_parent; } }
             }
-            public partial class FrameMain : KaitaiStruct
+            public class FrameMain : KaitaiStruct
             {
                 public static FrameMain FromFile(string fileName)
                 {
                     return new FrameMain(new KaitaiStream(fileName));
                 }
 
-                public FrameMain(KaitaiStream p__io, NtMdt.Frame p__parent = null, NtMdt p__root = null) : base(p__io)
+                public FrameMain(KaitaiStream io, Frame parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
-                    _read();
+                    m_parent = parent;
+                    m_root = root;
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
-                    _type = ((NtMdt.Frame.FrameType) m_io.ReadU2le());
+                    _type = ((FrameType) m_io.ReadU2le());
                     _version = new Version(m_io, this, m_root);
                     _dateTime = new DateTime(m_io, this, m_root);
                     _varSize = m_io.ReadU2le();
                     switch (Type) {
-                    case NtMdt.Frame.FrameType.Mda: {
+                    case FrameType.Mda: {
                         __raw_frameData = m_io.ReadBytesFull();
                         var io___raw_frameData = new KaitaiStream(__raw_frameData);
                         _frameData = new FdMetaData(io___raw_frameData, this, m_root);
                         break;
                     }
-                    case NtMdt.Frame.FrameType.CurvesNew: {
+                    case FrameType.CurvesNew: {
                         __raw_frameData = m_io.ReadBytesFull();
                         var io___raw_frameData = new KaitaiStream(__raw_frameData);
                         _frameData = new FdCurvesNew(io___raw_frameData, this, m_root);
                         break;
                     }
-                    case NtMdt.Frame.FrameType.Curves: {
+                    case FrameType.Curves: {
                         __raw_frameData = m_io.ReadBytesFull();
                         var io___raw_frameData = new KaitaiStream(__raw_frameData);
                         _frameData = new FdSpectroscopy(io___raw_frameData, this, m_root);
                         break;
                     }
-                    case NtMdt.Frame.FrameType.Spectroscopy: {
+                    case FrameType.Spectroscopy: {
                         __raw_frameData = m_io.ReadBytesFull();
                         var io___raw_frameData = new KaitaiStream(__raw_frameData);
                         _frameData = new FdSpectroscopy(io___raw_frameData, this, m_root);
                         break;
                     }
-                    case NtMdt.Frame.FrameType.Scanned: {
+                    case FrameType.Scanned: {
                         __raw_frameData = m_io.ReadBytesFull();
                         var io___raw_frameData = new KaitaiStream(__raw_frameData);
                         _frameData = new FdScanned(io___raw_frameData, this, m_root);
@@ -533,8 +532,8 @@ namespace NEXUS.Parsers.MDT
                 private DateTime _dateTime;
                 private ushort _varSize;
                 private object _frameData;
-                private NtMdt m_root;
-                private NtMdt.Frame m_parent;
+                private Mdt m_root;
+                private Frame m_parent;
                 private byte[] __raw_frameData;
 
                 /// <summary>
@@ -553,24 +552,24 @@ namespace NEXUS.Parsers.MDT
                 /// 
                 /// </summary>
                 public object FrameData { get { return _frameData; } }
-                public NtMdt M_Root { get { return m_root; } }
-                public NtMdt.Frame M_Parent { get { return m_parent; } }
+                public Mdt M_Root { get { return m_root; } }
+                public Frame M_Parent { get { return m_parent; } }
                 public byte[] M_RawFrameData { get { return __raw_frameData; } }
             }
-            public partial class FdCurvesNew : KaitaiStruct
+            public class FdCurvesNew : KaitaiStruct
             {
                 public static FdCurvesNew FromFile(string fileName)
                 {
                     return new FdCurvesNew(new KaitaiStream(fileName));
                 }
 
-                public FdCurvesNew(KaitaiStream p__io, NtMdt.Frame.FrameMain p__parent = null, NtMdt p__root = null) : base(p__io)
+                public FdCurvesNew(KaitaiStream io, FrameMain parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
-                    _read();
+                    m_parent = parent;
+                    m_root = root;
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
                     _blockCount = m_io.ReadU4le();
                     _blocksHeaders = new List<BlockDescr>();
@@ -589,61 +588,61 @@ namespace NEXUS.Parsers.MDT
                         _blocksData.Add(m_io.ReadBytes(BlocksHeaders[i].Len));
                     }
                 }
-                public partial class BlockDescr : KaitaiStruct
+                public class BlockDescr : KaitaiStruct
                 {
                     public static BlockDescr FromFile(string fileName)
                     {
                         return new BlockDescr(new KaitaiStream(fileName));
                     }
 
-                    public BlockDescr(KaitaiStream p__io, NtMdt.Frame.FdCurvesNew p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public BlockDescr(KaitaiStream io, FdCurvesNew parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _nameLen = m_io.ReadU4le();
                         _len = m_io.ReadU4le();
                     }
                     private uint _nameLen;
                     private uint _len;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.FdCurvesNew m_parent;
+                    private Mdt m_root;
+                    private FdCurvesNew m_parent;
                     public uint NameLen { get { return _nameLen; } }
                     public uint Len { get { return _len; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.FdCurvesNew M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public FdCurvesNew M_Parent { get { return m_parent; } }
                 }
                 private uint _blockCount;
                 private List<BlockDescr> _blocksHeaders;
                 private List<string> _blocksNames;
                 private List<byte[]> _blocksData;
-                private NtMdt m_root;
-                private NtMdt.Frame.FrameMain m_parent;
+                private Mdt m_root;
+                private FrameMain m_parent;
                 public uint BlockCount { get { return _blockCount; } }
                 public List<BlockDescr> BlocksHeaders { get { return _blocksHeaders; } }
                 public List<string> BlocksNames { get { return _blocksNames; } }
                 public List<byte[]> BlocksData { get { return _blocksData; } }
-                public NtMdt M_Root { get { return m_root; } }
-                public NtMdt.Frame.FrameMain M_Parent { get { return m_parent; } }
+                public Mdt M_Root { get { return m_root; } }
+                public FrameMain M_Parent { get { return m_parent; } }
             }
-            public partial class FdMetaData : KaitaiStruct
+            public class FdMetaData : KaitaiStruct
             {
                 public static FdMetaData FromFile(string fileName)
                 {
                     return new FdMetaData(new KaitaiStream(fileName));
                 }
 
-                public FdMetaData(KaitaiStream p__io, NtMdt.Frame.FrameMain p__parent = null, NtMdt p__root = null) : base(p__io)
+                public FdMetaData(KaitaiStream io, FrameMain parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
+                    m_parent = parent;
+                    m_root = root;
                     f_image = false;
-                    _read();
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
                     _headSize = m_io.ReadU4le();
                     _totLen = m_io.ReadU4le();
@@ -679,20 +678,20 @@ namespace NEXUS.Parsers.MDT
                         _mesurands.Add(new Calibration(m_io, this, m_root));
                     }
                 }
-                public partial class Image : KaitaiStruct
+                public class Image : KaitaiStruct
                 {
                     public static Image FromFile(string fileName)
                     {
                         return new Image(new KaitaiStream(fileName));
                     }
 
-                    public Image(KaitaiStream p__io, NtMdt.Frame.FdMetaData p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public Image(KaitaiStream io, FdMetaData parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _imageVectors = new List<Vec>();
                         {
@@ -703,62 +702,62 @@ namespace NEXUS.Parsers.MDT
                             }
                         }
                     }
-                    public partial class Vec : KaitaiStruct
+                    public class Vec : KaitaiStruct
                     {
                         public static Vec FromFile(string fileName)
                         {
                             return new Vec(new KaitaiStream(fileName));
                         }
 
-                        public Vec(KaitaiStream p__io, NtMdt.Frame.FdMetaData.Image p__parent = null, NtMdt p__root = null) : base(p__io)
+                        public Vec(KaitaiStream io, Image parent = null, Mdt root = null) : base(io)
                         {
-                            m_parent = p__parent;
-                            m_root = p__root;
-                            _read();
+                            m_parent = parent;
+                            m_root = root;
+                            read();
                         }
-                        private void _read()
+                        private void read()
                         {
                             _items = new List<double>();
                             for (var i = 0; i < M_Parent.M_Parent.NMesurands; i++)
                             {
                                 switch (M_Parent.M_Parent.Mesurands[i].DataType) {
-                                case NtMdt.DataType.Uint64: {
+                                case DataType.Uint64: {
                                     _items.Add(m_io.ReadU8le());
                                     break;
                                 }
-                                case NtMdt.DataType.Uint8: {
+                                case DataType.Uint8: {
                                     _items.Add(m_io.ReadU1());
                                     break;
                                 }
-                                case NtMdt.DataType.Float32: {
+                                case DataType.Float32: {
                                     _items.Add(m_io.ReadF4le());
                                     break;
                                 }
-                                case NtMdt.DataType.Int8: {
+                                case DataType.Int8: {
                                     _items.Add(m_io.ReadS1());
                                     break;
                                 }
-                                case NtMdt.DataType.Uint16: {
+                                case DataType.Uint16: {
                                     _items.Add(m_io.ReadU2le());
                                     break;
                                 }
-                                case NtMdt.DataType.Int64: {
+                                case DataType.Int64: {
                                     _items.Add(m_io.ReadS8le());
                                     break;
                                 }
-                                case NtMdt.DataType.Uint32: {
+                                case DataType.Uint32: {
                                     _items.Add(m_io.ReadU4le());
                                     break;
                                 }
-                                case NtMdt.DataType.Float64: {
+                                case DataType.Float64: {
                                     _items.Add(m_io.ReadF8le());
                                     break;
                                 }
-                                case NtMdt.DataType.Int16: {
+                                case DataType.Int16: {
                                     _items.Add(m_io.ReadS2le());
                                     break;
                                 }
-                                case NtMdt.DataType.Int32: {
+                                case DataType.Int32: {
                                     _items.Add(m_io.ReadS4le());
                                     break;
                                 }
@@ -766,34 +765,34 @@ namespace NEXUS.Parsers.MDT
                             }
                         }
                         private List<double> _items;
-                        private NtMdt m_root;
-                        private NtMdt.Frame.FdMetaData.Image m_parent;
+                        private Mdt m_root;
+                        private Image m_parent;
                         public List<double> Items { get { return _items; } }
-                        public NtMdt M_Root { get { return m_root; } }
-                        public NtMdt.Frame.FdMetaData.Image M_Parent { get { return m_parent; } }
+                        public Mdt M_Root { get { return m_root; } }
+                        public Image M_Parent { get { return m_parent; } }
                     }
                     private List<Vec> _imageVectors;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.FdMetaData m_parent;
+                    private Mdt m_root;
+                    private FdMetaData m_parent;
                     public List<Vec> ImageVectors { get { return _imageVectors; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.FdMetaData M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public FdMetaData M_Parent { get { return m_parent; } }
                 }
-                public partial class Calibration : KaitaiStruct
+                public class Calibration : KaitaiStruct
                 {
                     public static Calibration FromFile(string fileName)
                     {
                         return new Calibration(new KaitaiStream(fileName));
                     }
 
-                    public Calibration(KaitaiStream p__io, NtMdt.Frame.FdMetaData p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public Calibration(KaitaiStream io, FdMetaData parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
+                        m_parent = parent;
+                        m_root = root;
                         f_count = false;
-                        _read();
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _lenTot = m_io.ReadU4le();
                         _lenStruct = m_io.ReadU4le();
@@ -807,7 +806,7 @@ namespace NEXUS.Parsers.MDT
                         _scale = m_io.ReadF8le();
                         _minIndex = m_io.ReadU8le();
                         _maxIndex = m_io.ReadU8le();
-                        _dataType = ((NtMdt.DataType) m_io.ReadS4le());
+                        _dataType = ((DataType) m_io.ReadS4le());
                         _lenAuthor = m_io.ReadU4le();
                         _name = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenName));
                         _comment = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenComment));
@@ -845,8 +844,8 @@ namespace NEXUS.Parsers.MDT
                     private string _comment;
                     private string _unit;
                     private string _author;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.FdMetaData m_parent;
+                    private Mdt m_root;
+                    private FdMetaData m_parent;
                     public uint LenTot { get { return _lenTot; } }
                     public uint LenStruct { get { return _lenStruct; } }
                     public uint LenName { get { return _lenName; } }
@@ -865,8 +864,8 @@ namespace NEXUS.Parsers.MDT
                     public string Comment { get { return _comment; } }
                     public string Unit { get { return _unit; } }
                     public string Author { get { return _author; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.FdMetaData M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public FdMetaData M_Parent { get { return m_parent; } }
                 }
                 private bool f_image;
                 private Image _image;
@@ -907,8 +906,8 @@ namespace NEXUS.Parsers.MDT
                 private uint _nMesurands;
                 private List<Calibration> _dimensions;
                 private List<Calibration> _mesurands;
-                private NtMdt m_root;
-                private NtMdt.Frame.FrameMain m_parent;
+                private Mdt m_root;
+                private FrameMain m_parent;
                 private byte[] __raw_image;
                 public uint HeadSize { get { return _headSize; } }
                 public uint TotLen { get { return _totLen; } }
@@ -931,24 +930,24 @@ namespace NEXUS.Parsers.MDT
                 public uint NMesurands { get { return _nMesurands; } }
                 public List<Calibration> Dimensions { get { return _dimensions; } }
                 public List<Calibration> Mesurands { get { return _mesurands; } }
-                public NtMdt M_Root { get { return m_root; } }
-                public NtMdt.Frame.FrameMain M_Parent { get { return m_parent; } }
+                public Mdt M_Root { get { return m_root; } }
+                public FrameMain M_Parent { get { return m_parent; } }
                 public byte[] M_RawImage { get { return __raw_image; } }
             }
-            public partial class FdSpectroscopy : KaitaiStruct
+            public class FdSpectroscopy : KaitaiStruct
             {
                 public static FdSpectroscopy FromFile(string fileName)
                 {
                     return new FdSpectroscopy(new KaitaiStream(fileName));
                 }
 
-                public FdSpectroscopy(KaitaiStream p__io, NtMdt.Frame.FrameMain p__parent = null, NtMdt p__root = null) : base(p__io)
+                public FdSpectroscopy(KaitaiStream io, FrameMain parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
-                    _read();
+                    m_parent = parent;
+                    m_root = root;
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
                     __raw_vars = m_io.ReadBytes(M_Parent.VarSize);
                     var io___raw_vars = new KaitaiStream(__raw_vars);
@@ -965,20 +964,20 @@ namespace NEXUS.Parsers.MDT
                     _title = new Title(m_io, this, m_root);
                     _xml = new Xml(m_io, this, m_root);
                 }
-                public partial class Variables : KaitaiStruct
+                public class Variables : KaitaiStruct
                 {
                     public static Variables FromFile(string fileName)
                     {
                         return new Variables(new KaitaiStream(fileName));
                     }
 
-                    public Variables(KaitaiStream p__io, NtMdt.Frame.FdSpectroscopy p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public Variables(KaitaiStream io, FdSpectroscopy parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _xScale = new AxisScale(m_io, this, m_root);
                         _yScale = new AxisScale(m_io, this, m_root);
@@ -1021,8 +1020,8 @@ namespace NEXUS.Parsers.MDT
                     private short _sp4u;
                     private short _sp4i;
                     private short _spNx;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.FdSpectroscopy m_parent;
+                    private Mdt m_root;
+                    private FdSpectroscopy m_parent;
                     public AxisScale XScale { get { return _xScale; } }
                     public AxisScale YScale { get { return _yScale; } }
                     public AxisScale ZScale { get { return _zScale; } }
@@ -1043,8 +1042,8 @@ namespace NEXUS.Parsers.MDT
                     public short Sp4u { get { return _sp4u; } }
                     public short Sp4i { get { return _sp4i; } }
                     public short SpNx { get { return _spNx; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.FdSpectroscopy M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public FdSpectroscopy M_Parent { get { return m_parent; } }
                 }
                 private Variables _variables;
                 private ushort _fmMode;
@@ -1054,8 +1053,8 @@ namespace NEXUS.Parsers.MDT
                 private List<short> _data;
                 private Title _title;
                 private Xml _xml;
-                private NtMdt m_root;
-                private NtMdt.Frame.FrameMain m_parent;
+                private Mdt m_root;
+                private FrameMain m_parent;
                 private byte[] __raw_vars;
                 public Variables Vars { get { return _variables; } }
                 public ushort FmMode { get { return _fmMode; } }
@@ -1065,42 +1064,42 @@ namespace NEXUS.Parsers.MDT
                 public List<short> Data { get { return _data; } }
                 public Title Title { get { return _title; } }
                 public Xml Xml { get { return _xml; } }
-                public NtMdt M_Root { get { return m_root; } }
-                public NtMdt.Frame.FrameMain M_Parent { get { return m_parent; } }
+                public Mdt M_Root { get { return m_root; } }
+                public FrameMain M_Parent { get { return m_parent; } }
                 public byte[] M_RawVars { get { return __raw_vars; } }
             }
-            public partial class DateTime : KaitaiStruct
+            public class DateTime : KaitaiStruct
             {
                 public static DateTime FromFile(string fileName)
                 {
                     return new DateTime(new KaitaiStream(fileName));
                 }
 
-                public DateTime(KaitaiStream p__io, NtMdt.Frame.FrameMain p__parent = null, NtMdt p__root = null) : base(p__io)
+                public DateTime(KaitaiStream io, FrameMain parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
-                    _read();
+                    m_parent = parent;
+                    m_root = root;
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
                     _dateValue = new Date(m_io, this, m_root);
                     _timeValue = new Time(m_io, this, m_root);
                 }
-                public partial class Date : KaitaiStruct
+                public class Date : KaitaiStruct
                 {
                     public static Date FromFile(string fileName)
                     {
                         return new Date(new KaitaiStream(fileName));
                     }
 
-                    public Date(KaitaiStream p__io, NtMdt.Frame.DateTime p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public Date(KaitaiStream io, DateTime parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _year = m_io.ReadU2le();
                         _month = m_io.ReadU2le();
@@ -1109,8 +1108,8 @@ namespace NEXUS.Parsers.MDT
                     private ushort _year;
                     private ushort _month;
                     private ushort _day;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.DateTime m_parent;
+                    private Mdt m_root;
+                    private DateTime m_parent;
 
                     /// <summary>
                     /// h_yea
@@ -1126,23 +1125,23 @@ namespace NEXUS.Parsers.MDT
                     /// h_day
                     /// </summary>
                     public ushort Day { get { return _day; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.DateTime M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public DateTime M_Parent { get { return m_parent; } }
                 }
-                public partial class Time : KaitaiStruct
+                public class Time : KaitaiStruct
                 {
                     public static Time FromFile(string fileName)
                     {
                         return new Time(new KaitaiStream(fileName));
                     }
 
-                    public Time(KaitaiStream p__io, NtMdt.Frame.DateTime p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public Time(KaitaiStream io, DateTime parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _hour = m_io.ReadU2le();
                         _min = m_io.ReadU2le();
@@ -1151,8 +1150,8 @@ namespace NEXUS.Parsers.MDT
                     private ushort _hour;
                     private ushort _min;
                     private ushort _sec;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.DateTime m_parent;
+                    private Mdt m_root;
+                    private DateTime m_parent;
 
                     /// <summary>
                     /// h_h
@@ -1168,41 +1167,41 @@ namespace NEXUS.Parsers.MDT
                     /// h_s
                     /// </summary>
                     public ushort Sec { get { return _sec; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.DateTime M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public DateTime M_Parent { get { return m_parent; } }
                 }
                 private Date _dateValue;
                 private Time _timeValue;
-                private NtMdt m_root;
-                private NtMdt.Frame.FrameMain m_parent;
+                private Mdt m_root;
+                private FrameMain m_parent;
                 public Date DateValue { get { return _dateValue; } }
                 public Time TimeValue { get { return _timeValue; } }
-                public NtMdt M_Root { get { return m_root; } }
-                public NtMdt.Frame.FrameMain M_Parent { get { return m_parent; } }
+                public Mdt M_Root { get { return m_root; } }
+                public FrameMain M_Parent { get { return m_parent; } }
             }
-            public partial class AxisScale : KaitaiStruct
+            public class AxisScale : KaitaiStruct
             {
                 public static AxisScale FromFile(string fileName)
                 {
                     return new AxisScale(new KaitaiStream(fileName));
                 }
 
-                public AxisScale(KaitaiStream p__io, KaitaiStruct p__parent = null, NtMdt p__root = null) : base(p__io)
+                public AxisScale(KaitaiStream io, KaitaiStruct parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
-                    _read();
+                    m_parent = parent;
+                    m_root = root;
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
                     _offset = m_io.ReadF4le();
                     _step = m_io.ReadF4le();
-                    _unit = ((NtMdt.Unit) m_io.ReadS2le());
+                    _unit = ((Unit) m_io.ReadS2le());
                 }
                 private float _offset;
                 private float _step;
                 private Unit _unit;
-                private NtMdt m_root;
+                private Mdt m_root;
                 private KaitaiStruct m_parent;
 
                 /// <summary>
@@ -1222,10 +1221,10 @@ namespace NEXUS.Parsers.MDT
                 /// U
                 /// </summary>
                 public Unit Unit { get { return _unit; } }
-                public NtMdt M_Root { get { return m_root; } }
+                public Mdt M_Root { get { return m_root; } }
                 public KaitaiStruct M_Parent { get { return m_parent; } }
             }
-            public partial class FdScanned : KaitaiStruct
+            public class FdScanned : KaitaiStruct
             {
                 public static FdScanned FromFile(string fileName)
                 {
@@ -1255,13 +1254,13 @@ namespace NEXUS.Parsers.MDT
                     Fine = 1,
                     Slope = 2,
                 }
-                public FdScanned(KaitaiStream p__io, NtMdt.Frame.FrameMain p__parent = null, NtMdt p__root = null) : base(p__io)
+                public FdScanned(KaitaiStream io, FrameMain parent = null, Mdt root = null) : base(io)
                 {
-                    m_parent = p__parent;
-                    m_root = p__root;
-                    _read();
+                    m_parent = parent;
+                    m_root = root;
+                    read();
                 }
-                private void _read()
+                private void read()
                 {
                     __raw_vars = m_io.ReadBytes(M_Parent.VarSize);
                     var io___raw_vars = new KaitaiStream(__raw_vars);
@@ -1293,26 +1292,26 @@ namespace NEXUS.Parsers.MDT
                     _title = new Title(m_io, this, m_root);
                     _xml = new Xml(m_io, this, m_root);
                 }
-                public partial class Variables : KaitaiStruct
+                public class Variables : KaitaiStruct
                 {
                     public static Variables FromFile(string fileName)
                     {
                         return new Variables(new KaitaiStream(fileName));
                     }
 
-                    public Variables(KaitaiStream p__io, NtMdt.Frame.FdScanned p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public Variables(KaitaiStream io, FdScanned parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _xScale = new AxisScale(m_io, this, m_root);
                         _yScale = new AxisScale(m_io, this, m_root);
                         _zScale = new AxisScale(m_io, this, m_root);
-                        _channelIndex = ((NtMdt.AdcMode) m_io.ReadU1());
-                        _mode = ((NtMdt.Frame.FdScanned.Mode) m_io.ReadU1());
+                        _channelIndex = ((AdcMode) m_io.ReadU1());
+                        _mode = ((Mode) m_io.ReadU1());
                         _xres = m_io.ReadU2le();
                         _yres = m_io.ReadU2le();
                         _ndacq = m_io.ReadU2le();
@@ -1357,8 +1356,8 @@ namespace NEXUS.Parsers.MDT
                     private int _xoff;
                     private int _yoff;
                     private byte _nlCorr;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.FdScanned m_parent;
+                    private Mdt m_root;
+                    private FdScanned m_parent;
                     public AxisScale XScale { get { return _xScale; } }
                     public AxisScale YScale { get { return _yScale; } }
                     public AxisScale ZScale { get { return _zScale; } }
@@ -1409,7 +1408,7 @@ namespace NEXUS.Parsers.MDT
                     public byte AdcIndex { get { return _adcIndex; } }
 
                     /// <summary>
-                    /// MDTInputSignal smp_in; s_smp_in (for signal) s_8xx (for version)
+                    /// MDTInputSignal smin; s_smp_in (for signal) s_8xx (for version)
                     /// </summary>
                     public byte InputSignalOrVersion { get { return _inputSignalOrVersion; } }
 
@@ -1463,50 +1462,50 @@ namespace NEXUS.Parsers.MDT
                     /// s_cor (bool)
                     /// </summary>
                     public byte NlCorr { get { return _nlCorr; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.FdScanned M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public FdScanned M_Parent { get { return m_parent; } }
                 }
-                public partial class Dot : KaitaiStruct
+                public class Dot : KaitaiStruct
                 {
                     public static Dot FromFile(string fileName)
                     {
                         return new Dot(new KaitaiStream(fileName));
                     }
 
-                    public Dot(KaitaiStream p__io, KaitaiStruct p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public Dot(KaitaiStream io, KaitaiStruct parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _x = m_io.ReadS2le();
                         _y = m_io.ReadS2le();
                     }
                     private short _x;
                     private short _y;
-                    private NtMdt m_root;
+                    private Mdt m_root;
                     private KaitaiStruct m_parent;
                     public short X { get { return _x; } }
                     public short Y { get { return _y; } }
-                    public NtMdt M_Root { get { return m_root; } }
+                    public Mdt M_Root { get { return m_root; } }
                     public KaitaiStruct M_Parent { get { return m_parent; } }
                 }
-                public partial class ScanDir : KaitaiStruct
+                public class ScanDir : KaitaiStruct
                 {
                     public static ScanDir FromFile(string fileName)
                     {
                         return new ScanDir(new KaitaiStream(fileName));
                     }
 
-                    public ScanDir(KaitaiStream p__io, NtMdt.Frame.FdScanned.Variables p__parent = null, NtMdt p__root = null) : base(p__io)
+                    public ScanDir(KaitaiStream io, Variables parent = null, Mdt root = null) : base(io)
                     {
-                        m_parent = p__parent;
-                        m_root = p__root;
-                        _read();
+                        m_parent = parent;
+                        m_root = root;
+                        read();
                     }
-                    private void _read()
+                    private void read()
                     {
                         _unkn = m_io.ReadBitsIntBe(4);
                         _doublePass = m_io.ReadBitsIntBe(1) != 0;
@@ -1519,8 +1518,8 @@ namespace NEXUS.Parsers.MDT
                     private bool _bottom;
                     private bool _left;
                     private bool _horizontal;
-                    private NtMdt m_root;
-                    private NtMdt.Frame.FdScanned.Variables m_parent;
+                    private Mdt m_root;
+                    private Variables m_parent;
                     public ulong Unkn { get { return _unkn; } }
                     public bool DoublePass { get { return _doublePass; } }
 
@@ -1538,8 +1537,8 @@ namespace NEXUS.Parsers.MDT
                     /// Horizontal - 1 Vertical - 0
                     /// </summary>
                     public bool Horizontal { get { return _horizontal; } }
-                    public NtMdt M_Root { get { return m_root; } }
-                    public NtMdt.Frame.FdScanned.Variables M_Parent { get { return m_parent; } }
+                    public Mdt M_Root { get { return m_root; } }
+                    public Variables M_Parent { get { return m_parent; } }
                 }
                 private Variables _vars;
                 private uint? _origFormat;
@@ -1554,8 +1553,8 @@ namespace NEXUS.Parsers.MDT
                 private List<short> _image;
                 private Title _title;
                 private Xml _xml;
-                private NtMdt m_root;
-                private NtMdt.Frame.FrameMain m_parent;
+                private Mdt m_root;
+                private FrameMain m_parent;
                 private byte[] __raw_vars;
                 public Variables Vars { get { return _vars; } }
 
@@ -1602,14 +1601,14 @@ namespace NEXUS.Parsers.MDT
                 public List<short> Image { get { return _image; } }
                 public Title Title { get { return _title; } }
                 public Xml Xml { get { return _xml; } }
-                public NtMdt M_Root { get { return m_root; } }
-                public NtMdt.Frame.FrameMain M_Parent { get { return m_parent; } }
+                public Mdt M_Root { get { return m_root; } }
+                public FrameMain M_Parent { get { return m_parent; } }
                 public byte[] M_RawVars { get { return __raw_vars; } }
             }
             private uint _size;
             private FrameMain _main;
-            private NtMdt m_root;
-            private NtMdt.Framez m_parent;
+            private Mdt m_root;
+            private Frames m_parent;
             private byte[] __raw_main;
 
             /// <summary>
@@ -1617,89 +1616,89 @@ namespace NEXUS.Parsers.MDT
             /// </summary>
             public uint Size { get { return _size; } }
             public FrameMain Main { get { return _main; } }
-            public NtMdt M_Root { get { return m_root; } }
-            public NtMdt.Framez M_Parent { get { return m_parent; } }
+            public Mdt M_Root { get { return m_root; } }
+            public Frames M_Parent { get { return m_parent; } }
             public byte[] M_RawMain { get { return __raw_main; } }
         }
-        public partial class Version : KaitaiStruct
+        public class Version : KaitaiStruct
         {
             public static Version FromFile(string fileName)
             {
                 return new Version(new KaitaiStream(fileName));
             }
 
-            public Version(KaitaiStream p__io, NtMdt.Frame.FrameMain p__parent = null, NtMdt p__root = null) : base(p__io)
+            public Version(KaitaiStream io, Frame.FrameMain parent = null, Mdt root = null) : base(io)
             {
-                m_parent = p__parent;
-                m_root = p__root;
-                _read();
+                m_parent = parent;
+                m_root = root;
+                read();
             }
-            private void _read()
+            private void read()
             {
                 _minor = m_io.ReadU1();
                 _major = m_io.ReadU1();
             }
             private byte _minor;
             private byte _major;
-            private NtMdt m_root;
-            private NtMdt.Frame.FrameMain m_parent;
+            private Mdt m_root;
+            private Frame.FrameMain m_parent;
             public byte Minor { get { return _minor; } }
             public byte Major { get { return _major; } }
-            public NtMdt M_Root { get { return m_root; } }
-            public NtMdt.Frame.FrameMain M_Parent { get { return m_parent; } }
+            public Mdt M_Root { get { return m_root; } }
+            public Frame.FrameMain M_Parent { get { return m_parent; } }
         }
-        public partial class Xml : KaitaiStruct
+        public class Xml : KaitaiStruct
         {
             public static Xml FromFile(string fileName)
             {
                 return new Xml(new KaitaiStream(fileName));
             }
 
-            public Xml(KaitaiStream p__io, KaitaiStruct p__parent = null, NtMdt p__root = null) : base(p__io)
+            public Xml(KaitaiStream io, KaitaiStruct parent = null, Mdt root = null) : base(io)
             {
-                m_parent = p__parent;
-                m_root = p__root;
-                _read();
+                m_parent = parent;
+                m_root = root;
+                read();
             }
-            private void _read()
+            private void read()
             {
                 _xmlLen = m_io.ReadU4le();
                 _value = System.Text.Encoding.GetEncoding("UTF-16LE").GetString(m_io.ReadBytes(XmlLen));
             }
             private uint _xmlLen;
             private string _value;
-            private NtMdt m_root;
+            private Mdt m_root;
             private KaitaiStruct m_parent;
             public uint XmlLen { get { return _xmlLen; } }
             public string Value { get { return _value; } }
-            public NtMdt M_Root { get { return m_root; } }
+            public Mdt M_Root { get { return m_root; } }
             public KaitaiStruct M_Parent { get { return m_parent; } }
         }
-        public partial class Title : KaitaiStruct
+        public class Title : KaitaiStruct
         {
             public static Title FromFile(string fileName)
             {
                 return new Title(new KaitaiStream(fileName));
             }
 
-            public Title(KaitaiStream p__io, KaitaiStruct p__parent = null, NtMdt p__root = null) : base(p__io)
+            public Title(KaitaiStream io, KaitaiStruct parent = null, Mdt root = null) : base(io)
             {
-                m_parent = p__parent;
-                m_root = p__root;
-                _read();
+                m_parent = parent;
+                m_root = root;
+                read();
             }
-            private void _read()
+            private void read()
             {
                 _titleLen = m_io.ReadU4le();
                 _value = System.Text.Encoding.GetEncoding("cp1251").GetString(m_io.ReadBytes(TitleLen));
             }
             private uint _titleLen;
             private string _value;
-            private NtMdt m_root;
+            private Mdt m_root;
             private KaitaiStruct m_parent;
             public uint TitleLen { get { return _titleLen; } }
             public string Value { get { return _value; } }
-            public NtMdt M_Root { get { return m_root; } }
+            public Mdt M_Root { get { return m_root; } }
             public KaitaiStruct M_Parent { get { return m_parent; } }
         }
         private byte[] _signature;
@@ -1708,8 +1707,8 @@ namespace NEXUS.Parsers.MDT
         private ushort _lastFrame;
         private byte[] _reserved1;
         private byte[] _wrondDoc;
-        private Framez _frames;
-        private NtMdt m_root;
+        private Frames _framesValue;
+        private Mdt m_root;
         private KaitaiStruct m_parent;
         private byte[] __raw_frames;
         public byte[] Signature { get { return _signature; } }
@@ -1726,8 +1725,8 @@ namespace NEXUS.Parsers.MDT
         /// documentation specifies 32 bytes long header, but zeroth frame starts at 33th byte in reality
         /// </summary>
         public byte[] WrondDoc { get { return _wrondDoc; } }
-        public Framez Frames { get { return _frames; } }
-        public NtMdt M_Root { get { return m_root; } }
+        public Frames FramesValue { get { return _framesValue; } }
+        public Mdt M_Root { get { return m_root; } }
         public KaitaiStruct M_Parent { get { return m_parent; } }
         public byte[] M_RawFrames { get { return __raw_frames; } }
     }
