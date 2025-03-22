@@ -195,9 +195,9 @@ namespace NEXUS.Parsers.MDT
         {
             m_parent = parent;
             m_root = root ?? this;
-            read();
+            Read();
         }
-        private void read()
+        private void Read()
         {
             _signature = m_io.ReadBytes(4);
             if (!((KaitaiStream.ByteArrayCompare(Signature, new byte[] { 1, 176, 147, 255 }) == 0)))
@@ -224,9 +224,9 @@ namespace NEXUS.Parsers.MDT
             {
                 m_parent = parent;
                 m_root = root;
-                read();
+                Read();
             }
-            private void read()
+            private void Read()
             {
                 _data = new List<byte>();
                 for (var i = 0; i < 16; i++)
@@ -252,9 +252,9 @@ namespace NEXUS.Parsers.MDT
             {
                 m_parent = parent;
                 m_root = root;
-                read();
+                Read();
             }
-            private void read()
+            private void Read()
             {
                 _frameList = new List<Frame>();
                 for (var i = 0; i < (M_Root.LastFrame + 1); i++)
@@ -292,9 +292,9 @@ namespace NEXUS.Parsers.MDT
             {
                 m_parent = parent;
                 m_root = root;
-                read();
+                Read();
             }
-            private void read()
+            private void Read()
             {
                 _size = m_io.ReadU4le();
                 __raw_main = m_io.ReadBytes((Size - 4));
@@ -312,9 +312,9 @@ namespace NEXUS.Parsers.MDT
                 {
                     m_parent = parent;
                     m_root = root;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     _fmNdots = m_io.ReadU2le();
                     if (FmNdots > 0) {
@@ -342,9 +342,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _headerSize = m_io.ReadS4le();
                         __raw_header = m_io.ReadBytes(HeaderSize);
@@ -362,9 +362,9 @@ namespace NEXUS.Parsers.MDT
                         {
                             m_parent = parent;
                             m_root = root;
-                            read();
+                            Read();
                         }
-                        private void read()
+                        private void Read()
                         {
                             _coordSize = m_io.ReadS4le();
                             _version = m_io.ReadS4le();
@@ -403,9 +403,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _coordX = m_io.ReadF4le();
                         _coordY = m_io.ReadF4le();
@@ -432,9 +432,9 @@ namespace NEXUS.Parsers.MDT
                         m_parent = parent;
                         m_root = root;
                         _index = index;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _forward = new List<short>();
                         for (var i = 0; i < M_Parent.Coordinates[Index].ForwardSize; i++)
@@ -482,9 +482,9 @@ namespace NEXUS.Parsers.MDT
                 {
                     m_parent = parent;
                     m_root = root;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     _type = ((FrameType) m_io.ReadU2le());
                     _version = new Version(m_io, this, m_root);
@@ -567,9 +567,9 @@ namespace NEXUS.Parsers.MDT
                 {
                     m_parent = parent;
                     m_root = root;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     _blockCount = m_io.ReadU4le();
                     _blocksHeaders = new List<BlockDescr>();
@@ -599,9 +599,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _nameLen = m_io.ReadU4le();
                         _len = m_io.ReadU4le();
@@ -640,9 +640,9 @@ namespace NEXUS.Parsers.MDT
                     m_parent = parent;
                     m_root = root;
                     f_image = false;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     _headSize = m_io.ReadU4le();
                     _totLen = m_io.ReadU4le();
@@ -689,9 +689,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _imageVectors = new List<Vec>();
                         {
@@ -713,9 +713,9 @@ namespace NEXUS.Parsers.MDT
                         {
                             m_parent = parent;
                             m_root = root;
-                            read();
+                            Read();
                         }
-                        private void read()
+                        private void Read()
                         {
                             _items = new List<double>();
                             for (var i = 0; i < M_Parent.M_Parent.NMesurands; i++)
@@ -790,9 +790,9 @@ namespace NEXUS.Parsers.MDT
                         m_parent = parent;
                         m_root = root;
                         f_count = false;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _lenTot = m_io.ReadU4le();
                         _lenStruct = m_io.ReadU4le();
@@ -945,9 +945,9 @@ namespace NEXUS.Parsers.MDT
                 {
                     m_parent = parent;
                     m_root = root;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     __raw_vars = m_io.ReadBytes(M_Parent.VarSize);
                     var io___raw_vars = new KaitaiStream(__raw_vars);
@@ -975,9 +975,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _xScale = new AxisScale(m_io, this, m_root);
                         _yScale = new AxisScale(m_io, this, m_root);
@@ -1079,9 +1079,9 @@ namespace NEXUS.Parsers.MDT
                 {
                     m_parent = parent;
                     m_root = root;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     _dateValue = new Date(m_io, this, m_root);
                     _timeValue = new Time(m_io, this, m_root);
@@ -1097,9 +1097,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _year = m_io.ReadU2le();
                         _month = m_io.ReadU2le();
@@ -1139,9 +1139,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _hour = m_io.ReadU2le();
                         _min = m_io.ReadU2le();
@@ -1190,9 +1190,9 @@ namespace NEXUS.Parsers.MDT
                 {
                     m_parent = parent;
                     m_root = root;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     _offset = m_io.ReadF4le();
                     _step = m_io.ReadF4le();
@@ -1258,9 +1258,9 @@ namespace NEXUS.Parsers.MDT
                 {
                     m_parent = parent;
                     m_root = root;
-                    read();
+                    Read();
                 }
-                private void read()
+                private void Read()
                 {
                     __raw_vars = m_io.ReadBytes(M_Parent.VarSize);
                     var io___raw_vars = new KaitaiStream(__raw_vars);
@@ -1303,9 +1303,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _xScale = new AxisScale(m_io, this, m_root);
                         _yScale = new AxisScale(m_io, this, m_root);
@@ -1476,9 +1476,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _x = m_io.ReadS2le();
                         _y = m_io.ReadS2le();
@@ -1503,9 +1503,9 @@ namespace NEXUS.Parsers.MDT
                     {
                         m_parent = parent;
                         m_root = root;
-                        read();
+                        Read();
                     }
-                    private void read()
+                    private void Read()
                     {
                         _unkn = m_io.ReadBitsIntBe(4);
                         _doublePass = m_io.ReadBitsIntBe(1) != 0;
@@ -1631,9 +1631,9 @@ namespace NEXUS.Parsers.MDT
             {
                 m_parent = parent;
                 m_root = root;
-                read();
+                Read();
             }
-            private void read()
+            private void Read()
             {
                 _minor = m_io.ReadU1();
                 _major = m_io.ReadU1();
@@ -1658,9 +1658,9 @@ namespace NEXUS.Parsers.MDT
             {
                 m_parent = parent;
                 m_root = root;
-                read();
+                Read();
             }
-            private void read()
+            private void Read()
             {
                 _xmlLen = m_io.ReadU4le();
                 _value = System.Text.Encoding.GetEncoding("UTF-16LE").GetString(m_io.ReadBytes(XmlLen));
@@ -1685,9 +1685,9 @@ namespace NEXUS.Parsers.MDT
             {
                 m_parent = parent;
                 m_root = root;
-                read();
+                Read();
             }
-            private void read()
+            private void Read()
             {
                 _titleLen = m_io.ReadU4le();
                 _value = System.Text.Encoding.GetEncoding("cp1251").GetString(m_io.ReadBytes(TitleLen));
