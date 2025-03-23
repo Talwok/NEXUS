@@ -658,12 +658,12 @@ namespace NEXUS.Parsers.MDT
                     _specSize = m_io.ReadU4le();
                     _sourceInfoSize = m_io.ReadU4le();
                     _varSize = m_io.ReadU4le();
-                    _dataOffset = m_io.ReadU4le();
+                    _dataOffset = m_io.ReadU4le() - 53; // magic number
                     _dataSize = m_io.ReadU4le();
                     _title = System.Text.Encoding.GetEncoding("UTF-8").GetString(m_io.ReadBytes(NameSize));
                     _xml = System.Text.Encoding.GetEncoding("UTF-8").GetString(m_io.ReadBytes(CommSize));
                     _structLen = m_io.ReadU4le();
-                    _arraySize = m_io.ReadU8le();
+                    _arraySize = m_io.ReadU4le();
                     _cellSize = m_io.ReadU4le();
                     _nDimensions = m_io.ReadU4le();
                     _nMesurands = m_io.ReadU4le();
@@ -808,10 +808,14 @@ namespace NEXUS.Parsers.MDT
                         _maxIndex = m_io.ReadU8le();
                         _dataType = ((DataType) m_io.ReadS4le());
                         _lenAuthor = m_io.ReadU4le();
-                        _name = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenName));
-                        _comment = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenComment));
-                        _unit = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenUnit));
-                        _author = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenAuthor));
+                        if(LenName == 0)
+                            _name = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenName));
+                        if(LenComment == 0)
+                            _comment = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenComment));
+                        if(LenUnit == 0)
+                            _unit = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenUnit));
+                        if(LenAuthor == 0)
+                            _author = System.Text.Encoding.GetEncoding("utf-8").GetString(m_io.ReadBytes(LenAuthor));
                     }
                     private bool f_count;
                     private int _count;

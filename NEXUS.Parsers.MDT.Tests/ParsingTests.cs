@@ -17,7 +17,15 @@ public class Tests
     public void LoadingTest(string mdtFileName)
     {
         var sw = Stopwatch.StartNew();
-        var data = new Mdt(new KaitaiStream(File.ReadAllBytes(mdtFileName)));
+        var data = MDTFileParser.Parse(mdtFileName);
+        /*var data = new Mdt(new KaitaiStream(mdtFileName));
+        if (data.FramesValue.FrameList[0].Main.FrameData is Mdt.Frame.FdMetaData fdMetaData)
+        {
+            var image = fdMetaData.ImageValue;
+            foreach (var vec in image.ImageVectors)
+            {
+            }
+        }*/
         sw.Stop();
         Assert.Pass();
     }
