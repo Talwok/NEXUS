@@ -2,6 +2,6 @@
 
 public enum Calculation
 {
-    EnclosingBoxes,
+    BoxCounting,
     Triangulation
 }

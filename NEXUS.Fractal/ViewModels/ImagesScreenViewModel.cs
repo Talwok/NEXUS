@@ -8,29 +8,37 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Linq;
+using NEXUS.Fractal.Models;
 
 namespace NEXUS.Fractal.ViewModels;
 
 public class ImagesScreenViewModel : ViewModelBase
 {
-    public ImagesScreenViewModel(ImageService imageService)
+    public ImagesScreenViewModel(ImageService imageService, CalculationService calculationService)
     {
         ImageService = imageService;
-        SelectFolderCommand = ReactiveCommand.CreateFromTask(ImageService.InitFolder, outputScheduler: AvaloniaScheduler.Instance);
+        CalculationService = calculationService;
+        
+        SelectFolderCommand = ReactiveCommand.CreateRunInBackground(ImageService.InitFolder, outputScheduler: AvaloniaScheduler.Instance);
         AddImagesCommand = ReactiveCommand.CreateFromTask(ImageService.AddImages, outputScheduler: AvaloniaScheduler.Instance);
         RemoveImagesCommand = ReactiveCommand.Create<IEnumerable<ImageFileViewModel>>(ImageService.RemoveImages, outputScheduler: AvaloniaScheduler.Instance);
 
+        BoxCountingCommand = ReactiveCommand.CreateRunInBackground(() => CalculationService.Run(Calculation.BoxCounting), outputScheduler: AvaloniaScheduler.Instance);
+        TriangulationCommand = ReactiveCommand.CreateRunInBackground(() => CalculationService.Run(Calculation.Triangulation), outputScheduler: AvaloniaScheduler.Instance);
+        
         this.WhenAnyValue(vm => vm.SelectedImages)
             .Subscribe(images =>
             {
-                ImageService.SelectedImages = images.Select(img => img.Path);
+                ImageService.SelectedImages = images;
             });
     }
+
 
     [Reactive]
     public bool IsPaneOpened { get; set; }
     
     public ImageService ImageService { get; }
+    public CalculationService CalculationService { get; }
 
     [Reactive] 
     public ObservableCollection<ImageFileViewModel> SelectedImages { get; set; } = [];
@@ -38,4 +46,7 @@ public class ImagesScreenViewModel : ViewModelBase
     public ICommand SelectFolderCommand { get; }
     public ICommand AddImagesCommand { get; }
     public ICommand RemoveImagesCommand { get; }
+    
+    public ICommand BoxCountingCommand { get; }
+    public ICommand TriangulationCommand { get; }
 }

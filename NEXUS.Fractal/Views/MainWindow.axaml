@@ -5,7 +5,6 @@
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
         xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
-        xmlns:fractal="clr-namespace:NEXUS.Fractal"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NEXUS.Fractal.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -13,7 +12,34 @@
         MinHeight="400"
         Icon="/Assets/FractalSurface.ico"
         Title="NEXUS Fractal Surface">
-    <Panel>
+    <DockPanel>
+        <DockPanel Height="32" DockPanel.Dock="Bottom">
+            <Button VerticalAlignment="Stretch" 
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Padding="0"
+                    Margin="0"
+                    IsVisible="{Binding InfoService.Messages.Count}">
+                <controls:InfoBar Padding="0"
+                                  Margin="0"
+                                  Title="{Binding InfoService.LastMessage.Title}"
+                                  Message="{Binding InfoService.LastMessage.Message}"
+                                  IconSource="{Binding InfoService.LastMessage.Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}"
+                                  Severity="{Binding InfoService.LastMessage.Severity}"
+                                  IsOpen="True"
+                                  IsClosable="False"
+                                  IsIconVisible="True"/>
+                <Button.Flyout>
+                    <Flyout>
+                        <ItemsControl HorizontalAlignment="Right" 
+                                      ItemsSource="{Binding InfoService.Messages}"/>   
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </DockPanel>
+        
+
         <controls:NavigationView PaneDisplayMode="LeftCompact"
                                  IsPaneOpen="False"
                                  IsPaneToggleButtonVisible="False"
@@ -33,8 +59,8 @@
                                              IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
                     <controls:NavigationViewItem.InfoBadge>
                         <controls:InfoBadge DataContext="{Binding Screen}"
-                                            IsVisible="{Binding TotalCharts, DataType=viewModels:ChartsScreenViewModel}"
-                                            Value="{Binding TotalCharts, DataType=viewModels:ChartsScreenViewModel}" />
+                                            IsVisible="{Binding ChartService.Charts.Count, DataType=viewModels:ChartsScreenViewModel}"
+                                            Value="{Binding ChartService.Charts.Count, DataType=viewModels:ChartsScreenViewModel}" />
                     </controls:NavigationViewItem.InfoBadge>
                 </controls:NavigationViewItem>
             </controls:NavigationView.MenuItems>
@@ -43,7 +69,5 @@
                                              IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}" />
             </controls:NavigationView.FooterMenuItems>
         </controls:NavigationView>
-        <ItemsControl HorizontalAlignment="Right" Margin="20" Width="450" 
-                      ItemsSource="{Binding InfoService.Messages}"/>
-    </Panel>
+    </DockPanel>
 </Window>

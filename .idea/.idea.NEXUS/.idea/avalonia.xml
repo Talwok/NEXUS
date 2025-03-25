@@ -73,6 +73,8 @@
         <entry key="NEXUS/Styles/Control/Styles/TabViewItem.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/TabViewListView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/TextBlock.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Resources/Brushes.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Resources/Colors.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Styles.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Views/CommonSettingsView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
       </map>

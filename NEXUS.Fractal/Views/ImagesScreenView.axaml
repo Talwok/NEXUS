@@ -100,12 +100,12 @@
                             <Button ToolTip.Tip="Фрактальная размерность" Theme="{StaticResource TransparentButton}">
                                 <Button.Flyout>
                                     <MenuFlyout>
-                                        <MenuItem Header="Метод вложенных кубов">
+                                        <MenuItem Command="{Binding BoxCountingCommand}" Header="Метод вложенных кубов">
                                             <MenuItem.Icon>
                                                 <avalonia:MaterialIcon Kind="CubeOutline"/>
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        <MenuItem Header="Метод триангуляции">
+                                        <MenuItem Command="{Binding TriangulationCommand}" Header="Метод триангуляции">
                                             <MenuItem.Icon>
                                                 <avalonia:MaterialIcon Kind="TriangleOutline"/>
                                             </MenuItem.Icon>

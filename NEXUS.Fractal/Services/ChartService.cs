@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using DynamicData;
 using NEXUS.Fractal.ViewModels;
+using System;
+using System.Collections.ObjectModel;
+using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Fractal.Services;
 
@@ -11,20 +14,26 @@ public class ChartService : ServiceBase
     public ChartService()
     {
         _sourceCache = new SourceCache<ChartViewModel, string>(chart => chart.Path);
+        _sourceCache.Connect()
+            .Bind(out var charts)
+            .Subscribe();
+
+        Charts = charts;
     }
+
+    public ReadOnlyObservableCollection<ChartViewModel> Charts { get; }
+    
+    [Reactive]
+    public ChartViewModel? SelectedChart { get; set; }
     
     public void Clear()
     {
         _sourceCache.Clear();
     }
 
-    public void Add(string path, IDictionary<double, double> values)
+    public void Add(ImageFileViewModel image, IDictionary<double, double> values)
     {
-        var chart = new ChartViewModel
-        {
-            Path = path,
-            Values = values
-        };
+        var chart = new ChartViewModel(image, values);
         _sourceCache.AddOrUpdate(chart);
     }
 }

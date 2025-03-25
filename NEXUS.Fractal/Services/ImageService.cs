@@ -64,8 +64,8 @@ public class ImageService : ServiceBase
     [Reactive]
     public string? Folder { get; private set; }
 
-    [Reactive]
-    public IEnumerable<string>? SelectedImages { get; set; }
+    [Reactive] 
+    public ObservableCollection<ImageFileViewModel> SelectedImages { get; set; } = [];
 
     #region Watcher
 
@@ -74,7 +74,7 @@ public class ImageService : ServiceBase
         // Создаем FileSystemWatcher для отслеживания изменений в файловой системе
         var watcher = new FileSystemWatcher(folderPath)
         {
-            NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.DirectoryName
+            NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.DirectoryName,
         };
         
         watcher.Filters.Add(SearchPatterns);
@@ -92,7 +92,7 @@ public class ImageService : ServiceBase
         var files = SearchPatterns
             .SelectMany(pattern => Directory.GetFiles(folderPath, pattern))
             .Distinct();
-        
+
         foreach (var file in files) 
             _sourceCache.AddOrUpdate(file);
         
@@ -166,8 +166,8 @@ public class ImageService : ServiceBase
             var directoryInfo = Directory.CreateDirectory(folders[0].Path.LocalPath);
             Folder = directoryInfo.FullName;
             _watcher?.Dispose();
+            _sourceCache.Clear();
             _watcher = CreateWatcher(Folder);
-            
             _infoService.AppendMessage(new InfoMessageViewModel
             {
                 Title = "Изображения",

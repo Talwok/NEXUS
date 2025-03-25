@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.ViewModels;
+using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
@@ -17,13 +19,16 @@ namespace NEXUS.Fractal.Services
         InfoService infoService)
         : ServiceBase
     {
+        [Reactive]
+        public bool IsCalculating { get; set; }
+        
         public void Run(Calculation calculation)
         {
-            if (imageService is { SelectedImages: not null })
+            IsCalculating = true;
+            
+            if (imageService is { SelectedImages: {} selectedImageVMs })
             {
-                var imagePaths = imageService.SelectedImages.ToList();
-
-                if (imagePaths == null || !imagePaths.Any())
+                if (selectedImageVMs.Count == 0)
                 {
                     infoService.AppendMessage(new InfoMessageViewModel
                     {
@@ -32,27 +37,28 @@ namespace NEXUS.Fractal.Services
                         Icon = MaterialIconKind.Error,
                         Severity = InfoBarSeverity.Error
                     });
+                    IsCalculating = false;
                     return;
                 }
-                
+
                 switch (calculation)
                 {
-                    case Calculation.EnclosingBoxes:
-                        chartService.Clear();
-                        foreach (var imagePath in imagePaths)
+                    case Calculation.BoxCounting:
+                        Dispatcher.UIThread.Invoke(chartService.Clear);
+                        foreach (var imageVm in selectedImageVMs.ToArray())
                         {
-                            using var image = Image.Load<Rgba32>(imagePath);
+                            using var image = Image.Load<Rgba32>(imageVm.Path);
                             var values = EnclosingBoxes(image, 1, 100);
-                            chartService.Add(imagePath, values);
+                            Dispatcher.UIThread.Invoke(() => chartService.Add(imageVm, values));   
                         }
                         break;
                     case Calculation.Triangulation:
-                        chartService.Clear();
-                        foreach (var imagePath in imagePaths)
+                        Dispatcher.UIThread.Invoke(chartService.Clear);
+                        foreach (var imageVm in selectedImageVMs)
                         {
-                            using var image = Image.Load<Rgba32>(imagePath);
+                            using var image = Image.Load<Rgba32>(imageVm.Path);
                             var values = Triangulation(image, 1, 100);
-                            chartService.Add(imagePath, values);
+                            Dispatcher.UIThread.Invoke(() => chartService.Add(imageVm, values));   
                         }
                         break;
                     default:
@@ -63,9 +69,12 @@ namespace NEXUS.Fractal.Services
                             Icon = MaterialIconKind.Error,
                             Severity = InfoBarSeverity.Error
                         });
+                        IsCalculating = false;
                         return;
                 }
             }
+            
+            IsCalculating = false;
         }
 
         #region Dimension Methods
@@ -77,7 +86,7 @@ namespace NEXUS.Fractal.Services
             int height = image.Height;
 
             int darkPixelsCount = 0;
-            
+
             var pixelRow = image.DangerousGetPixelRowMemory(0).Span;
             foreach (var pixel in pixelRow)
             {

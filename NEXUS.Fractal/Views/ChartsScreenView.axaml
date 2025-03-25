@@ -12,46 +12,9 @@
     <SplitView OpenPaneLength="380" IsPaneOpen="{Binding IsPaneOpened}" DisplayMode="Inline">
         <SplitView.Pane>
             <DockPanel>
-                <Border DockPanel.Dock="Bottom" 
-                        CornerRadius="{DynamicResource ControlCornerRadius}"
-                        Background="{DynamicResource ButtonBackground}"
-                        Padding="8"
-                        Margin="8">
-                    <StackPanel Spacing="8">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <avalonia:MaterialIcon HorizontalAlignment="Left" 
-                                                   Kind="DataSettings"/>
-                            <TextBlock Text="Корректировка ФР"/>
-                        </StackPanel>    
-                        <Grid ColumnDefinitions="Auto, 8, *" 
-                              RowDefinitions="Auto, 8, Auto, 8, Auto">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Начало диапазона"/>
-                            <NumericUpDown Value="{Binding RangeFromValue}" 
-                                           Increment="0.01"
-                                           Grid.Row="0" Grid.Column="2" Width="200" HorizontalAlignment="Left">
-                                <NumericUpDown.InnerLeftContent>
-                                    <avalonia:MaterialIcon Margin="8 0" Kind="ContainStart"/>
-                                </NumericUpDown.InnerLeftContent>
-                            </NumericUpDown>
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Конец диапазона"/>
-                            <NumericUpDown Grid.Row="2" Grid.Column="2" Increment="0.01" Value="{Binding RangeToValue}" Width="200" HorizontalAlignment="Left">
-                                <NumericUpDown.InnerLeftContent>
-                                    <avalonia:MaterialIcon Margin="8 0" Kind="ContainEnd"/>
-                                </NumericUpDown.InnerLeftContent>
-                            </NumericUpDown>
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Диапазон"/>
-                            <controls:RangeSlider Grid.Row="4" Grid.Column="2"  
-                                                  MinimumRange="0.01" StepFrequency="0.01"
-                                                  Minimum="{Binding RangeFromLimit}" 
-                                                  Maximum="{Binding RangeToLimit}" 
-                                                  RangeStart="{Binding RangeFromValue}" 
-                                                  RangeEnd="{Binding RangeToValue}" />
-                        </Grid>
-                    </StackPanel>
-                </Border>
                 <controls:TabView Name="Tabs"
-                                  CanDragTabs="False" 
-                                  CanReorderTabs="False" 
+                                  CanDragTabs="False"
+                                  CanReorderTabs="False"
                                   TabWidthMode="Compact"
                                   IsAddTabButtonVisible="False"
                                   BorderThickness="1 0 1 1"
@@ -60,67 +23,139 @@
                                   Margin="8 0">
                     <controls:TabView.Styles>
                         <Style Selector="controls|TabViewItem">
-                            <Setter Property="IsClosable" Value="False"/>
+                            <Setter Property="IsClosable" Value="False" />
                         </Style>
                     </controls:TabView.Styles>
                     <controls:TabView.TabStripFooter>
                         <StackPanel HorizontalAlignment="Right"
-                                    Orientation="Horizontal" 
+                                    Orientation="Horizontal"
                                     Spacing="8">
                             <Button Theme="{StaticResource TransparentButton}"
                                     VerticalAlignment="Bottom">
-                                <avalonia:MaterialIcon Kind="ContentSave"/>
+                                <avalonia:MaterialIcon Kind="ContentSave" />
                             </Button>
                             <Button Theme="{StaticResource TransparentButton}"
                                     VerticalAlignment="Bottom">
-                                <avalonia:MaterialIcon Kind="TrashCan"/>
+                                <avalonia:MaterialIcon Kind="TrashCan" />
                             </Button>
                         </StackPanel>
                     </controls:TabView.TabStripFooter>
                     <controls:TabViewItem>
                         <controls:TabViewItem.Header>
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4">
-                                <avalonia:MaterialIcon Kind="FolderClockOutline"/>
-                                <TextBlock Text="Графики"/>
-                                <controls:InfoBadge Value="{Binding TotalCharts}"/>
+                                <avalonia:MaterialIcon Kind="FolderClockOutline" />
+                                <TextBlock Text="Графики" />
+                                <controls:InfoBadge Value="{Binding ChartService.Charts.Count}" />
                             </StackPanel>
                         </controls:TabViewItem.Header>
                         <controls:TabViewItem.Content>
-                                <ListBox >
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="4">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="*"/>
-                                                </Grid.RowDefinitions>
-                                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4">
-
-                                                </StackPanel>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                            <ListBox ItemsSource="{Binding ChartService.Charts}"
+                                     SelectedItem="{Binding ChartService.SelectedChart}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </controls:TabViewItem.Content>
                     </controls:TabViewItem>
                 </controls:TabView>
             </DockPanel>
-        </SplitView.Pane>  
-        
+        </SplitView.Pane>
+
         <DockPanel LastChildFill="True">
-            <ToggleButton Width="26" VerticalAlignment="Stretch" Margin="0 8" Padding="0" 
+            <ToggleButton Width="26" VerticalAlignment="Stretch" Margin="0 8" Padding="0"
                           IsChecked="{Binding IsPaneOpened}">
                 <Grid>
-                    <avalonia:MaterialIcon  Kind="ChevronRight" IsVisible="{Binding !IsPaneOpened}"/>
-                    <avalonia:MaterialIcon  Kind="ChevronLeft" IsVisible="{Binding IsPaneOpened}"/>
+                    <avalonia:MaterialIcon Kind="ChevronRight" IsVisible="{Binding !IsPaneOpened}" />
+                    <avalonia:MaterialIcon Kind="ChevronLeft" IsVisible="{Binding IsPaneOpened}" />
                 </Grid>
             </ToggleButton>
             <DockPanel Margin="8">
-                <avalonia1:CartesianChart>
+                <Border DockPanel.Dock="Bottom"
+                        CornerRadius="{DynamicResource ControlCornerRadius}"
+                        Background="{DynamicResource ButtonBackground}"
+                        Padding="8"
+                        Margin="8">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <avalonia:MaterialIcon HorizontalAlignment="Left"
+                                                   Kind="DataSettings" />
+                            <TextBlock Text="{Binding ChartService.SelectedChart.FractalDimension, StringFormat='Значение ФР: {0}'}" />
+                        </StackPanel>
+                        <Grid ColumnDefinitions="*,32,*">
+                            <Grid Grid.Column="0" ColumnDefinitions="Auto, 8, *"
+                                  RowDefinitions="Auto, 8, Auto, 8, Auto">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Начало диапазона" />
+                                <NumericUpDown Value="{Binding  ChartService.SelectedChart.RangeFromValueX}"
+                                               Minimum="{Binding ChartService.SelectedChart.RangeFromLimitX}"
+                                               Maximum="{Binding ChartService.SelectedChart.RangeToLimitX}"
+                                               Increment="0.01"
+                                               Grid.Row="0" Grid.Column="2" Width="200" HorizontalAlignment="Left">
+                                    <NumericUpDown.InnerLeftContent>
+                                        <avalonia:MaterialIcon Margin="8 0" Kind="ContainStart" />
+                                    </NumericUpDown.InnerLeftContent>
+                                </NumericUpDown>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Конец диапазона" />
+                                <NumericUpDown Grid.Row="2" Grid.Column="2" Increment="0.01"
+                                               Value="{Binding ChartService.SelectedChart.RangeToValueX}" Width="200"
+                                               Minimum="{Binding ChartService.SelectedChart.RangeFromLimitX}"
+                                               Maximum="{Binding ChartService.SelectedChart.RangeToLimitX}"
+                                               HorizontalAlignment="Left">
+                                    <NumericUpDown.InnerLeftContent>
+                                        <avalonia:MaterialIcon Margin="8 0" Kind="ContainEnd" />
+                                    </NumericUpDown.InnerLeftContent>
+                                </NumericUpDown>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Диапазон X" />
+                                <controls:RangeSlider Grid.Row="4" Grid.Column="2"
+                                                      MinimumRange="0.01" StepFrequency="0.01"
+                                                      Minimum="{Binding ChartService.SelectedChart.RangeFromLimitX}"
+                                                      Maximum="{Binding ChartService.SelectedChart.RangeToLimitX}"
+                                                      RangeStart="{Binding ChartService.SelectedChart.RangeFromValueX}"
+                                                      RangeEnd="{Binding ChartService.SelectedChart.RangeToValueX}" />
+                            </Grid>
+                            <Grid Grid.Column="2" ColumnDefinitions="Auto, 8, *"
+                                  RowDefinitions="Auto, 8, Auto, 8, Auto">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Начало диапазона" />
+                                <NumericUpDown Value="{Binding  ChartService.SelectedChart.RangeFromValueY}"
+                                               Minimum="{Binding ChartService.SelectedChart.RangeFromLimitY}"
+                                               Maximum="{Binding ChartService.SelectedChart.RangeToLimitY}"
+                                               Increment="0.01"
+                                               Grid.Row="0" Grid.Column="2" Width="200" HorizontalAlignment="Left">
+                                    <NumericUpDown.InnerLeftContent>
+                                        <avalonia:MaterialIcon Margin="8 0" Kind="ContainStart" />
+                                    </NumericUpDown.InnerLeftContent>
+                                </NumericUpDown>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Конец диапазона" />
+                                <NumericUpDown Grid.Row="2" Grid.Column="2" Increment="0.01"
+                                               Value="{Binding ChartService.SelectedChart.RangeToValueY}" Width="200"
+                                               Minimum="{Binding ChartService.SelectedChart.RangeFromLimitY}"
+                                               Maximum="{Binding ChartService.SelectedChart.RangeToLimitY}"
+                                               HorizontalAlignment="Left">
+                                    <NumericUpDown.InnerLeftContent>
+                                        <avalonia:MaterialIcon Margin="8 0" Kind="ContainEnd" />
+                                    </NumericUpDown.InnerLeftContent>
+                                </NumericUpDown>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Диапазон Y" />
+                                <controls:RangeSlider Grid.Row="4" Grid.Column="2"
+                                                      MinimumRange="0.01" StepFrequency="0.01"
+                                                      Minimum="{Binding ChartService.SelectedChart.RangeFromLimitY}"
+                                                      Maximum="{Binding ChartService.SelectedChart.RangeToLimitY}"
+                                                      RangeStart="{Binding ChartService.SelectedChart.RangeFromValueY}"
+                                                      RangeEnd="{Binding ChartService.SelectedChart.RangeToValueY}" />
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                <avalonia1:CartesianChart Series="{Binding ChartService.SelectedChart.Series}"
+                                          >
+                    <!--
+XAxes="{Binding ChartService.SelectedChart.XAxes}"
+                                          YAxes="{Binding ChartService.SelectedChart.YAxes}"
+-->
                 </avalonia1:CartesianChart>
             </DockPanel>
-        </DockPanel>    
-        
+        </DockPanel>
+
     </SplitView>
 </UserControl>
