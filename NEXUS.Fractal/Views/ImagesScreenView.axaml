@@ -5,132 +5,126 @@
              xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:models="clr-namespace:NEXUS.Fractal.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Fractal.Views.ImagesScreenView"
-             x:DataType="viewModels:ImagesScreenViewModel">
-    <SplitView OpenPaneLength="380" IsPaneOpen="{Binding IsPaneOpened}" DisplayMode="Inline">
-        <SplitView.Pane>
-            <controls:TabView Name="Tabs"
-                                  CanDragTabs="False"
-                                  CanReorderTabs="False"
-                                  TabWidthMode="Compact"
-                                  IsAddTabButtonVisible="False"
-                                  BorderThickness="1 0 1 1"
-                                  BorderBrush="{DynamicResource TabViewBorderBrush}"
-                                  VerticalAlignment="Stretch"
-                                  Margin="8 0 8 8">
-                    <controls:TabView.Styles>
-                        <Style Selector="controls|TabViewItem">
-                            <Setter Property="IsClosable" Value="False" />
-                        </Style>
-                    </controls:TabView.Styles>
-                    <controls:TabView.TabStripFooter>
-                        <StackPanel DockPanel.Dock="Bottom"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal" Spacing="8">
-                            <Button Theme="{StaticResource TransparentButton}" 
-                                    Command="{Binding SelectFolderCommand}">
-                                <avalonia:MaterialIcon Kind="Folder" />
-                            </Button>
-                            <Button Theme="{StaticResource TransparentButton}"
-                                    Command="{Binding AddImagesCommand}">
-                                <avalonia:MaterialIcon Kind="Image" />
-                            </Button>
-                            <Button Theme="{StaticResource TransparentButton}"
-                                    Command="{Binding RemoveImagesCommand}" CommandParameter="{Binding SelectedImages}">
-                                <avalonia:MaterialIcon Kind="Trash" />
-                            </Button>
-                        </StackPanel>
-                    </controls:TabView.TabStripFooter>
-                    <controls:TabViewItem>
-                        <controls:TabViewItem.Header>
-                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4">
-                                <avalonia:MaterialIcon Kind="FolderClockOutline" />
-                                <TextBlock Text="Изображения" />
-                                <controls:InfoBadge Value="{Binding SelectedImages.Count}" />
+             x:DataType="viewModels:ImagesScreenViewModel"
+             x:Name="ImageScreen">
+    <Design.DataContext>
+        <viewModels:ImagesScreenViewModel />
+    </Design.DataContext>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" 
+                    Margin="8"
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    HorizontalAlignment="Stretch">
+            <Button ToolTip.Tip="Выбрать папку для работы с изображениями"
+                    Command="{Binding SelectFolderCommand}">
+                <avalonia:MaterialIcon Kind="Folder" />
+            </Button>
+            <Button ToolTip.Tip="Добавить изображения в папку"
+                    Command="{Binding AddImagesCommand}">
+                <avalonia:MaterialIcon Kind="ImageAdd" />
+            </Button>
+            <Button ToolTip.Tip="Удалить выбранные изображения"
+                    Command="{Binding RemoveImagesCommand}" CommandParameter="{Binding SelectedImages}">
+                <avalonia:MaterialIcon Kind="ImageRemove" />
+            </Button>
+            <Button ToolTip.Tip="Вычисления">
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuItem Header="Фрактальная размерность">
+                            <MenuItem.Icon>
+                                <avalonia:MaterialIcon Kind="Summation" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Command="{Binding BoxCountingCommand}" Header="Метод вложенных кубов">
+                            <MenuItem.Icon>
+                                <avalonia:MaterialIcon Kind="CubeOutline" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Command="{Binding TriangulationCommand}" Header="Метод триангуляции">
+                            <MenuItem.Icon>
+                                <avalonia:MaterialIcon Kind="TriangleOutline" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+                <avalonia:MaterialIcon Kind="FunctionVariant" />
+            </Button>
+            <!--MatrixTypes-->
+            <Button ToolTip.Tip="Матричные фильтры">
+                <avalonia:MaterialIcon Kind="Matrix" />
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <ItemsControl ItemsSource="{Binding MatrixTypes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem Header="{Binding .}" Command="{ReflectionBinding #ImageScreen.DataContext.ApplyFilterCommand}" CommandParameter="{Binding .}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
+        <SplitView OpenPaneLength="380" IsPaneOpen="{Binding IsPaneOpened}" DisplayMode="Inline">
+            <SplitView.Pane>
+                <TreeView ItemsSource="{Binding ImageService.TreeImages}"
+                          SelectedItems="{Binding SelectedImages}"
+                          SelectionMode="3">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate DataType="{x:Type viewModels:ImageFileViewModel}"
+                                          ItemsSource="{Binding Children}">
+                            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8">
+                                <avalonia:MaterialIcon IsVisible="{Binding !IsFolder}" Kind="ImageOutline" />
+                                <avalonia:MaterialIcon IsVisible="{Binding IsFolder}" Kind="ImagesOutline" />
+                                <TextBlock Text="{Binding Name}" />
                             </StackPanel>
-                        </controls:TabViewItem.Header>
-                        <controls:TabViewItem.Content>
-                            <TreeView Margin="8"
-                                      ItemsSource="{Binding ImageService.TreeImages}"
-                                      SelectedItems="{Binding SelectedImages}"
-                                      SelectionMode="3">
-                                <TreeView.ItemTemplate>
-                                    <TreeDataTemplate DataType="{x:Type viewModels:ImageFileViewModel}"
-                                                      ItemsSource="{Binding Children}">
-                                        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8">
-                                            <avalonia:MaterialIcon IsVisible="{Binding !IsFolder}" Kind="ImageOutline" />
-                                            <avalonia:MaterialIcon IsVisible="{Binding IsFolder}" Kind="ImagesOutline" />
-                                            <TextBlock Text="{Binding Name}" />
-                                        </StackPanel>
-                                    </TreeDataTemplate>
-                                </TreeView.ItemTemplate>
-                            </TreeView>
-                        </controls:TabViewItem.Content>
-                    </controls:TabViewItem>
-                </controls:TabView>
-        </SplitView.Pane>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </SplitView.Pane>
 
-        <DockPanel LastChildFill="True">
-            <ToggleButton Width="26" VerticalAlignment="Stretch" Margin="0 8" Padding="0"
-                          IsChecked="{Binding IsPaneOpened}">
-                <Grid>
-                    <avalonia:MaterialIcon Kind="ChevronRight"
-                                           IsVisible="{Binding !IsPaneOpened}" />
-                    <avalonia:MaterialIcon Kind="ChevronLeft"
-                                           IsVisible="{Binding IsPaneOpened}" />
-                </Grid>
-            </ToggleButton>
-            <DockPanel Margin="8">
-                
-                <controls:TabView Name="Images"
-                                  CanDragTabs="False"
-                                  CanReorderTabs="False"
-                                  TabWidthMode="Compact"
-                                  IsAddTabButtonVisible="False"
-                                  BorderThickness="1 0 1 1"
-                                  BorderBrush="{DynamicResource TabViewBorderBrush}"
-                                  VerticalAlignment="Stretch"
-                                  Margin="8 0 8 8"
-                                  TabItems="{Binding SelectedImages}">
-                    <controls:TabView.TabStripFooter>
-                        <StackPanel Orientation="Horizontal"
-                                    Spacing="8"
-                                    HorizontalAlignment="Right">
-                            <Button ToolTip.Tip="Фрактальная размерность" Theme="{StaticResource TransparentButton}">
-                                <Button.Flyout>
-                                    <MenuFlyout>
-                                        <MenuItem Command="{Binding BoxCountingCommand}" Header="Метод вложенных кубов">
-                                            <MenuItem.Icon>
-                                                <avalonia:MaterialIcon Kind="CubeOutline"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem Command="{Binding TriangulationCommand}" Header="Метод триангуляции">
-                                            <MenuItem.Icon>
-                                                <avalonia:MaterialIcon Kind="TriangleOutline"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                    </MenuFlyout>
-                                </Button.Flyout>
-                                <avalonia:MaterialIcon Kind="Summation"/>
-                            </Button>
-                            <Button ToolTip.Tip="Матричные фильтры" Theme="{StaticResource TransparentButton}">
-                                <avalonia:MaterialIcon Kind="FilterVariant"/>
-                            </Button>
-                        </StackPanel>
-                    </controls:TabView.TabStripFooter>
-                    <controls:TabView.TabItemTemplate>
-                        <DataTemplate x:DataType="viewModels:ImageFileViewModel">
-                            <controls:TabViewItem Header="{Binding Name}"
-                                                  CloseRequested="TabViewItem_OnCloseRequested"
-                                                  Content="{Binding .}">
-                                
-                            </controls:TabViewItem>
-                        </DataTemplate>
-                    </controls:TabView.TabItemTemplate>
-                </controls:TabView>
+            <DockPanel LastChildFill="True">
+                <ToggleButton Width="26" VerticalAlignment="Stretch" Margin="0 8" Padding="0"
+                              IsChecked="{Binding IsPaneOpened}">
+                    <Grid>
+                        <avalonia:MaterialIcon Kind="ChevronRight"
+                                               IsVisible="{Binding !IsPaneOpened}" />
+                        <avalonia:MaterialIcon Kind="ChevronLeft"
+                                               IsVisible="{Binding IsPaneOpened}" />
+                    </Grid>
+                </ToggleButton>
+                <DockPanel Margin="8">
+
+                    <controls:TabView Name="Images"
+                                      CanDragTabs="False"
+                                      CanReorderTabs="False"
+                                      TabWidthMode="Compact"
+                                      IsAddTabButtonVisible="False"
+                                      BorderThickness="1 0 1 1"
+                                      BorderBrush="{DynamicResource TabViewBorderBrush}"
+                                      VerticalAlignment="Stretch"
+                                      TabItems="{Binding SelectedImages}">
+                        <controls:TabView.TabItemTemplate>
+                            <DataTemplate x:DataType="viewModels:ImageFileViewModel">
+                                <controls:TabViewItem CloseRequested="TabViewItem_OnCloseRequested"
+                                                      Content="{Binding .}"
+                                                      ToolTip.Tip="{Binding Name}">
+                                    <controls:TabViewItem.Header>
+                                        <TextBlock Width="150"
+                                                   Text="{Binding Name}"
+                                                   TextWrapping="NoWrap" />
+                                    </controls:TabViewItem.Header>
+
+                                </controls:TabViewItem>
+                            </DataTemplate>
+                        </controls:TabView.TabItemTemplate>
+                    </controls:TabView>
+                </DockPanel>
             </DockPanel>
-        </DockPanel>
-
-    </SplitView>
+        </SplitView>
+    </DockPanel>
 </UserControl>

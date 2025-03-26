@@ -8,12 +8,19 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Fractal.Models;
 
 namespace NEXUS.Fractal.ViewModels;
 
 public class ImagesScreenViewModel : ViewModelBase
 {
+    public ImagesScreenViewModel()
+    {
+        
+    }
+ 
+    [ActivatorUtilitiesConstructor]
     public ImagesScreenViewModel(ImageService imageService, CalculationService calculationService)
     {
         ImageService = imageService;
@@ -25,6 +32,8 @@ public class ImagesScreenViewModel : ViewModelBase
 
         BoxCountingCommand = ReactiveCommand.CreateRunInBackground(() => CalculationService.Run(Calculation.BoxCounting), outputScheduler: AvaloniaScheduler.Instance);
         TriangulationCommand = ReactiveCommand.CreateRunInBackground(() => CalculationService.Run(Calculation.Triangulation), outputScheduler: AvaloniaScheduler.Instance);
+        
+        ApplyFilterCommand = ReactiveCommand.CreateFromTask<MatrixType>(ImageService.ApplyFilter, outputScheduler: AvaloniaScheduler.Instance);
         
         this.WhenAnyValue(vm => vm.SelectedImages)
             .Subscribe(images =>
@@ -43,10 +52,16 @@ public class ImagesScreenViewModel : ViewModelBase
     [Reactive] 
     public ObservableCollection<ImageFileViewModel> SelectedImages { get; set; } = [];
     
+    [Reactive]
+    public IEnumerable<MatrixType> MatrixTypes { get; set; } = Enum.GetValues<MatrixType>();
+    
     public ICommand SelectFolderCommand { get; }
     public ICommand AddImagesCommand { get; }
     public ICommand RemoveImagesCommand { get; }
     
     public ICommand BoxCountingCommand { get; }
     public ICommand TriangulationCommand { get; }
+    
+    public ICommand ApplyFilterCommand { get; }
+
 }
