@@ -3,13 +3,13 @@ name: NEXUS DESKTOP
 on:
   push:
     tags:
-      - "v*"  # Запускать workflow при создании тегов, начинающихся с "v" (например, v1.0.0)
+      - "v*"
 
 permissions:
-  contents: write  # Необходимо для создания релизов
+  contents: write
 
 jobs:
-  build:
+  build-and-package:
     strategy:
       matrix:
         configuration: [Release]
@@ -17,7 +17,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      Solution_Name: NEXUS.sln  # Предполагается, что у вас есть solution файл
+      Solution_Name: NEXUS.sln
       Build_Output: build_output
 
     steps:
@@ -25,54 +25,49 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      # Установка .NET
+
       - name: Install .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      
-      # Создание выходной директории
+
       - name: Create output directory
         run: mkdir $env:Build_Output
-      
-      # Сборка Fractal
+
       - name: Build NEXUS.Fractal
         run: |
           dotnet publish NEXUS.Fractal -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -o $env:Build_Output/Fractal
-      
-      # Сборка Growth
+
       - name: Build NEXUS.Growth
         run: |
           dotnet publish NEXUS.Growth -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -o $env:Build_Output/Growth
-      
-      # Сборка Growth.Simulation
+
       - name: Build NEXUS.Growth.Simulation
         run: |
           dotnet publish NEXUS.Growth.Simulation -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -o $env:Build_Output/Simulation
-      
-      # Создание архива с релизом
+
       - name: Create release zip
         run: |
           $version = $env:GITHUB_REF -replace "refs/tags/v", ""
           Compress-Archive -Path $env:Build_Output/* -DestinationPath NEXUS-$version.zip
-      
-      # Загрузка артефакта
-      - name: Upload artifact
+
+      - name: Upload release package
         uses: actions/upload-artifact@v4
         with:
-          name: NEXUS-Release
+          name: release-package
           path: NEXUS-${{ github.ref_name }}.zip
+          retention-days: 1
 
   create-release:
-    needs: build
+    needs: build-and-package
     runs-on: ubuntu-latest
     
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: NEXUS-Release
+          name: release-package
+          path: ./release-artifact
 
       - name: Create Release
         id: create_release
@@ -98,6 +93,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./NEXUS-${{ github.ref_name }}.zip
+          asset_path: ./release-artifact/NEXUS-${{ github.ref_name }}.zip
           asset_name: NEXUS-${{ github.ref_name }}.zip
           asset_content_type: application/zip
