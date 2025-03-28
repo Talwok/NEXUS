@@ -65,6 +65,9 @@
         <entry key="NEXUS.Styles/Resources/ColorR.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Styles/Resources/Colors.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Styles/Styles.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Custom/CompositionElement.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Custom/Controls.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Custom/TreeViewItem/TreeViewItemRemovable.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/Controls.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/FlyoutPresenter.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/MaterialIcon.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />

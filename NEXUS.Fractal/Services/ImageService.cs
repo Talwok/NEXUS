@@ -282,7 +282,7 @@ public class ImageService : ServiceBase
 
         if (FilterFunctions.TryGetValue(matrixType, out var filter))
         {
-            foreach (var imageVm in SelectedImages)
+            foreach (var imageVm in SelectedImages.ToList())
             {
                 var image = await Image.LoadAsync<Rgba32>(imageVm.Path);
                 var filteredImage = filter(image);

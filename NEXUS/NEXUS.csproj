@@ -61,5 +61,9 @@
     <ItemGroup>
       <Folder Include="Parsers\" />
     </ItemGroup>
+  
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Styles\Control\Custom\TreeViewItem\TreeViewRemovable.axaml" />
+    </ItemGroup>
 
 </Project>

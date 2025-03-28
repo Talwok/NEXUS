@@ -15,5 +15,7 @@ public class ImageFileViewModel : ViewModelBase
     public string? Extension { get; init; }
     [Reactive] 
     public Guid? Id { get; init; }
+    [Reactive] 
+    public bool IsExpanded { get; set; } = true;
     public ObservableCollection<ImageFileViewModel> Children { get; } = [];
 }

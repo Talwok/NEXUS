@@ -5,7 +5,7 @@
              xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             xmlns:models="clr-namespace:NEXUS.Fractal.Models"
+             xmlns:views="clr-namespace:NEXUS.Fractal.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Fractal.Views.ImagesScreenView"
              x:DataType="viewModels:ImagesScreenViewModel"
@@ -14,78 +14,235 @@
         <viewModels:ImagesScreenViewModel />
     </Design.DataContext>
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" 
-                    Margin="8"
-                    Orientation="Horizontal"
-                    Spacing="8"
-                    HorizontalAlignment="Stretch">
-            <Button ToolTip.Tip="Выбрать папку для работы с изображениями"
-                    Command="{Binding SelectFolderCommand}">
-                <avalonia:MaterialIcon Kind="Folder" />
-            </Button>
-            <Button ToolTip.Tip="Добавить изображения в папку"
-                    Command="{Binding AddImagesCommand}">
-                <avalonia:MaterialIcon Kind="ImageAdd" />
-            </Button>
-            <Button ToolTip.Tip="Удалить выбранные изображения"
-                    Command="{Binding RemoveImagesCommand}" CommandParameter="{Binding SelectedImages}">
-                <avalonia:MaterialIcon Kind="ImageRemove" />
-            </Button>
-            <Button ToolTip.Tip="Вычисления">
-                <Button.Flyout>
-                    <MenuFlyout>
-                        <MenuItem Header="Фрактальная размерность">
-                            <MenuItem.Icon>
-                                <avalonia:MaterialIcon Kind="Summation" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Command="{Binding BoxCountingCommand}" Header="Метод вложенных кубов">
-                            <MenuItem.Icon>
-                                <avalonia:MaterialIcon Kind="CubeOutline" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Command="{Binding TriangulationCommand}" Header="Метод триангуляции">
-                            <MenuItem.Icon>
-                                <avalonia:MaterialIcon Kind="TriangleOutline" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                    </MenuFlyout>
-                </Button.Flyout>
-                <avalonia:MaterialIcon Kind="FunctionVariant" />
-            </Button>
-            <!--MatrixTypes-->
-            <Button ToolTip.Tip="Матричные фильтры">
-                <avalonia:MaterialIcon Kind="Matrix" />
-                <Button.Flyout>
-                    <MenuFlyout>
-                        <ItemsControl ItemsSource="{Binding MatrixTypes}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <MenuItem Header="{Binding .}" Command="{ReflectionBinding #ImageScreen.DataContext.ApplyFilterCommand}" CommandParameter="{Binding .}"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </MenuFlyout>
-                </Button.Flyout>
-            </Button>
-        </StackPanel>
         <SplitView OpenPaneLength="380" IsPaneOpen="{Binding IsPaneOpened}" DisplayMode="Inline">
             <SplitView.Pane>
-                <TreeView ItemsSource="{Binding ImageService.TreeImages}"
+                <DockPanel Margin="8">
+                <StackPanel DockPanel.Dock="Top"
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                HorizontalAlignment="Stretch">
+                        <Button ToolTip.Tip="Выбрать все изображения"
+                                Click="ToggleAllButton_OnClick">
+                            <avalonia:MaterialIcon Kind="CheckboxesMarkedOutline" />
+                        </Button>
+                    <Button ToolTip.Tip="Снять выбор всех изображений"
+                            Click="UntoggleAllButton_OnClick">
+                        <avalonia:MaterialIcon Kind="CheckboxesBlankOutline" />
+                    </Button>
+                    <Button ToolTip.Tip="Развернуть все элементы"
+                            Command="{Binding ExpandAllCommand}">
+                        <avalonia:MaterialIcon Kind="ExpandAll" />
+                    </Button>
+                    <Button ToolTip.Tip="Свернуть все элементы"
+                            Command="{Binding CollapseAllCommand}">
+                        <avalonia:MaterialIcon Kind="CollapseAll" />
+                    </Button>
+                        <Button ToolTip.Tip="Добавить изображения в папку"
+                                Command="{Binding AddImagesCommand}">
+                            <avalonia:MaterialIcon Kind="ImageAdd" />
+                        </Button>
+                        <Button ToolTip.Tip="Удалить выбранные изображения"
+                                Command="{Binding RemoveImagesCommand}" CommandParameter="{Binding SelectedImages}">
+                            <avalonia:MaterialIcon Kind="ImageRemove" />
+                        </Button>
+                    </StackPanel>
+                    <TreeView x:Name="ImageTree" 
+                              ItemsSource="{Binding ImageService.TreeImages}"
                           SelectedItems="{Binding SelectedImages}"
                           SelectionMode="3">
+                    <TreeView.ItemContainerTheme>
+                        <ControlTheme TargetType="TreeViewItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Background" Value="{DynamicResource TreeViewItemBackground}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource TreeViewItemBorderBrush}" />
+                            <Setter Property="BorderThickness"
+                                    Value="{DynamicResource TreeViewItemBorderThemeThickness}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TreeViewItemForeground}" />
+                            <Setter Property="MinHeight" Value="{DynamicResource TreeViewItemMinHeight}" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+                            <Setter Property="Template">
+                                <ControlTemplate>
+                                    <StackPanel ToolTip.Tip="{ReflectionBinding Name}">
+                                        <Grid ColumnDefinitions="*,8,Auto">
+                                            <Button Grid.Column="2" 
+                                                    Theme="{StaticResource TransparentButton}"
+                                                    Command="{ReflectionBinding $parent[views:ImagesScreenView].DataContext.RemoveImageCommand}"
+                                                    CommandParameter="{TemplateBinding DataContext}">
+                                                <avalonia:MaterialIcon Kind="TrashOutline"/>
+                                            </Button>
+                                            <Border Grid.Column="0" Name="PART_LayoutRoot"
+                                                    Classes="TreeViewItemLayoutRoot"
+                                                    Focusable="True"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    MinHeight="{TemplateBinding MinHeight}"
+                                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                                    TemplatedControl.IsTemplateFocusTarget="True"
+                                                    Margin="2">
+                                                <Panel>
+                                                    <Rectangle Name="SelectionIndicator"
+                                                               Width="3"
+                                                               Height="16"
+                                                               HorizontalAlignment="Left"
+                                                               VerticalAlignment="Center"
+                                                               RadiusX="2"
+                                                               RadiusY="2"
+                                                               IsVisible="False"
+                                                               Fill="{DynamicResource TreeViewItemSelectionIndicatorForeground}" />
+
+                                                    <Grid Name="PART_Header"
+                                                          ColumnDefinitions="Auto, *, Auto"
+                                                          Margin="{TemplateBinding Level, Mode=OneWay, Converter={StaticResource TreeViewItemLeftMarginConverter}}">
+                                                        <Panel Name="PART_ExpandCollapseChevronContainer"
+                                                               Margin="{StaticResource TreeViewItemExpandCollapseChevronMargin}">
+                                                            <ToggleButton Name="PART_ExpandCollapseChevron"
+                                                                          Theme="{StaticResource TreeViewChevronButton}"
+                                                                          Focusable="False"
+                                                                          IsChecked="{ReflectionBinding IsExpanded, Mode=TwoWay}" />
+                                                        </Panel>
+                                                        <ContentPresenter Name="PART_HeaderPresenter"
+                                                                          Grid.Column="1"
+                                                                          Focusable="False"
+                                                                          Content="{TemplateBinding Header}"
+                                                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                                                          HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                                                          VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                                                                          Margin="{TemplateBinding Padding}" />
+                                                    </Grid>
+                                                </Panel>
+                                            </Border>
+                                        </Grid>
+
+                                        <ItemsPresenter Name="PART_ItemsPresenter"
+                                                        IsVisible="{ReflectionBinding IsExpanded}"
+                                                        ItemsPanel="{TemplateBinding ItemsPanel}" />
+                                    </StackPanel>
+                                </ControlTemplate>
+                            </Setter>
+
+                            <Style Selector="^ /template/ Border#PART_LayoutRoot:pointerover">
+                                <Setter Property="Background"
+                                        Value="{DynamicResource TreeViewItemBackgroundPointerOver}" />
+                                <Setter Property="BorderBrush"
+                                        Value="{DynamicResource TreeViewItemBorderBrushPointerOver}" />
+                            </Style>
+                            <Style
+                                Selector="^ /template/ Border#PART_LayoutRoot:pointerover > ContentPresenter#PART_HeaderPresenter">
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource TreeViewItemForegroundPointerOver}" />
+                            </Style>
+
+                            <Style Selector="^:pressed">
+                                <Style Selector="^ /template/ Border#PART_LayoutRoot:pointerover">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TreeViewItemBackgroundPressed}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource TreeViewItemBorderBrushPressed}" />
+                                </Style>
+                                <Style
+                                    Selector="^ /template/ Border#PART_LayoutRoot:pointerover > ContentPresenter#PART_HeaderPresenter">
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TreeViewItemForegroundPressed}" />
+                                </Style>
+                            </Style>
+
+                            <Style Selector="^:disabled">
+                                <Style Selector="^ /template/ Border#PART_LayoutRoot">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TreeViewItemBackgroundDisabled}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource TreeViewItemBorderBrushDisabled}" />
+                                </Style>
+                                <Style
+                                    Selector="^ /template/ Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter">
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TreeViewItemForegroundDisabled}" />
+                                </Style>
+                            </Style>
+
+                            <Style Selector="^:selected">
+                                <Style Selector="^ /template/ Rectangle#SelectionIndicator">
+                                    <Setter Property="IsVisible" Value="True" />
+                                </Style>
+
+                                <Style Selector="^ /template/ Border#PART_LayoutRoot">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TreeViewItemBackgroundSelected}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource TreeViewItemBorderBrushSelected}" />
+                                </Style>
+                                <Style
+                                    Selector="^ /template/ Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter">
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TreeViewItemForegroundSelected}" />
+                                </Style>
+
+                                <!--  Selected PointerOver state  -->
+                                <Style Selector="^ /template/ Border#PART_LayoutRoot:pointerover">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TreeViewItemBackgroundSelectedPointerOver}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource TreeViewItemBorderBrushSelectedPointerOver}" />
+                                </Style>
+                                <Style
+                                    Selector="^ /template/ Border#PART_LayoutRoot:pointerover > ContentPresenter#PART_HeaderPresenter">
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TreeViewItemForegroundSelectedPointerOver}" />
+                                </Style>
+
+                                <!--  Selected Pressed state  -->
+                                <Style Selector="^:pressed /template/ Border#PART_LayoutRoot:pointerover">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TreeViewItemBackgroundSelectedPressed}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource TreeViewItemBorderBrushSelectedPressed}" />
+                                </Style>
+                                <Style
+                                    Selector="^:pressed /template/ Border#PART_LayoutRoot:pointerover > ContentPresenter#PART_HeaderPresenter">
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TreeViewItemForegroundSelectedPressed}" />
+                                </Style>
+
+                                <!--  Disabled Selected state  -->
+                                <Style Selector="^:disabled /template/ Border#PART_LayoutRoot">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TreeViewItemBackgroundSelectedDisabled}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource TreeViewItemBorderBrushSelectedDisabled}" />
+                                </Style>
+                                <Style
+                                    Selector="^:disabled /template/ Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter">
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TreeViewItemForegroundSelectedDisabled}" />
+                                </Style>
+                            </Style>
+
+                            <Style Selector="^:empty">
+                                <Style Selector="^ /template/ ToggleButton#PART_ExpandCollapseChevron">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </Style>
+                                <Style Selector="^ /template/ Panel#PART_ExpandCollapseChevronContainer">
+                                    <Setter Property="Width"
+                                            Value="{StaticResource TreeViewItemExpandCollapseChevronSize}" />
+                                </Style>
+                            </Style>
+                        </ControlTheme>
+                    </TreeView.ItemContainerTheme>
                     <TreeView.ItemTemplate>
                         <TreeDataTemplate DataType="{x:Type viewModels:ImageFileViewModel}"
-                                          ItemsSource="{Binding Children}"
-                                          >
+                                          ItemsSource="{Binding Children}">
                             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8">
                                 <avalonia:MaterialIcon IsVisible="{Binding !Children.Count}" Kind="ImageOutline" />
                                 <avalonia:MaterialIcon IsVisible="{Binding Children.Count}" Kind="ImagesOutline" />
-                                <TextBlock Text="{Binding Name}" />
+                                <TextBlock Text="{Binding Name}" Width="250" />
                             </StackPanel>
                         </TreeDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
+                </DockPanel>
+                
             </SplitView.Pane>
 
             <DockPanel LastChildFill="True">
@@ -99,7 +256,54 @@
                     </Grid>
                 </ToggleButton>
                 <DockPanel Margin="8">
-
+                    <StackPanel DockPanel.Dock="Top"
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                HorizontalAlignment="Stretch">
+                        <Button ToolTip.Tip="Выбрать папку для работы с изображениями"
+                                Command="{Binding SelectFolderCommand}">
+                            <avalonia:MaterialIcon Kind="Folder" />
+                        </Button>
+                        <Button ToolTip.Tip="Вычисления">
+                            <Button.Flyout>
+                                <MenuFlyout>
+                                    <MenuItem Header="Фрактальная размерность">
+                                        <MenuItem.Icon>
+                                            <avalonia:MaterialIcon Kind="Summation" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Command="{Binding BoxCountingCommand}" Header="Метод вложенных кубов">
+                                        <MenuItem.Icon>
+                                            <avalonia:MaterialIcon Kind="CubeOutline" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Command="{Binding TriangulationCommand}" Header="Метод триангуляции">
+                                        <MenuItem.Icon>
+                                            <avalonia:MaterialIcon Kind="TriangleOutline" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                            <avalonia:MaterialIcon Kind="FunctionVariant" />
+                        </Button>
+                        <!--MatrixTypes-->
+                        <Button ToolTip.Tip="Матричные фильтры">
+                            <avalonia:MaterialIcon Kind="Matrix" />
+                            <Button.Flyout>
+                                <MenuFlyout>
+                                    <ItemsControl ItemsSource="{Binding MatrixTypes}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <MenuItem Header="{Binding .}"
+                                                          Command="{ReflectionBinding #ImageScreen.DataContext.ApplyFilterCommand}"
+                                                          CommandParameter="{Binding .}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
                     <controls:TabView Name="Images"
                                       CanDragTabs="False"
                                       CanReorderTabs="False"
