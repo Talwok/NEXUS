@@ -9,90 +9,77 @@ permissions:
   contents: write
 
 jobs:
-  build-and-package:
-    strategy:
-      matrix:
-        configuration: [Release]
-    
+  create-release:
     runs-on: windows-latest
-
-    env:
-      Solution_Name: NEXUS.sln
-      Build_Output: build_output
-
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Install .NET Core
+      - name: Extract version from tag
+        id: extract-version
+        run: |
+          version=${GITHUB_REF#refs/tags/v}
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "Extracted version: ${version}"
+
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
-      - name: Create output directory
-        run: mkdir $env:Build_Output
-
+      
+      # Fractal
       - name: Build NEXUS.Fractal
         run: |
-          dotnet publish NEXUS.Fractal -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -o $env:Build_Output/Fractal
+          dotnet publish NEXUS.Fractal -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
+            -o ./artifacts/Fractal
 
+      - name: Create Fractal ZIP
+        run: |
+          $version = ${{ steps.extract-version.outputs.version }}
+          Compress-Archive -Path ./artifacts/Fractal/* -DestinationPath "./NEXUS.Fractal-$version.zip"
+      
+      # Growth
       - name: Build NEXUS.Growth
         run: |
-          dotnet publish NEXUS.Growth -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -o $env:Build_Output/Growth
+          dotnet publish NEXUS.Growth -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
+            -o ./artifacts/Growth
 
+      - name: Create Growth ZIP
+        run: |
+          $version = ${{ steps.extract-version.outputs.version }}
+          Compress-Archive -Path ./artifacts/Growth/* -DestinationPath "./NEXUS.Growth-$version.zip"
+      
+      # Simulation
       - name: Build NEXUS.Growth.Simulation
         run: |
-          dotnet publish NEXUS.Growth.Simulation -c ${{ matrix.configuration }} -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -o $env:Build_Output/Simulation
+          dotnet publish NEXUS.Growth.Simulation -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
+            -o ./artifacts/Simulation
 
-      - name: Create release zip
+      - name: Create Simulation ZIP
         run: |
-          $version = $env:GITHUB_REF -replace "refs/tags/v", ""
-          Compress-Archive -Path $env:Build_Output/* -DestinationPath NEXUS-$version.zip
+          $version = ${{ steps.extract-version.outputs.version }}
+          Compress-Archive -Path ./artifacts/Simulation/* -DestinationPath "./NEXUS.Growth.Simulation-$version.zip"
 
-      - name: Upload release package
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-package
-          path: NEXUS-${{ github.ref_name }}.zip
-          retention-days: 1
-
-  create-release:
-    needs: build-and-package
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: release-package
-          path: ./release-artifact
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create GitHub Release
+        id: create-release
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: NEXUS ${{ github.ref_name }}
+          name: NEXUS ${{ steps.extract-version.outputs.version }}
           body: |
-            NEXUS Desktop Applications Release
+            NEXUS Desktop Applications Release ${{ steps.extract-version.outputs.version }}
+            
             Includes:
             - NEXUS.Fractal (Avalonia)
             - NEXUS.Growth (Avalonia)
             - NEXUS.Growth.Simulation (Console)
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-artifact/NEXUS-${{ github.ref_name }}.zip
-          asset_name: NEXUS-${{ github.ref_name }}.zip
-          asset_content_type: application/zip
+          files: |
+            NEXUS.Fractal-${{ steps.extract-version.outputs.version }}.zip
+            NEXUS.Growth-${{ steps.extract-version.outputs.version }}.zip
+            NEXUS.Growth.Simulation-${{ steps.extract-version.outputs.version }}.zip
