@@ -3,89 +3,75 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using DynamicData;
-using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.ViewModels;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace NEXUS.Fractal.Services;
 
 public class ImageService : ServiceBase
 {
-    private static readonly Dictionary<MatrixType, Func<Image<Rgba32>, Image<Rgba32>>> FilterFunctions = new([
-        new (MatrixType.Gaussian3x3_085, Filter.Gaussian3x3Filter_085),
-        new (MatrixType.Gaussian3x3_0391, Filter.Gaussian3x3Filter_0391),
-        new (MatrixType.Gaussian5x5_0625, Filter.Gaussian5x5Filter_0625),
-        new (MatrixType.Gaussian5x5_10, Filter.Gaussian5x5Filter_10),
-        new (MatrixType.Uniform3x3, Filter.Uniform3x3Filter),
-        new (MatrixType.Uniform5x5, Filter.Uniform5x5Filter),
-        new (MatrixType.Sharpen3x3, Filter.Sharpen3x3Filter),
-        new (MatrixType.Laplacian3x3, Filter.Laplacian3x3Filter),
-        new (MatrixType.Laplacian5x5, Filter.Laplacian5x5Filter),
-        new (MatrixType.HighPass5x5Type1, Filter.Highpass5x5Filter1),
-        new (MatrixType.HighPass5x5Type2, Filter.Highpass5x5Filter2),
-        new (MatrixType.Sobel3x3, Filter.Sobel3x3Filter),
-        new (MatrixType.Sobel3x3Horizontal, Filter.Sobel3x3HorizontalFilter),
-        new (MatrixType.Sobel3x3Vertical, Filter.Sobel3x3VerticalFilter),
-        new (MatrixType.Prewitt3x3, Filter.Prewitt3x3Filter),
-        new (MatrixType.Prewitt3x3Horizontal, Filter.Prewitt3x3HorizontalFilter),
-        new (MatrixType.Prewitt3x3Vertical, Filter.Prewitt3x3VerticalFilter),
-        new (MatrixType.Kirsch3x3, Filter.Kirsch3x3Filter),
-        new (MatrixType.Kirsch3x3Horizontal, Filter.Kirsch3x3HorizontalFilter),
-        new (MatrixType.Kirsch3x3Vertical, Filter.Kirsch3x3VerticalFilter)
-    ]);
-    
-    
+    private static readonly Dictionary<MatrixType, Func<Image<Rgba32>, Image<Rgba32>>> FilterFunctions =
+        new([
+            new(MatrixType.Gaussian3x3_085, Filter.Gaussian3x3Filter_085),
+            new(MatrixType.Gaussian3x3_0391, Filter.Gaussian3x3Filter_0391),
+            new(MatrixType.Gaussian5x5_0625, Filter.Gaussian5x5Filter_0625),
+            new(MatrixType.Gaussian5x5_10, Filter.Gaussian5x5Filter_10),
+            new(MatrixType.Uniform3x3, Filter.Uniform3x3Filter),
+            new(MatrixType.Uniform5x5, Filter.Uniform5x5Filter),
+            new(MatrixType.Sharpen3x3, Filter.Sharpen3x3Filter),
+            new(MatrixType.Laplacian3x3, Filter.Laplacian3x3Filter),
+            new(MatrixType.Laplacian5x5, Filter.Laplacian5x5Filter),
+            new(MatrixType.HighPass5x5Type1, Filter.Highpass5x5Filter1),
+            new(MatrixType.HighPass5x5Type2, Filter.Highpass5x5Filter2),
+            new(MatrixType.Sobel3x3, Filter.Sobel3x3Filter),
+            new(MatrixType.Sobel3x3Horizontal, Filter.Sobel3x3HorizontalFilter),
+            new(MatrixType.Sobel3x3Vertical, Filter.Sobel3x3VerticalFilter),
+            new(MatrixType.Prewitt3x3, Filter.Prewitt3x3Filter),
+            new(MatrixType.Prewitt3x3Horizontal, Filter.Prewitt3x3HorizontalFilter),
+            new(MatrixType.Prewitt3x3Vertical, Filter.Prewitt3x3VerticalFilter),
+            new(MatrixType.Kirsch3x3, Filter.Kirsch3x3Filter),
+            new(MatrixType.Kirsch3x3Horizontal, Filter.Kirsch3x3HorizontalFilter),
+            new(MatrixType.Kirsch3x3Vertical, Filter.Kirsch3x3VerticalFilter)
+        ]);
+
     private static readonly string[] SearchPatterns = ["*.png", "*.jpg", "*.jpeg", "*.bmp"];
 
     private static readonly string NameGroup = "name";
     private static readonly string GuidGroup = "guid";
     private static readonly string ExtensionGroup = "extension";
-    private static readonly string RegexPattern = $@"^\.\$(?<{NameGroup}>.+)_(?<{GuidGroup}>[0-9a-fA-F\-]+)\.(?<{ExtensionGroup}>png|jpg|jpeg|bmp)$";
 
-    private readonly SourceCache<string, string> _sourceCache;
-    
+    private static readonly string RegexPattern =
+        $@"^\.\$(?<{NameGroup}>.+)_(?<{GuidGroup}>[0-9a-fA-F\-]+)\.(?<{ExtensionGroup}>png|jpg|jpeg|bmp)$";
+
+    private readonly SourceCache<ImageFileViewModel, string> _sourceCache;
+
     private readonly IStorageProvider _storageProvider;
     private readonly InfoService _infoService;
-    
+
     private FileSystemWatcher? _watcher;
 
     public ImageService(IStorageProvider storageProvider, InfoService infoService)
     {
-        _storageProvider = storageProvider;
         _infoService = infoService;
+        _storageProvider = storageProvider;
 
-        _sourceCache = new SourceCache<string, string>(name => name).DisposeWith(Disposable);
+        _sourceCache = new SourceCache<ImageFileViewModel, string>(x => x.Path);
         _sourceCache.Connect()
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Transform(ParseChangedImageFileName)
-            .AutoRefresh()
-            .Group(x => x.Name) // Группируем по имени
-            .Transform(group =>
-            {
-                var groupRoot = group.Cache.Items
-                    .First(item => !Regex.IsMatch(Path.GetFileName(item.Path), RegexPattern, RegexOptions.IgnoreCase));
-                groupRoot.Children = new ObservableCollection<ImageFileViewModel>(group.Cache.Items.Where(item => item.Path != groupRoot.Path));
-                return groupRoot;
-            })
             .Bind(out var treeImages)
-            .Subscribe()
-            .DisposeWith(Disposable);
-        
+            .Subscribe();
+
         TreeImages = treeImages;
     }
 
@@ -95,128 +81,106 @@ public class ImageService : ServiceBase
 
     [Reactive] public ObservableCollection<ImageFileViewModel> SelectedImages { get; set; } = [];
 
-    #region Watcher
+    public async Task InitFolder()
+    {
+        var folders = await _storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Выберите папку для изображений",
+            AllowMultiple = false
+        });
+
+        if (folders.Count == 0) return;
+
+        Folder = folders[0].Path.LocalPath;
+        _watcher?.Dispose();
+        _watcher = CreateWatcher(Folder);
+    }
 
     private FileSystemWatcher CreateWatcher(string folderPath)
     {
-        // Создаем FileSystemWatcher для отслеживания изменений в файловой системе
         var watcher = new FileSystemWatcher(folderPath)
         {
-            NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.DirectoryName,
+            NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
+            EnableRaisingEvents = true
         };
 
-        watcher.Filters.Add(SearchPatterns);
+        watcher.Created += (s, e) => ProcessFiles();
+        watcher.Changed += (s, e) => ProcessFiles();
+        watcher.Renamed += (s, e) => ProcessFiles();
+        watcher.Deleted += (s, e) => ProcessFiles();
 
-        // Подписываемся на события FileSystemWatcher
-        Observable.FromEventPattern<FileSystemEventArgs>(watcher, nameof(watcher.Created))
-            .Subscribe(OnCreated).DisposeWith(Disposable);
-        Observable.FromEventPattern<FileSystemEventArgs>(watcher, nameof(watcher.Changed))
-            .Subscribe(OnChanged).DisposeWith(Disposable);
-        Observable.FromEventPattern<FileSystemEventArgs>(watcher, nameof(watcher.Deleted))
-            .Subscribe(OnDeleted).DisposeWith(Disposable);
-        Observable.FromEventPattern<RenamedEventArgs>(watcher, nameof(watcher.Renamed))
-            .Subscribe(OnRenamed).DisposeWith(Disposable);
-
-        var files = SearchPatterns
-            .SelectMany(pattern => Directory.GetFiles(folderPath, pattern))
-            .Distinct();
-
-        foreach (var file in files)
-            _sourceCache.AddOrUpdate(file);
-
-        watcher.EnableRaisingEvents = true;
+        ProcessFiles();
 
         return watcher;
     }
 
-    private void OnRenamed(EventPattern<RenamedEventArgs> args)
+    private void ProcessFiles()
     {
-        /*_sourceCache.RemoveKey(args.EventArgs.OldFullPath);
-        _sourceCache.AddOrUpdate(args.EventArgs.FullPath);*/
-    }
+        if (string.IsNullOrEmpty(Folder))
+            return;
 
-    private void OnDeleted(EventPattern<FileSystemEventArgs> args)
-    {
-        _sourceCache.RemoveKey(args.EventArgs.FullPath);
-        _sourceCache.Refresh();
-    }
-
-    private void OnChanged(EventPattern<FileSystemEventArgs> args)
-    {
-        _sourceCache.AddOrUpdate(args.EventArgs.FullPath);
-        _sourceCache.Refresh();
-    }
-
-    private void OnCreated(EventPattern<FileSystemEventArgs> args)
-    {
-        _sourceCache.AddOrUpdate(args.EventArgs.FullPath);
-        _sourceCache.Refresh();
-    }
-
-    #endregion
-
-    private ImageFileViewModel ParseChangedImageFileName(string filePath)
-    {
-        var fileName = Path.GetFileName(filePath);
-        var match = Regex.Match(fileName, RegexPattern, RegexOptions.IgnoreCase);
-
-        if (match.Success && Guid.TryParse(match.Groups[GuidGroup].Value, out var guid))
-        {
-            return new ImageFileViewModel
+        var fileGroups = SearchPatterns
+            .SelectMany(pattern => Directory.GetFiles(Folder, pattern))
+            .Distinct()
+            .Select(filePath =>
             {
-                Path = filePath,
-                Name = match.Groups[NameGroup].Value,
-                Extension = match.Groups[ExtensionGroup].Value,
-                Id = guid
-            };
+                var fileName = Path.GetFileName(filePath);
+                var match = Regex.Match(fileName, RegexPattern);
+                if (match.Success)
+                {
+                    if (Guid.TryParse(match.Groups[GuidGroup].Value, out var guid))
+                    {
+                        return new ImageFileViewModel
+                        {
+                            Path = filePath,
+                            Name = match.Groups[NameGroup].Value,
+                            Extension = match.Groups[ExtensionGroup].Value,
+                            Id = guid
+                        };
+                    }
+                }
+
+                return new ImageFileViewModel
+                {
+                    Path = filePath,
+                    Name = Path.GetFileNameWithoutExtension(fileName),
+                    Extension = Path.GetExtension(fileName)
+                };
+            })
+            .GroupBy(file => file.Name);
+
+        foreach (var root in TreeImages.ToList())
+        {
+            foreach (var rootChild in root.Children.ToList())
+            {
+                if (!File.Exists(rootChild.Path))
+                {
+                    root.Children.Remove(rootChild);
+                }
+            }
+            
+            if (!File.Exists(root.Path))
+            {
+                _sourceCache.Remove(root.Path);
+            }
         }
 
-        return new ImageFileViewModel
+        foreach (var fileGroup in fileGroups)
         {
-            Path = filePath,
-            Name = Path.GetFileNameWithoutExtension(filePath),
-            Extension = Path.GetExtension(filePath)
-        };
-    }
-
-    #region Public
-
-    public async Task InitFolder()
-    {
-        try
-        {
-            var folders = await _storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            var root = fileGroup.FirstOrDefault(item => item.Id == null);
+            if (root != null)
             {
-                Title = "Выберите папку для изображений",
-                AllowMultiple = false
-            });
-
-            if (folders.Count == 0)
-                return;
-
-            var directoryInfo = Directory.CreateDirectory(folders[0].Path.LocalPath);
-            Folder = directoryInfo.FullName;
-            _watcher?.Dispose();
-            _sourceCache.Clear();
-            _watcher = CreateWatcher(Folder);
-            _infoService.AppendMessage(new InfoMessageViewModel
-            {
-                Title = "Изображения",
-                Message = $"Выбрана новая папка: {Folder}",
-                Icon = MaterialIconKind.Folder,
-                Severity = InfoBarSeverity.Informational
-            });
-        }
-        catch (Exception ex)
-        {
-            _infoService.AppendMessage(new InfoMessageViewModel
-            {
-                Title = "Изображения",
-                Message = $"Ошибка при инициализации папки: {Folder}",
-                Icon = MaterialIconKind.Folder,
-                Severity = InfoBarSeverity.Error
-            });
-            Console.WriteLine($"ImageService InitFolder: {ex.Message}");
+                var cachedRoot = _sourceCache.Lookup(root.Path);
+                if (cachedRoot.HasValue) 
+                    root = cachedRoot.Value;
+                
+                var children = fileGroup
+                    .Where(item => item.Id != null && !root.Children.Select(child => child.Path).Contains(item.Path));
+                
+                root.Children.AddRange(children);
+                
+                _sourceCache.AddOrUpdate(root);
+            }
         }
     }
 
@@ -315,22 +279,19 @@ public class ImageService : ServiceBase
     {
         if (Folder == null)
             return;
-        
+
         if (FilterFunctions.TryGetValue(matrixType, out var filter))
         {
             foreach (var imageVm in SelectedImages)
             {
                 var image = await Image.LoadAsync<Rgba32>(imageVm.Path);
                 var filteredImage = filter(image);
-            
+
                 // Формируем новое имя файла по шаблону .$Name_Guid.Extension
-                var newFileName = $".${imageVm.Name}_{Guid.NewGuid()}{imageVm.Extension}";
-                
+                var newFileName = $".${imageVm.Name}_{Guid.NewGuid()}.{imageVm.Extension?.Replace(".","")}";
+
                 await filteredImage.SaveAsync(Path.Combine(Folder, newFileName));
-            }   
+            }
         }
     }
-    #endregion
-
-
 }

@@ -76,10 +76,11 @@
                           SelectionMode="3">
                     <TreeView.ItemTemplate>
                         <TreeDataTemplate DataType="{x:Type viewModels:ImageFileViewModel}"
-                                          ItemsSource="{Binding Children}">
+                                          ItemsSource="{Binding Children}"
+                                          >
                             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8">
-                                <avalonia:MaterialIcon IsVisible="{Binding !IsFolder}" Kind="ImageOutline" />
-                                <avalonia:MaterialIcon IsVisible="{Binding IsFolder}" Kind="ImagesOutline" />
+                                <avalonia:MaterialIcon IsVisible="{Binding !Children.Count}" Kind="ImageOutline" />
+                                <avalonia:MaterialIcon IsVisible="{Binding Children.Count}" Kind="ImagesOutline" />
                                 <TextBlock Text="{Binding Name}" />
                             </StackPanel>
                         </TreeDataTemplate>
