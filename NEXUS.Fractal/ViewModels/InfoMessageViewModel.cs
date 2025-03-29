@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Input;
 using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using NEXUS.ViewModels;
@@ -12,5 +13,7 @@ public class InfoMessageViewModel : ViewModelBase
     public string Message { get; set; } = string.Empty;
     public MaterialIconKind Icon { get; set; } = MaterialIconKind.Information;
     public bool IsOpen { get; set; } = true;
+    public bool IsClosable { get; set; } = true;
     public InfoBarSeverity Severity { get; set; } = InfoBarSeverity.Informational;
+    public ICommand Command { get; set; }
 }

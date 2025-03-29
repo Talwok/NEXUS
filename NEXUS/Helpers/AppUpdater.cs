@@ -18,36 +18,55 @@ public enum ApplicationType
 /// <param name="currentVersion"></param>
 public class GitHubUpdater(ApplicationType appType, Version currentVersion)
 {
+    private GitHubAsset? _asset;
     private const string RepoOwner = "Talwok";
     private const string RepoName = "NEXUS";
-    
+
     private static readonly Dictionary<ApplicationType, string> Applications = new()
     {
         { ApplicationType.Fractal, "Fractal" },
         { ApplicationType.Growth, "Growth" },
         { ApplicationType.GrowthSimulation, "Growth.Simulation" }
     };
-     
+
 
     public async Task<bool> CheckForUpdates()
     {
         try
         {
             var latestRelease = await GetLatestReleaseAsync();
-            if (latestRelease == null) 
+            if (latestRelease == null)
                 return false;
 
             if (latestRelease.Tag != null)
             {
                 var latestVersion = ParseVersion(latestRelease.Tag);
-                return latestVersion > currentVersion;
+                if (latestVersion > currentVersion)
+                {
+                    _asset = latestRelease.Assets.FirstOrDefault(a =>
+                        a.Name.Contains($"NEXUS.{Applications[appType]}") &&
+                        a.Name.EndsWith(".zip"));
+
+                    if (_asset == null) return false;
+
+                    // Получаем пути
+                    var tempZip = Path.Combine(Path.GetTempPath(), _asset.Name);
+
+                    // 1. Скачивание обновления
+                    using var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", "NEXUS.Updater");
+                    var response = await httpClient.GetAsync(_asset.DownloadUrl);
+                    await using var fs = new FileStream(tempZip, FileMode.Create);
+                    await response.Content.CopyToAsync(fs);
+                    return true;
+                }
             }
         }
         catch
         {
             return false;
         }
-        
+
         return false;
     }
 
@@ -55,65 +74,65 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
     {
         try
         {
-            var latestRelease = await GetLatestReleaseAsync();
-            if (latestRelease == null) return false;
+            if (_asset?.Name == null ) 
+                return false;
 
-            if (latestRelease.Assets != null)
+            var appDir = AppContext.BaseDirectory.TrimEnd('\\', '/');
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var tempZip = Path.Combine(Path.GetTempPath(), _asset.Name);
+            var backupDir = Path.Combine(appDir, "Backup");
+            var updateScript = Path.Combine(Path.GetTempPath(), $"update_{Guid.NewGuid()}.bat");
+
+            // 2. Создание скрипта обновления
+            var scriptContent = $@"
+@echo off
+chcp 65001 >nul
+setlocal enabledelayedexpansion
+
+:: Параметры
+set APP_DIR={appDir}
+set BACKUP_DIR={backupDir}
+set TEMP_ZIP={tempZip}
+set EXE_NAME=NEXUS.{Applications[appType]}.exe
+set TEMP_DIR={tempDir}
+
+:: Создаем резервную копию
+if not exist ""!BACKUP_DIR!"" mkdir ""!BACKUP_DIR!""
+robocopy ""!APP_DIR!"" ""!BACKUP_DIR!"" /mir /njh /njs /ndl /nc /ns /nfl
+
+:: Распаковываем во временную директорию
+mkdir ""!TEMP_DIR!"" 2>nul
+""{Path.Combine(Environment.SystemDirectory, "tar.exe")}"" -xf ""!TEMP_ZIP!"" -C ""!TEMP_DIR!""
+
+:: Копируем файлы с заменой
+robocopy ""!TEMP_DIR!"" ""!APP_DIR!"" /e /njh /njs /ndl /nc /ns /nfl
+
+:: Запускаем приложение
+start """" /D ""!APP_DIR!"" ""!EXE_NAME!""
+
+:: Очистка
+rmdir /s /q ""!TEMP_DIR!"" >nul 2>&1
+del ""{updateScript}"" >nul 2>&1
+del ""!TEMP_ZIP!"" >nul 2>&1
+";
+            await File.WriteAllTextAsync(updateScript, scriptContent);
+
+            // 3. Запуск обновления
+            var processInfo = new ProcessStartInfo
             {
-                var asset = latestRelease.Assets.FirstOrDefault(a => 
-                    a.Name != null &&
-                    a.Name.Contains($"NEXUS.{Applications[appType]}") && 
-                    a.Name.EndsWith(".zip"));
+                FileName = "cmd.exe",
+                Arguments = $"/C \"\"{updateScript}\"\"",
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = true
+            };
 
-                if (asset?.Name == null || asset.DownloadUrl == null) 
-                    return false;
-
-                var tempZip = Path.Combine(Path.GetTempPath(), asset.Name);
-                var exePath = Process.GetCurrentProcess().MainModule?.FileName;
-                var appDir = Path.GetDirectoryName(exePath);
-                if (appDir != null)
-                {
-                    var backupDir = Path.Combine(appDir, "Backup");
-
-                    // Скачивание обновления
-                    using (var httpClient = new HttpClient())
-                    {
-                        httpClient.DefaultRequestHeaders.Add("User-Agent", "NEXUS.Updater");
-                        var response = await httpClient.GetAsync(asset.DownloadUrl);
-                        await using (var fs = new FileStream(tempZip, FileMode.Create)) 
-                            await response.Content.CopyToAsync(fs);
-                    }
-
-                    // Создание скрипта обновления
-                    var updateScript = Path.Combine(Path.GetTempPath(), $"update_NEXUS.{Applications[appType]}.bat");
-                    await File.WriteAllTextAsync(updateScript, 
-                        $@"
-                @echo off
-                timeout /t 2 /nobreak >nul
-                mkdir ""{backupDir}""
-                robocopy ""{appDir}"" ""{backupDir}"" /mir /njh /njs /ndl /nc /ns /nfl
-                tar -xf ""{tempZip}"" -C ""{appDir}""
-                start """" ""{exePath}""
-                del ""{updateScript}""
-                del ""{tempZip}""
-                ");
-
-                    // Запуск обновления
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "cmd.exe",
-                        Arguments = $"/C start \"\" \"{updateScript}\"",
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true
-                    });
-                }
-            }
-
+            Process.Start(processInfo);
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Update failed: {ex.Message}");
+            Debug.WriteLine($"Update failed: {ex}");
             return false;
         }
     }
@@ -124,7 +143,7 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
         httpClient.DefaultRequestHeaders.Add("User-Agent", "NEXUS.Updater");
         var response = await httpClient.GetAsync(
             $"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases/latest");
-        
+
         return await response.Content.ReadFromJsonAsync<GitHubRelease>();
     }
 
@@ -136,16 +155,14 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
 
 public class GitHubRelease
 {
-    [JsonPropertyName("tag_name")]
-    public string? Tag { get; set; }
-    [JsonPropertyName("assets")]
-    public GitHubAsset[]? Assets { get; set; }
+    [JsonPropertyName("tag_name")] public string? Tag { get; set; }
+    [JsonPropertyName("assets")] public GitHubAsset[]? Assets { get; set; }
 }
 
 public class GitHubAsset
 {
-    [JsonPropertyName("name")]
-    public string? Name { get; set; }
+    [JsonPropertyName("name")] public string? Name { get; set; }
+
     [JsonPropertyName("browser_download_url")]
     public string? DownloadUrl { get; set; }
 }

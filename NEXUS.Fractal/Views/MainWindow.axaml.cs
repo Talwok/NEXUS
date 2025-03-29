@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ using NEXUS.Fractal.Services;
 using NEXUS.Fractal.ViewModels;
 using NEXUS.Helpers;
 using NEXUS.ViewModels;
+using ReactiveUI;
 
 namespace NEXUS.Fractal.Views;
 
@@ -36,11 +38,6 @@ public partial class MainWindow : Window
         _ = CheckForUpdates();
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-    }
-
     private async Task CheckForUpdates()
     {
         var infoService = App.ServiceProvider.GetService<InfoService>();
@@ -51,29 +48,45 @@ public partial class MainWindow : Window
             {
                 Title = "Обновление",
                 Message = "Проверка наличия обновлений",
-                Icon = MaterialIconKind.Internet,
+                Icon = MaterialIconKind.Download,
                 Severity = InfoBarSeverity.Informational
             });
             
             if (_updater != null && await _updater.CheckForUpdates())
             {
-                infoService?.AppendMessage(new InfoMessageViewModel
+                var message = new InfoMessageViewModel
                 {
                     Title = "Обновление",
-                    Message = "Найдено новое обновление, проводится установка",
-                    Icon = MaterialIconKind.Internet,
-                    Severity = InfoBarSeverity.Informational
-                });
+                    Message = "Рекомендуется провести обновление",
+                    Icon = MaterialIconKind.Download,
+                    Severity = InfoBarSeverity.Informational,
+                };
+                message.Command = ReactiveCommand.CreateFromTask(
+                    async () =>
+                    {
+                        var startMessage = new InfoMessageViewModel
+                        {
+                            Title = "Обновление",
+                            Message = "Приложение перезапустится по завершению обновления",
+                            Icon = MaterialIconKind.Download,
+                            Severity = InfoBarSeverity.Informational,
+                        };
+                        infoService?.AppendMessage(startMessage, false);
+                        var success = await _updater.UpdateApplication();
+                        infoService?.RemoveMessage(startMessage);
+                        infoService?.AppendMessage(new InfoMessageViewModel
+                        {
+                            Title = "Обновление",
+                            Message = success ? "Обновление прошло успешно" : "Не удалось установить обновление",
+                            Icon = MaterialIconKind.Download,
+                            Severity = success ? InfoBarSeverity.Informational : InfoBarSeverity.Error
+                        });
+                        infoService?.RemoveMessage(startMessage);
 
-                var success = await _updater.UpdateApplication();
-                infoService?.AppendMessage(new InfoMessageViewModel
-                {
-                    Title = "Обновление",
-                    Message = success ? "Обновление прошло успешно" : "Не удалось установить обновление",
-                    Icon = MaterialIconKind.Internet,
-                    Severity = success ? InfoBarSeverity.Informational : InfoBarSeverity.Error
-                });
-                if (success) Close();
+                        if (success)
+                            Close();
+                    }, outputScheduler: AvaloniaScheduler.Instance);
+                infoService?.AppendMessage(message, false);
             }
         }
         catch (Exception ex)
@@ -82,7 +95,7 @@ public partial class MainWindow : Window
             {
                 Title = "Обновление",
                 Message = $"Ошибка проверкки уведомлений: {ex.Source}",
-                Icon = MaterialIconKind.Internet,
+                Icon = MaterialIconKind.Download,
                 Severity = InfoBarSeverity.Error
             });
         }

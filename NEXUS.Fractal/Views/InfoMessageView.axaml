@@ -15,6 +15,6 @@
                       Message="{Binding Message}"
                       IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}"
                       Severity="{Binding Severity}"
-                      IsClosable="True"
+                      IsClosable="{Binding IsClosable}"
                       IsIconVisible="True"/>
 </UserControl>

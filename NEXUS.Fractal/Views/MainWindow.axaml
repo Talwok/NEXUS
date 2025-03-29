@@ -5,6 +5,7 @@
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
         xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NEXUS.Fractal.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -14,6 +15,11 @@
         Title="{Binding Version, StringFormat='NEXUS.Fractal {0}'}">
     <DockPanel>
         <DockPanel Height="32" DockPanel.Dock="Bottom">
+            <Button DockPanel.Dock="Right"
+                    IsVisible="{Binding InfoService.LastMessage.Command}"
+                    Command="{Binding InfoService.LastMessage.Command}">
+                <avalonia:MaterialIcon Kind="PlayBoxOutline"/>
+            </Button>
             <Button VerticalAlignment="Stretch" 
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
