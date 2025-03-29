@@ -7,19 +7,10 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <ApplicationIcon>Assets\GrowthSimulation.ico</ApplicationIcon>
-        <IsPackable>false</IsPackable>
-        <Title>CSEG</Title>
-        <Authors>Alex Bembel, Vitaly Anofriev</Authors>
-        <Description>Computer Simulation of Epitaxial Growth</Description>
-        <Copyright>TvSU</Copyright>
-        <Company>TvSU</Company>
-        <Product>CSEG - Computer Simulation of Epitaxial Growth</Product>
-        <AssemblyVersion>1.0.0</AssemblyVersion>
-        <FileVersion>1.0.0</FileVersion>
         <NeutralLanguage>en</NeutralLanguage>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>cseg-key.snk</AssemblyOriginatorKeyFile>
-        <PublicSign>true</PublicSign>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
+        <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
     </PropertyGroup>
 
     <ItemGroup>
