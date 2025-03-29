@@ -1,4 +1,6 @@
-﻿using Material.Icons;
+﻿using System;
+using System.Reflection;
+using Material.Icons;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.Services;
 using NEXUS.ViewModels;
@@ -34,4 +36,5 @@ public class MainWindowViewModel(
     };
 
     public InfoService InfoService { get; } = infoService;
+    public Version? Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 }

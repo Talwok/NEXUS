@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -32,7 +34,9 @@ public partial class App : Application
         serviceCollection.AddSingleton<Application>(this);
 
         serviceCollection.AddCommon();
-
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        // Или для файловой версии:
+        var fileVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         serviceCollection.AddSingleton<ImageService>(); 
         serviceCollection.AddSingleton<ChartService>(); 
         serviceCollection.AddSingleton<InfoService>();
