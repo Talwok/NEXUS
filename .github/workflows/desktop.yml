@@ -36,69 +36,69 @@ jobs:
         run: |
           $version = $env:VERSION
           $versionProps = @"
-  <Project>
-  <PropertyGroup>
-  <Version>$version</Version>
-  <FileVersion>$version</FileVersion>
-  <AssemblyVersion>$version.0</AssemblyVersion>
-  </PropertyGroup>
-  </Project>
-  "@
-        $versionProps | Out-File -FilePath "Version.props"
-
-# Сборка Fractal
-- name: Build NEXUS.Fractal
-  shell: pwsh
-  run: |
-    dotnet publish NEXUS.Fractal -c Release -r win-x64 --self-contained true `
-      -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
-      -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
-      -o ./artifacts/Fractal
-
-# Сборка Growth
-- name: Build NEXUS.Growth
-  shell: pwsh
-  run: |
-    dotnet publish NEXUS.Growth -c Release -r win-x64 --self-contained true `
-      -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
-      -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
-      -o ./artifacts/Growth
-
-# Сборка Simulation
-- name: Build NEXUS.Growth.Simulation
-  shell: pwsh
-  run: |
-    dotnet publish NEXUS.Growth.Simulation -c Release -r win-x64 --self-contained true `
-      -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
-      -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
-      -o ./artifacts/Simulation
-
-# Создание архивов
-- name: Create ZIP archives
-  shell: pwsh
-  run: |
-    $version = $env:VERSION
-    Compress-Archive -Path ./artifacts/Fractal/* -DestinationPath "./NEXUS.Fractal-$version.zip"
-    Compress-Archive -Path ./artifacts/Growth/* -DestinationPath "./NEXUS.Growth-$version.zip"
-    Compress-Archive -Path ./artifacts/Simulation/* -DestinationPath "./NEXUS.Simulation-$version.zip"
-
-# Создание релиза
-- name: Create GitHub Release
-  id: create-release
-  uses: softprops/action-gh-release@v1
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  with:
-    tag_name: ${{ github.ref }}
-    name: NEXUS ${{ env.VERSION }}
-    body: |
-      NEXUS Desktop Applications Release ${{ env.VERSION }}
+          <Project>
+          <PropertyGroup>
+          <Version>$version</Version>
+          <FileVersion>$version</FileVersion>
+          <AssemblyVersion>$version.0</AssemblyVersion>
+          </PropertyGroup>
+          </Project>
+          "@
+          $versionProps | Out-File -FilePath "Version.props"
+  
+      # Сборка Fractal
+      - name: Build NEXUS.Fractal
+        shell: pwsh
+        run: |
+          dotnet publish NEXUS.Fractal -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
+            -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
+            -o ./artifacts/Fractal
       
-      Includes:
-      - NEXUS.Fractal (Avalonia)
-      - NEXUS.Growth (Avalonia)
-      - NEXUS.Growth.Simulation (Console)
-    files: |
-      NEXUS.Fractal-${{ env.VERSION }}.zip
-      NEXUS.Growth-${{ env.VERSION }}.zip
-      NEXUS.Simulation-${{ env.VERSION }}.zip
+      # Сборка Growth
+      - name: Build NEXUS.Growth
+        shell: pwsh
+        run: |
+          dotnet publish NEXUS.Growth -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
+            -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
+            -o ./artifacts/Growth
+      
+      # Сборка Simulation
+      - name: Build NEXUS.Growth.Simulation
+        shell: pwsh
+        run: |
+          dotnet publish NEXUS.Growth.Simulation -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
+            -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
+            -o ./artifacts/Simulation
+      
+      # Создание архивов
+      - name: Create ZIP archives
+        shell: pwsh
+        run: |
+          $version = $env:VERSION
+          Compress-Archive -Path ./artifacts/Fractal/* -DestinationPath "./NEXUS.Fractal-$version.zip"
+          Compress-Archive -Path ./artifacts/Growth/* -DestinationPath "./NEXUS.Growth-$version.zip"
+          Compress-Archive -Path ./artifacts/Simulation/* -DestinationPath "./NEXUS.Simulation-$version.zip"
+      
+      # Создание релиза
+      - name: Create GitHub Release
+        id: create-release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          name: NEXUS ${{ env.VERSION }}
+          body: |
+            NEXUS Desktop Applications Release ${{ env.VERSION }}
+            
+            Includes:
+            - NEXUS.Fractal (Avalonia)
+            - NEXUS.Growth (Avalonia)
+            - NEXUS.Growth.Simulation (Console)
+          files: |
+            NEXUS.Fractal-${{ env.VERSION }}.zip
+            NEXUS.Growth-${{ env.VERSION }}.zip
+            NEXUS.Simulation-${{ env.VERSION }}.zip
