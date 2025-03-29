@@ -8,9 +8,6 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <ApplicationIcon>Assets\GrowthSimulation.ico</ApplicationIcon>
         <NeutralLanguage>en</NeutralLanguage>
-        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
-        <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
     </PropertyGroup>
 
     <ItemGroup>

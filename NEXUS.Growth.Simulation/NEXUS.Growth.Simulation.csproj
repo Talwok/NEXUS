@@ -6,9 +6,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <ApplicationIcon>Assets\GrowthSimulation.ico</ApplicationIcon>
-        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
-        <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
     </PropertyGroup>
 
     <ItemGroup>

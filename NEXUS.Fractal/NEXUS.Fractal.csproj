@@ -7,10 +7,6 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <ApplicationIcon>Assets\FractalSurface.ico</ApplicationIcon>
-        
-        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
-        <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
     </PropertyGroup>
     
     <ItemGroup>
