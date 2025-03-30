@@ -147,25 +147,45 @@ jobs:
         run: |
           $version = $env:VERSION
           $hashes = @()
-          
+
           if (Test-Path "./NEXUS.Fractal-$version.zip") {
               $hash = (Get-FileHash "./NEXUS.Fractal-$version.zip" -Algorithm MD5).Hash
               $hashes += "NEXUS.Fractal - $hash"
           }
-          
+
           if (Test-Path "./NEXUS.Growth-$version.zip") {
               $hash = (Get-FileHash "./NEXUS.Growth-$version.zip" -Algorithm MD5).Hash
               $hashes += "NEXUS.Growth - $hash"
           }
-          
+
           if (Test-Path "./NEXUS.Simulation-$version.zip") {
               $hash = (Get-FileHash "./NEXUS.Simulation-$version.zip" -Algorithm MD5).Hash
               $hashes += "NEXUS.Simulation - $hash"
           }
-          
+
           $hashes | Out-File -FilePath "./hashes.md5"
           echo "hashes=$($hashes -join '|')" >> $env:GITHUB_OUTPUT
           echo "Hashes calculated and saved to hashes.md5"
+
+      - name: Prepare release body
+        id: prepare-release-body
+        shell: pwsh
+        run: |
+          $body = @"
+          NEXUS Desktop Applications Release $env:VERSION
+
+          $($(if (Test-Path "./NEXUS.Fractal-$env:VERSION.zip") { "- NEXUS.Fractal (Avalonia)" }))
+          $($(if (Test-Path "./NEXUS.Growth-$env:VERSION.zip") { "- NEXUS.Growth (Avalonia)" }))
+          $($(if (Test-Path "./NEXUS.Simulation-$env:VERSION.zip") { "- NEXUS.Growth.Simulation (Console)" }))
+
+          MD5 Hashes:
+          $(Get-Content ./hashes.md5 | Out-String)
+
+          Note: Applications are published as full folders (not single-file)
+          "@
+
+          echo "body=$body" >> $env:GITHUB_OUTPUT
+          $body | Out-File -FilePath "./release_body.md"
 
       - name: Create GitHub Release
         id: create-release
@@ -175,17 +195,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           name: NEXUS ${{ env.VERSION }}${{ env.APP && format('-{0}', env.APP) || '' }}
-          body: |
-            NEXUS Desktop Applications Release ${{ env.VERSION }}
-            
-            ${{ contains(steps.determine-apps.outputs.apps, 'fractal') && '- NEXUS.Fractal (Avalonia)' || '' }}
-            ${{ contains(steps.determine-apps.outputs.apps, 'growth') && '- NEXUS.Growth (Avalonia)' || '' }}
-            ${{ contains(steps.determine-apps.outputs.apps, 'simulation') && '- NEXUS.Growth.Simulation (Console)' || '' }}
-            
-            MD5 Hashes:
-            ${{ join(fromJSON(format('["{0}"]', replace(steps.calculate-hashes.outputs.hashes, '|', '","')), '\n')) }}
-            
-            Note: Applications are published as full folders (not single-file)
+          body_file: release_body.md
           files: |
             ${{ steps.create-archives.outputs.files }}
             hashes.md5
