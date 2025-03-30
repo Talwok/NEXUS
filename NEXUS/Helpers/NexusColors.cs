@@ -1,5 +1,4 @@
-﻿using Avalonia.Media;
-using SkiaSharp;
+﻿using SkiaSharp;
 
 namespace NEXUS.Helpers;
 

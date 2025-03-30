@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using NEXUS.Fractal.Services;
+﻿using NEXUS.Fractal.Services;
 using NEXUS.ViewModels;
 using ReactiveUI.Fody.Helpers;
 

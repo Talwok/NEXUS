@@ -14,12 +14,22 @@
         Icon="/Assets/FractalSurface.ico"
         Title="{Binding Version, StringFormat='NEXUS.Fractal {0}'}">
     <DockPanel>
+        <controls:InfoBar DockPanel.Dock="Top"
+                          Padding="0"
+                          Margin="0"
+                          Title="Обновление:"
+                          Message="Рекомендуется установить последнюю версию приложения"
+                          IsOpen="True"
+                          IsClosable="False"
+                          IsIconVisible="False"
+                          IsVisible="{Binding IsUpdateFound}">
+            <controls:InfoBar.ActionButton>
+                <Button Command="{Binding UpdateCommand}">
+                    <avalonia:MaterialIcon Kind="ProgressDownload"/>
+                </Button>
+            </controls:InfoBar.ActionButton>
+        </controls:InfoBar>
         <DockPanel Height="32" DockPanel.Dock="Bottom">
-            <Button DockPanel.Dock="Right"
-                    IsVisible="{Binding InfoService.LastMessage.Command}"
-                    Command="{Binding InfoService.LastMessage.Command}">
-                <avalonia:MaterialIcon Kind="PlayBoxOutline"/>
-            </Button>
             <Button VerticalAlignment="Stretch" 
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
@@ -44,8 +54,6 @@
                 </Button.Flyout>
             </Button>
         </DockPanel>
-        
-
         <controls:NavigationView PaneDisplayMode="LeftCompact"
                                  IsPaneOpen="False"
                                  IsPaneToggleButtonVisible="False"

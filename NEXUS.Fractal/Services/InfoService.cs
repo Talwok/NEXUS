@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.ReactiveUI;
 using DynamicData;
-using DynamicData.PLinq;
 using NEXUS.Fractal.ViewModels;
 using ReactiveUI.Fody.Helpers;
 

@@ -1,9 +1,6 @@
 ﻿using System;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
-using DynamicData;
 using FluentAvalonia.UI.Controls;
 using NEXUS.Fractal.ViewModels;
 

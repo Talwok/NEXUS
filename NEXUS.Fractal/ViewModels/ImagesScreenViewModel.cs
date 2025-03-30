@@ -8,7 +8,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.IO;
-using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Fractal.Models;
 

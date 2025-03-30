@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 
 namespace NEXUS.Helpers;
@@ -18,7 +19,6 @@ public enum ApplicationType
 /// <param name="currentVersion"></param>
 public class GitHubUpdater(ApplicationType appType, Version currentVersion)
 {
-    private GitHubAsset? _asset;
     private const string RepoOwner = "Talwok";
     private const string RepoName = "NEXUS";
 
@@ -29,6 +29,7 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
         { ApplicationType.GrowthSimulation, "Growth.Simulation" }
     };
 
+    public GitHubAsset? Asset { get; private set; }
 
     public async Task<bool> CheckForUpdates()
     {
@@ -43,19 +44,19 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
                 var latestVersion = ParseVersion(latestRelease.Tag);
                 if (latestVersion > currentVersion)
                 {
-                    _asset = latestRelease.Assets.FirstOrDefault(a =>
+                    Asset = latestRelease.Assets.FirstOrDefault(a =>
                         a.Name.Contains($"NEXUS.{Applications[appType]}") &&
                         a.Name.EndsWith(".zip"));
 
-                    if (_asset == null) return false;
+                    if (Asset == null) return false;
 
                     // Получаем пути
-                    var tempZip = Path.Combine(Path.GetTempPath(), _asset.Name);
+                    var tempZip = Path.Combine(Path.GetTempPath(), Asset.Name);
 
                     // 1. Скачивание обновления
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", "NEXUS.Updater");
-                    var response = await httpClient.GetAsync(_asset.DownloadUrl);
+                    var response = await httpClient.GetAsync(Asset.DownloadUrl);
                     await using var fs = new FileStream(tempZip, FileMode.Create);
                     await response.Content.CopyToAsync(fs);
                     return true;
@@ -74,12 +75,12 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
     {
         try
         {
-            if (_asset?.Name == null ) 
+            if (Asset?.Name == null ) 
                 return false;
 
             var appDir = AppContext.BaseDirectory.TrimEnd('\\', '/');
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var tempZip = Path.Combine(Path.GetTempPath(), _asset.Name);
+            var tempZip = Path.Combine(Path.GetTempPath(), Asset.Name);
             var backupDir = Path.Combine(appDir, "Backup");
             var updateScript = Path.Combine(Path.GetTempPath(), $"update_{Guid.NewGuid()}.bat");
 
@@ -151,6 +152,15 @@ del ""!TEMP_ZIP!"" >nul 2>&1
     {
         return new Version(tag.TrimStart('v').Split('-')[0]);
     }
+    
+    public async Task<string> CalculateZipMD5Async(string filePath)
+    {
+        using var md5 = MD5.Create();
+        await using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+        var hashBytes = await md5.ComputeHashAsync(stream);
+        return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+    }
+
 }
 
 public class GitHubRelease
