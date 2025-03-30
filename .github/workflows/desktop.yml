@@ -147,22 +147,22 @@ jobs:
         run: |
           $version = $env:VERSION
           $hashes = @()
-
+          
           if (Test-Path "./NEXUS.Fractal-$version.zip") {
               $hash = (Get-FileHash "./NEXUS.Fractal-$version.zip" -Algorithm MD5).Hash
               $hashes += "NEXUS.Fractal - $hash"
           }
-
+          
           if (Test-Path "./NEXUS.Growth-$version.zip") {
               $hash = (Get-FileHash "./NEXUS.Growth-$version.zip" -Algorithm MD5).Hash
               $hashes += "NEXUS.Growth - $hash"
           }
-
+          
           if (Test-Path "./NEXUS.Simulation-$version.zip") {
               $hash = (Get-FileHash "./NEXUS.Simulation-$version.zip" -Algorithm MD5).Hash
               $hashes += "NEXUS.Simulation - $hash"
           }
-
+          
           $hashes | Out-File -FilePath "./hashes.md5"
           echo "hashes=$($hashes -join '|')" >> $env:GITHUB_OUTPUT
           echo "Hashes calculated and saved to hashes.md5"
@@ -171,21 +171,29 @@ jobs:
         id: prepare-release-body
         shell: pwsh
         run: |
-          $body = @"
-          NEXUS Desktop Applications Release $env:VERSION
-
-          $($(if (Test-Path "./NEXUS.Fractal-$env:VERSION.zip") { "- NEXUS.Fractal (Avalonia)" }))
-          $($(if (Test-Path "./NEXUS.Growth-$env:VERSION.zip") { "- NEXUS.Growth (Avalonia)" }))
-          $($(if (Test-Path "./NEXUS.Simulation-$env:VERSION.zip") { "- NEXUS.Growth.Simulation (Console)" }))
-
-          MD5 Hashes:
-          $(Get-Content ./hashes.md5 | Out-String)
-
-          Note: Applications are published as full folders (not single-file)
-          "@
-
-          echo "body=$body" >> $env:GITHUB_OUTPUT
-          $body | Out-File -FilePath "./release_body.md"
+          # Формируем список приложений
+          $appsList = @()
+          if (Test-Path "./NEXUS.Fractal-$env:VERSION.zip") { $appsList += "- NEXUS.Fractal (Avalonia)" }
+          if (Test-Path "./NEXUS.Growth-$env:VERSION.zip") { $appsList += "- NEXUS.Growth (Avalonia)" }
+          if (Test-Path "./NEXUS.Simulation-$env:VERSION.zip") { $appsList += "- NEXUS.Growth.Simulation (Console)" }
+          
+          # Получаем хеши из файла
+          $hashesContent = Get-Content ./hashes.md5 -Raw
+          
+          # Формируем тело релиза
+          $body = "NEXUS Desktop Applications Release $env:VERSION"
+          $body += "`n`n"
+          $body += $appsList -join "`n"
+          $body += "`n`n"
+          $body += "MD5 Hashes:`n"
+          $body += $hashesContent
+          $body += "`n"
+          $body += "Note: Applications are published as full folders (not single-file)"
+          
+          # Сохраняем результат
+          $body | Out-File -FilePath "./release_body.md" -Encoding utf8
+          $bodyEscaped = $body -replace '"', '\"'
+          echo "body=$bodyEscaped" >> $env:GITHUB_OUTPUT
 
       - name: Create GitHub Release
         id: create-release
