@@ -153,7 +153,7 @@ del ""!TEMP_ZIP!"" >nul 2>&1
         return new Version(tag.TrimStart('v').Split('-')[0]);
     }
     
-    public async Task<string> CalculateZipMD5Async(string filePath)
+    public async Task<string> CalculateMD5Async(string filePath)
     {
         using var md5 = MD5.Create();
         await using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);

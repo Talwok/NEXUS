@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*.*.*"
+      - "v*.*.*-*"
     paths:
       - 'NEXUS.Fractal/**'
       - 'NEXUS.Growth/**'
@@ -25,10 +26,15 @@ jobs:
         id: extract-version
         shell: pwsh
         run: |
-          $version = $env:GITHUB_REF -replace "refs/tags/v", ""
+          $tag = $env:GITHUB_REF -replace "refs/tags/v", ""
+          $version = $tag -replace "-.*", ""
+          $app = $tag -replace ".*-", ""
+          
           echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "app=$app" >> $env:GITHUB_OUTPUT
           echo "VERSION=$version" >> $env:GITHUB_ENV
-          Write-Host "Extracted version: $version"
+          echo "APP=$app" >> $env:GITHUB_ENV
+          Write-Host "Extracted version: $version, app: $app"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -50,94 +56,115 @@ jobs:
           "@
           $versionProps | Out-File -FilePath "Version.props"
 
-      - name: Detect changed apps
-        id: changed-apps
+      - name: Determine apps to build
+        id: determine-apps
         shell: pwsh
         run: |
+          if ("${{ env.APP }}" -ne "") {
+              $app = "${{ env.APP }}".ToLower()
+              if ($app -eq "fractal" -or $app -eq "growth" -or $app -eq "simulation") {
+                  echo "Building only $app as specified in tag"
+                  echo "apps=$app" >> $env:GITHUB_OUTPUT
+                  exit 0
+              }
+          }
+          
           $changedFiles = git diff --name-only HEAD^ HEAD
           $apps = @()
           
-          if ($changedFiles -like "*NEXUS.Fractal*") { $apps += "Fractal" }
-          if ($changedFiles -like "*NEXUS.Growth*") { $apps += "Growth" }
-          if ($changedFiles -like "*NEXUS.Growth.Simulation*") { $apps += "Simulation" }
+          if ($changedFiles -like "*NEXUS.Fractal*") { $apps += "fractal" }
+          if ($changedFiles -like "*NEXUS.Growth*") { $apps += "growth" }
+          if ($changedFiles -like "*NEXUS.Growth.Simulation*") { $apps += "simulation" }
           
-          if ($apps.Count -eq 0) { $apps = @("Fractal", "Growth", "Simulation") }
+          if ($apps.Count -eq 0) { $apps = @("fractal", "growth", "simulation") }
           
           echo "apps=$($apps -join ',')" >> $env:GITHUB_OUTPUT
           Write-Host "Apps to build: $($apps -join ', ')"
 
       - name: Build NEXUS.Fractal
-        if: contains(steps.changed-apps.outputs.apps, 'Fractal')
+        if: contains(steps.determine-apps.outputs.apps, 'fractal')
         shell: pwsh
         run: |
           dotnet publish NEXUS.Fractal -c Release -r win-x64 --self-contained true `
-            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
-            -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
+            -p:PublishSingleFile=false `  # Отключаем single-file
+            -p:IncludeAllContentForSelfExtract=false `
+            -p:Version=$env:VERSION `
+            -p:FileVersion=$env:VERSION `
+            -p:AssemblyVersion=$env:VERSION.0 `
             -o ./artifacts/Fractal
 
       - name: Build NEXUS.Growth
-        if: contains(steps.changed-apps.outputs.apps, 'Growth')
+        if: contains(steps.determine-apps.outputs.apps, 'growth')
         shell: pwsh
         run: |
           dotnet publish NEXUS.Growth -c Release -r win-x64 --self-contained true `
-            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
-            -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
+            -p:PublishSingleFile=false `  # Отключаем single-file
+            -p:IncludeAllContentForSelfExtract=false `
+            -p:Version=$env:VERSION `
+            -p:FileVersion=$env:VERSION `
+            -p:AssemblyVersion=$env:VERSION.0 `
             -o ./artifacts/Growth
 
       - name: Build NEXUS.Growth.Simulation
-        if: contains(steps.changed-apps.outputs.apps, 'Simulation')
+        if: contains(steps.determine-apps.outputs.apps, 'simulation')
         shell: pwsh
         run: |
           dotnet publish NEXUS.Growth.Simulation -c Release -r win-x64 --self-contained true `
-            -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true `
-            -p:Version=$env:VERSION -p:FileVersion=$env:VERSION -p:AssemblyVersion=$env:VERSION.0 `
+            -p:PublishSingleFile=false `  # Отключаем single-file
+            -p:IncludeAllContentForSelfExtract=false `
+            -p:Version=$env:VERSION `
+            -p:FileVersion=$env:VERSION `
+            -p:AssemblyVersion=$env:VERSION.0 `
             -o ./artifacts/Simulation
 
       - name: Create ZIP archives
+        id: create-archives
         shell: pwsh
         run: |
           $version = $env:VERSION
           $files = @()
           
           if (Test-Path "./artifacts/Fractal") {
-            Compress-Archive -Path ./artifacts/Fractal/* -DestinationPath "./NEXUS.Fractal-$version.zip"
-            $files += "NEXUS.Fractal-$version.zip"
+              Compress-Archive -Path ./artifacts/Fractal/* -DestinationPath "./NEXUS.Fractal-$version.zip"
+              $files += "NEXUS.Fractal-$version.zip"
           }
           
           if (Test-Path "./artifacts/Growth") {
-            Compress-Archive -Path ./artifacts/Growth/* -DestinationPath "./NEXUS.Growth-$version.zip"
-            $files += "NEXUS.Growth-$version.zip"
+              Compress-Archive -Path ./artifacts/Growth/* -DestinationPath "./NEXUS.Growth-$version.zip"
+              $files += "NEXUS.Growth-$version.zip"
           }
           
           if (Test-Path "./artifacts/Simulation") {
-            Compress-Archive -Path ./artifacts/Simulation/* -DestinationPath "./NEXUS.Simulation-$version.zip"
-            $files += "NEXUS.Simulation-$version.zip"
+              Compress-Archive -Path ./artifacts/Simulation/* -DestinationPath "./NEXUS.Simulation-$version.zip"
+              $files += "NEXUS.Simulation-$version.zip"
           }
           
           echo "files=$($files -join ',')" >> $env:GITHUB_OUTPUT
 
       - name: Calculate MD5 hashes
+        id: calculate-hashes
         shell: pwsh
         run: |
           $version = $env:VERSION
           $hashes = @()
           
           if (Test-Path "./NEXUS.Fractal-$version.zip") {
-            $hash = (Get-FileHash "./NEXUS.Fractal-$version.zip" -Algorithm MD5).Hash
-            $hashes += "NEXUS.Fractal - $hash"
+              $hash = (Get-FileHash "./NEXUS.Fractal-$version.zip" -Algorithm MD5).Hash
+              $hashes += "NEXUS.Fractal - $hash"
           }
           
           if (Test-Path "./NEXUS.Growth-$version.zip") {
-            $hash = (Get-FileHash "./NEXUS.Growth-$version.zip" -Algorithm MD5).Hash
-            $hashes += "NEXUS.Growth - $hash"
+              $hash = (Get-FileHash "./NEXUS.Growth-$version.zip" -Algorithm MD5).Hash
+              $hashes += "NEXUS.Growth - $hash"
           }
           
           if (Test-Path "./NEXUS.Simulation-$version.zip") {
-            $hash = (Get-FileHash "./NEXUS.Simulation-$version.zip" -Algorithm MD5).Hash
-            $hashes += "NEXUS.Simulation - $hash"
+              $hash = (Get-FileHash "./NEXUS.Simulation-$version.zip" -Algorithm MD5).Hash
+              $hashes += "NEXUS.Simulation - $hash"
           }
           
           $hashes | Out-File -FilePath "./hashes.md5"
+          echo "hashes=$($hashes -join ',')" >> $env:GITHUB_OUTPUT
           echo "Hashes calculated and saved to hashes.md5"
 
       - name: Create GitHub Release
@@ -147,17 +174,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          name: NEXUS ${{ env.VERSION }}
+          name: NEXUS ${{ env.VERSION }} ${{ env.APP && format('-{0}', env.APP) || '' }}
           body: |
             NEXUS Desktop Applications Release ${{ env.VERSION }}
             
-            Includes:
-            ${{ contains(steps.changed-apps.outputs.apps, 'Fractal') && '- NEXUS.Fractal (Avalonia)' || '' }}
-            ${{ contains(steps.changed-apps.outputs.apps, 'Growth') && '- NEXUS.Growth (Avalonia)' || '' }}
-            ${{ contains(steps.changed-apps.outputs.apps, 'Simulation') && '- NEXUS.Growth.Simulation (Console)' || '' }}
+            ${{ contains(steps.determine-apps.outputs.apps, 'fractal') && '- NEXUS.Fractal (Avalonia)' || '' }}
+            ${{ contains(steps.determine-apps.outputs.apps, 'growth') && '- NEXUS.Growth (Avalonia)' || '' }}
+            ${{ contains(steps.determine-apps.outputs.apps, 'simulation') && '- NEXUS.Growth.Simulation (Console)' || '' }}
             
             MD5 Hashes:
-            ${{ join(fromJSON('["' + replace(steps.calculate-hashes.outputs.hashes, ',', '","') + '"]'), '\n') }}
+            ${{ steps.calculate-hashes.outputs.hashes.replace(',', '\n') }}
+            
+            Note: Applications are published as full folders (not single-file)
           files: |
             ${{ steps.create-archives.outputs.files }}
             hashes.md5
