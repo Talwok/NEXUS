@@ -86,7 +86,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet publish NEXUS.Fractal -c Release -r win-x64 --self-contained true `
-            -p:PublishSingleFile=false `  # Отключаем single-file
+            -p:PublishSingleFile=false `
             -p:IncludeAllContentForSelfExtract=false `
             -p:Version=$env:VERSION `
             -p:FileVersion=$env:VERSION `
@@ -98,7 +98,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet publish NEXUS.Growth -c Release -r win-x64 --self-contained true `
-            -p:PublishSingleFile=false `  # Отключаем single-file
+            -p:PublishSingleFile=false `
             -p:IncludeAllContentForSelfExtract=false `
             -p:Version=$env:VERSION `
             -p:FileVersion=$env:VERSION `
@@ -110,7 +110,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet publish NEXUS.Growth.Simulation -c Release -r win-x64 --self-contained true `
-            -p:PublishSingleFile=false `  # Отключаем single-file
+            -p:PublishSingleFile=false `
             -p:IncludeAllContentForSelfExtract=false `
             -p:Version=$env:VERSION `
             -p:FileVersion=$env:VERSION `
@@ -164,7 +164,7 @@ jobs:
           }
           
           $hashes | Out-File -FilePath "./hashes.md5"
-          echo "hashes=$($hashes -join ',')" >> $env:GITHUB_OUTPUT
+          echo "hashes=$($hashes -join '|')" >> $env:GITHUB_OUTPUT
           echo "Hashes calculated and saved to hashes.md5"
 
       - name: Create GitHub Release
@@ -174,7 +174,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          name: NEXUS ${{ env.VERSION }} ${{ env.APP && format('-{0}', env.APP) || '' }}
+          name: NEXUS ${{ env.VERSION }}${{ env.APP && format('-{0}', env.APP) || '' }}
           body: |
             NEXUS Desktop Applications Release ${{ env.VERSION }}
             
@@ -183,7 +183,7 @@ jobs:
             ${{ contains(steps.determine-apps.outputs.apps, 'simulation') && '- NEXUS.Growth.Simulation (Console)' || '' }}
             
             MD5 Hashes:
-            ${{ steps.calculate-hashes.outputs.hashes.replace(',', '\n') }}
+            ${{ join(fromJSON(format('["{0}"]', replace(steps.calculate-hashes.outputs.hashes, '|', '","')), '\n')) }}
             
             Note: Applications are published as full folders (not single-file)
           files: |
