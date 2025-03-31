@@ -21,7 +21,6 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
 {
     private const string RepoOwner = "Talwok";
     private const string RepoName = "NEXUS";
-    private const int ReleasesToCheck = 10; // Количество проверяемых релизов
     
     private static readonly Dictionary<ApplicationType, string> Applications = new()
     {
@@ -144,7 +143,7 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
             httpClient.Timeout = TimeSpan.FromSeconds(15);
             
             var response = await httpClient.GetAsync(
-                $"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases?per_page={ReleasesToCheck}");
+                $"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases");
             
             response.EnsureSuccessStatusCode();
             
