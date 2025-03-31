@@ -17,15 +17,16 @@
         <controls:InfoBar DockPanel.Dock="Top"
                           Padding="0"
                           Margin="0"
-                          Title="Обновление:"
+                          Title="{Binding UpdateVersion, StringFormat='Обновление {0}: '}"
                           Message="Рекомендуется установить последнюю версию приложения"
                           IsOpen="True"
-                          IsClosable="False"
-                          IsIconVisible="False"
+                          IsClosable="True"
+                          IsIconVisible="True"
                           IsVisible="{Binding IsUpdateFound}">
             <controls:InfoBar.ActionButton>
-                <Button Command="{Binding UpdateCommand}">
-                    <avalonia:MaterialIcon Kind="ProgressDownload"/>
+                <Button Command="{Binding UpdateCommand}" 
+                        ToolTip.Tip="Установить обновление (приложение перезапустится)">
+                    <avalonia:MaterialIcon Kind="MonitorArrowDownVariant"/>
                 </Button>
             </controls:InfoBar.ActionButton>
         </controls:InfoBar>

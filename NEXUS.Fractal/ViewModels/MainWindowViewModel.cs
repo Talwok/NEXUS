@@ -91,6 +91,8 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
     };
 
     [Reactive]
+    public Version? UpdateVersion { get; set; }
+    [Reactive]
     public bool IsUpdateFound { get; set; }
     public InfoService InfoService { get; }
     public Version? Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
@@ -108,8 +110,8 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
             });
             if (_updater != null && await _updater.CheckForUpdates())
             {
-                var name = _updater.Asset?.Name;
                 IsUpdateFound = true;
+                UpdateVersion = _updater.LatestVersion;
                 return;
             }
         }
