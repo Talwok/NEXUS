@@ -45,26 +45,21 @@ public static class PalleteParser
         return !a1.Where((t, i) => t != a2[i]).Any();
     }
     
-    private static Meta ReadMeta(BinaryReader reader)
+    private static PalleteCollorTableMeta ReadMeta(BinaryReader reader)
     {
-        var meta = new Meta();
+        var meta = new PalleteCollorTableMeta();
         
-        reader.ReadBytes(3);
-        reader.ReadBytes(2);
-        reader.ReadBytes(1);
-        reader.ReadBytes(1);
+        reader.ReadBytes(7);
         meta.ColorsCount = reader.ReadUInt16();
-        reader.ReadBytes(2);
-        reader.ReadBytes(1);
-        reader.ReadBytes(2);
+        reader.ReadBytes(5);
         meta.TitleSize = reader.ReadUInt16Le();
         
         return meta;
     }
     
-    private static Color ReadColor(BinaryReader reader)
+    private static PalleteColor ReadColor(BinaryReader reader)
     {
-        return new Color
+        return new PalleteColor
         {
             Red = reader.ReadByte(),
             Unknown = reader.ReadByte(),
@@ -73,20 +68,19 @@ public static class PalleteParser
         };
     }
 
-    private static CollorTable ReadColorTable(PalleteFile parent, ushort index, BinaryReader reader)
+    private static PalleteCollorTable ReadColorTable(PalleteFile parent, ushort index, BinaryReader reader)
     {
-        var colorTable = new CollorTable
+        var colorTable = new PalleteCollorTable
         {
             Index = index,
             Parent = parent
         };
         
-        reader.ReadByte();
-        reader.ReadByte();
+        reader.ReadBytes(2);
         
         colorTable.Title = Encoding.Unicode.GetString(reader.ReadBytes(colorTable.Parent.MetaValue[colorTable.Index].TitleSize));
                 
-        reader.ReadUInt16();
+        reader.ReadBytes(2);
         
         for (var i = 0; i < colorTable.Parent.MetaValue[colorTable.Index].ColorsCount - 1; i++) 
             colorTable.Colors.Add(ReadColor(reader));

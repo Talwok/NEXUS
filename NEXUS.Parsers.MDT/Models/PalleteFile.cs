@@ -9,7 +9,7 @@ namespace NEXUS.Parsers.MDT.Models
     {
         public byte[] Signature { get; set; }
         public uint Count { get; set; }
-        public List<Meta> MetaValue { get; } = [];
-        public List<CollorTable> Tables { get; } = [];
+        public List<PalleteCollorTableMeta> MetaValue { get; } = [];
+        public List<PalleteCollorTable> Tables { get; } = [];
     }
 }
