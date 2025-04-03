@@ -22,13 +22,28 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Fe_#2_Th=80nm_2024.03.21_0.mdt">
+      <None Update="Palletes\Palette.pal">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Fe_#1_Th=65nm_2024.03.31_0.mdt">
+      <None Update="Palletes\Stylish.pal">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Fe_#1_Th=65nm_2024.04.04_0.mdt">
+      <None Update="Mdt\Fe_#1_Th=65nm_2024.03.31_0.mdt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Mdt\Fe_#1_Th=65nm_2024.04.04_0.mdt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Mdt\Fe_#2_Th=80nm_2024.03.21_0.mdt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Palletes\Default.pal">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Palletes\Rainbows.pal">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Palletes\TrueCol.pal">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
