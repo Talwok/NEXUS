@@ -8,6 +8,27 @@
 
     <ItemGroup>
       <PackageReference Include="KaitaiStruct.Runtime.CSharp" Version="0.10.0" />
+      <PackageReference Include="ReactiveUI" Version="20.1.63" />
+      <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Assets\Palletes\Default.pal">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\Palletes\Palette.pal">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\Palletes\Rainbows.pal">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\Palletes\Stylish.pal">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\Palletes\TrueCol.pal">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

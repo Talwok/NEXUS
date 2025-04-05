@@ -1,0 +1,79 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="using:FluentAvalonia.UI.Controls"
+                    xmlns:rangeSlider="clr-namespace:NEXUS.Styles.Control.Custom.RangeSlider">
+
+    <Design.PreviewWith>
+        <Border MinWidth="100" MinHeight="200" Background="#202020">
+            <rangeSlider:NexusRangeSlider VerticalAlignment="Center" Margin="20" Orientation="Vertical"/>
+        </Border>
+    </Design.PreviewWith>
+
+    <x:Double x:Key="RangeSliderTrackCornerRadius">2</x:Double>
+    <Thickness x:Key="RangeSliderToolTipPadding">4</Thickness>
+    <x:Double x:Key="RangeSliderToolTipFontSize">14</x:Double>
+    <x:Double x:Key="SliderVerticalThumbWidth">12</x:Double>
+    <x:Double x:Key="SliderVerticalThumbHeight">8</x:Double>
+
+    <ControlTheme TargetType="Thumb"
+                  x:Key="RangeSliderThumbStyle"
+                  BasedOn="{StaticResource SliderThumbStyle}">
+        <Setter Property="Focusable" Value="True" />
+    </ControlTheme>
+    
+    <ControlTheme TargetType="rangeSlider:NexusRangeSlider"
+                  x:Key="{x:Type rangeSlider:NexusRangeSlider}">
+        <Setter Property="Background" Value="{DynamicResource SliderTrackFill}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource SliderBorderThemeThickness}" />
+        <Setter Property="Foreground" Value="{DynamicResource SliderTrackValueFill}" />
+        <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Name="ControlGrid" Width="24">
+                    <Border Name="OutOfRangeContentContainer" 
+                            Background="Transparent"
+                            Margin="0 2">
+                        <Rectangle Name="BackgroundElement" Width="2"
+                                   Fill="{TemplateBinding Background}"
+                                   RadiusX="{DynamicResource RangeSliderTrackCornerRadius}"
+                                   RadiusY="{DynamicResource RangeSliderTrackCornerRadius}" />
+                    </Border>
+
+                    <Canvas Name="ContainerCanvas"
+                            Margin="0 2"
+                            Background="Transparent"
+                            ClipToBounds="False">
+                        <Rectangle Name="ActiveRectangle"
+                                   Width="2"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Stretch"
+                                   Fill="{TemplateBinding Foreground}" />
+
+                        <Border Name="ToolTip">
+                            <TextBlock Name="ToolTipText"
+                                       Margin="{DynamicResource RangeSliderToolTipPadding}"
+                                       FontSize="{DynamicResource RangeSliderToolTipFontSize}"/>
+                        </Border>
+
+                        <Thumb Name="MinThumb"
+                               AutomationProperties.Name="Min thumb"
+                               IsTabStop="True"
+                               Theme="{StaticResource RangeSliderThumbStyle}"
+                               TabIndex="0" HorizontalAlignment="Center"
+                               Width="{DynamicResource SliderVerticalThumbWidth}"
+                               Height="{DynamicResource SliderVerticalThumbHeight}"/>
+                        <Thumb Name="MaxThumb"
+                               AutomationProperties.Name="Max thumb"
+                               IsTabStop="True"
+                               Theme="{StaticResource RangeSliderThumbStyle}"
+                               TabIndex="1" HorizontalAlignment="Center"
+                               Width="{DynamicResource SliderVerticalThumbWidth}"
+                               Height="{DynamicResource SliderVerticalThumbHeight}"/>
+                    </Canvas>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+</ResourceDictionary>

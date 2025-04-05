@@ -2,5 +2,7 @@
 
 public class ScannedFrame : MdtFrame
 {
-    
+    public ScannedFrame(MdtFrame frame) : base(frame)
+    {
+    }
 }

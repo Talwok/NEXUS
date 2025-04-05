@@ -1,9 +1,9 @@
 ﻿namespace NEXUS.Parsers.MDT.Models.Pallete;
 
-public class PalleteCollorTable
+public class PaletteCollorTable
 {
     public ushort Index { get; set; }
     public PalleteFile Parent { get; set; }
     public string Title { get; set; }
-    public List<PalleteColor> Colors { get; } = [];
+    public List<PaletteColor> Colors { get; } = [];
 }

@@ -24,11 +24,14 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
         ImagesScreenViewModel images,
         ChartsScreenViewModel charts,
         SettingsScreenViewModel settings,
+        MdtScreenViewModel mdt,
         InfoService infoService)
     {
         ChartsMenuItem.Screen = charts;
         ImagesMenuItem.Screen = images;
         SettingsMenuItem.Screen = settings;
+        MdtMenuItem.Screen = mdt;
+        
         InfoService = infoService;
         
         if (Version != null)
@@ -84,6 +87,12 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
         Icon = MaterialIconKind.Images,
     };
 
+    public ScreenMenuItem MdtMenuItem { get; } = new()
+    {
+        Name = "MDT",
+        Icon = MaterialIconKind.Microscope,
+    };
+    
     public ScreenMenuItem SettingsMenuItem { get; } = new()
     {
         Name = "Настройки",

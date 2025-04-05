@@ -46,6 +46,9 @@
       <None Update="Palletes\TrueCol.pal">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Mdt\вах 14 минут.mdt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>

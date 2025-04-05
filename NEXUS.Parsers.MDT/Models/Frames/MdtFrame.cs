@@ -1,10 +1,11 @@
 ﻿using NEXUS.Parsers.MDT.Models.Enums;
 using NEXUS.Parsers.MDT.Models.Frames.MDA;
-using NEXUS.Parsers.MDT.Parsers;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Parsers.MDT.Models.Frames;
 
-public class MdtFrame
+public class MdtFrame : ReactiveObject
 {
     public MdtFrame()
     {
@@ -26,16 +27,26 @@ public class MdtFrame
         Buffer = frame.Buffer;
     }
     
+    [Reactive]
     public uint Size { get; set; }
+    [Reactive]
     public FrameType Type { get; set; }
+    [Reactive]
     public int Version { get; set; }
+    [Reactive]
     public ushort Year { get; set; }
+    [Reactive]
     public ushort Month { get; set; }
+    [Reactive]
     public ushort Day { get; set; }
+    [Reactive]
     public ushort Hour { get; set; }
+    [Reactive]
     public ushort Minute { get; set; }
+    [Reactive]
     public ushort Second { get; set; }
+    [Reactive]
     public ushort VarSize { get; set; }
+    [Reactive]
     public byte[] Buffer { get; set; }
-    public MdtFrame FrameData { get; set; }
 }

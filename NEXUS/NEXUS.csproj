@@ -66,5 +66,9 @@
     <ItemGroup>
       <UpToDateCheckInput Remove="Styles\Control\Custom\TreeViewItem\TreeViewRemovable.axaml" />
     </ItemGroup>
+  
+    <ItemGroup>
+      <ProjectReference Include="..\NEXUS.Parsers.MDT\NEXUS.Parsers.MDT.csproj" />
+    </ItemGroup>
 
 </Project>

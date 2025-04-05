@@ -38,10 +38,12 @@ public partial class App : Application
         serviceCollection.AddSingleton<ChartService>(); 
         serviceCollection.AddSingleton<InfoService>();
         serviceCollection.AddSingleton<CalculationService>();
+        serviceCollection.AddSingleton<MdtService>();
         
         serviceCollection.AddSingleton<ImagesScreenViewModel>();
         serviceCollection.AddSingleton<ChartsScreenViewModel>();
         serviceCollection.AddSingleton<SettingsScreenViewModel>();
+        serviceCollection.AddSingleton<MdtScreenViewModel>();
         
         serviceCollection.AddSingleton<MainWindowViewModel>();
 

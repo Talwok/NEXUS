@@ -3,10 +3,13 @@ using NEXUS.Parsers.MDT.Helpers;
 using NEXUS.Parsers.MDT.Models;
 using NEXUS.Parsers.MDT.Models.Pallete;
 
-namespace NEXUS.Parsers.MDT.Parsers;
+namespace NEXUS.Parsers.MDT;
 
-public static class PalleteParser
+public static class PaletteParser
 {
+    private const string StandardPalettesDirectory = @"Assets\Palletes";
+    private const string PalletesSearchPattern = "*.pal";
+
     public static PalleteFile Parse(string filePath)
     {   
         using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
@@ -14,6 +17,7 @@ public static class PalleteParser
             
         var pallete = new PalleteFile
         {
+            Path = filePath,
             // Read signature
             Signature = reader.ReadBytes(26)
         };
@@ -36,6 +40,14 @@ public static class PalleteParser
 
         return pallete;
     }
+
+    public static IEnumerable<PalleteFile> GetStandardPalleteFiles()
+    {
+        if (!Directory.Exists(StandardPalettesDirectory)) yield break;
+        
+        foreach (var palettePath in Directory.GetFiles(StandardPalettesDirectory, PalletesSearchPattern).ToArray())
+            yield return Parse(palettePath);
+    }
     
     private static bool CompareByteArrays(byte[] a1, byte[] a2)
     {
@@ -45,9 +57,9 @@ public static class PalleteParser
         return !a1.Where((t, i) => t != a2[i]).Any();
     }
     
-    private static PalleteCollorTableMeta ReadMeta(BinaryReader reader)
+    private static PaletteCollorTableMeta ReadMeta(BinaryReader reader)
     {
-        var meta = new PalleteCollorTableMeta();
+        var meta = new PaletteCollorTableMeta();
         
         reader.ReadBytes(7);
         meta.ColorsCount = reader.ReadUInt16();
@@ -57,9 +69,9 @@ public static class PalleteParser
         return meta;
     }
     
-    private static PalleteColor ReadColor(BinaryReader reader)
+    private static PaletteColor ReadColor(BinaryReader reader)
     {
-        return new PalleteColor
+        return new PaletteColor
         {
             Red = reader.ReadByte(),
             Unknown = reader.ReadByte(),
@@ -68,9 +80,9 @@ public static class PalleteParser
         };
     }
 
-    private static PalleteCollorTable ReadColorTable(PalleteFile parent, ushort index, BinaryReader reader)
+    private static PaletteCollorTable ReadColorTable(PalleteFile parent, ushort index, BinaryReader reader)
     {
-        var colorTable = new PalleteCollorTable
+        var colorTable = new PaletteCollorTable
         {
             Index = index,
             Parent = parent

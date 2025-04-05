@@ -1,11 +1,8 @@
-using System.Diagnostics;
 using System.Text;
-using Kaitai;
-using NEXUS.Parsers.MDT.Parsers;
 
 namespace NEXUS.Parsers.MDT.Tests;
 
-public class Tests
+public class ParsingTests
 {
     [SetUp]
     public void Setup()
@@ -22,7 +19,7 @@ public class Tests
     [TestCase("Palletes/Default.pal")]
     public void PalletesParsingTest(string fileName)
     {
-        var pallete = PalleteParser.Parse(fileName);
+        var pallete = PaletteParser.Parse(fileName);
         
         Console.WriteLine($"################################################################");
         Console.WriteLine($"Palletes signature: {Encoding.UTF8.GetString(pallete.Signature)};");
@@ -48,6 +45,7 @@ public class Tests
     [TestCase("Mdt/Fe_#1_Th=65nm_2024.03.31_0.mdt")]
     [TestCase("Mdt/Fe_#2_Th=80nm_2024.03.21_0.mdt")]
     [TestCase("Mdt/Fe_#1_Th=65nm_2024.04.04_0.mdt")]
+    [TestCase("Mdt/вах 14 минут.mdt")]
     public void LoadingTest(string fileName)
     {
         var mdt = MdtParser.Parse(fileName);

@@ -7,9 +7,10 @@ namespace NEXUS.Parsers.MDT.Models
     /// </summary>
     public class PalleteFile
     {
+        public string Path { get; set; }
         public byte[] Signature { get; set; }
         public uint Count { get; set; }
-        public List<PalleteCollorTableMeta> MetaValue { get; } = [];
-        public List<PalleteCollorTable> Tables { get; } = [];
+        public List<PaletteCollorTableMeta> MetaValue { get; } = [];
+        public List<PaletteCollorTable> Tables { get; } = [];
     }
 }

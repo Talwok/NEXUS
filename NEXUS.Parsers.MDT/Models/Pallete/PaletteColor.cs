@@ -1,6 +1,6 @@
 ﻿namespace NEXUS.Parsers.MDT.Models.Pallete;
 
-public class PalleteColor
+public class PaletteColor
 {
     public byte Unknown { get; set; }
     public byte Red { get; set; }

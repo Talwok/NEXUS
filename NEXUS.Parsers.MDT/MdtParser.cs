@@ -3,9 +3,13 @@ using NEXUS.Parsers.MDT.Helpers;
 using NEXUS.Parsers.MDT.Models;
 using NEXUS.Parsers.MDT.Models.Enums;
 using NEXUS.Parsers.MDT.Models.Frames;
+using NEXUS.Parsers.MDT.Models.Frames.Curves;
+using NEXUS.Parsers.MDT.Models.Frames.CurvesNew;
 using NEXUS.Parsers.MDT.Models.Frames.MDA;
+using NEXUS.Parsers.MDT.Models.Frames.Scanned;
+using NEXUS.Parsers.MDT.Models.Frames.Spectroscopy;
 
-namespace NEXUS.Parsers.MDT.Parsers;
+namespace NEXUS.Parsers.MDT;
 
 public static class MdtParser
 {
@@ -50,6 +54,7 @@ public static class MdtParser
         var frame = new MdtFrame();
         // Read frame size
         frame.Size = reader.ReadUInt32();
+        var position = reader.BaseStream.Position;
         // Read frame type
         frame.Type = (FrameType)reader.ReadUInt16();
 
@@ -69,20 +74,60 @@ public static class MdtParser
 
         // Read frame data
         frame.Buffer = reader.ReadBytes((int)frame.Size - Magic.FrameHeaderSize);
-
-        // Parse specific frame types
-        return frame.Type switch
+        var modifiedFrame = frame.Type switch
         {
             FrameType.Mda => ParseMdaFrame(frame),
-            FrameType.Scanned 
-            or FrameType.Spectroscopy 
-            or FrameType.Text 
-            or FrameType.OldMda 
-            or FrameType.Palette
-            or FrameType.CurvesNew 
-            or FrameType.Curves => frame,
+            FrameType.Scanned => ParseScannedFrame(frame),
+            FrameType.Spectroscopy => ParseSpectroscopyFrame(frame),
+            FrameType.Text => ParseTextFrame(frame),
+            FrameType.OldMda => ParseOldMdaFrame(frame),
+            FrameType.Palette => ParsePaletteFrame(frame),
+            FrameType.CurvesNew => ParseCurvesNewFrame(frame),
+            FrameType.Curves => ParseCurvesFrame(frame),
             _ => frame
         };
+        reader.BaseStream.Seek(position + frame.Size - 4, SeekOrigin.Begin);
+        // Parse specific frame types
+        return modifiedFrame;
+    }
+
+    private static MdtFrame ParseCurvesFrame(MdtFrame frame)
+    {
+        var curvesFrame = new CurvesFrame(frame);
+        return curvesFrame;
+    }
+
+    private static MdtFrame ParseCurvesNewFrame(MdtFrame frame)
+    {
+        var curvesNewFrame = new NewCurvesFrame(frame);
+        return curvesNewFrame;
+    }
+
+    private static MdtFrame ParsePaletteFrame(MdtFrame frame)
+    {
+        return frame;
+    }
+
+    private static MdtFrame ParseOldMdaFrame(MdtFrame frame)
+    {
+        return frame;
+    }
+
+    private static MdtFrame ParseTextFrame(MdtFrame frame)
+    {
+        return frame;
+    }
+
+    private static MdtFrame ParseSpectroscopyFrame(MdtFrame frame)
+    {
+        var spectroscopyFrame = new SpectroscopyFrame(frame);
+        return spectroscopyFrame;
+    }
+
+    private static MdtFrame ParseScannedFrame(MdtFrame frame)
+    {
+        var scannedFrame = new ScannedFrame(frame);
+        return scannedFrame;
     }
 
     private static MdaFrame ParseMdaFrame(MdtFrame frame)
@@ -114,7 +159,7 @@ public static class MdtParser
         // Read XML stuff
         if (commSize > 0)
         {
-            mdaFrame.XMLStuff = Encoding.UTF8.GetString(reader.ReadBytes((int)commSize));
+            mdaFrame.XmlStuff = Encoding.UTF8.GetString(reader.ReadBytes((int)commSize));
         }
 
         // Skip FrameSpec, ViewInfo, SourceInfo and vars
@@ -126,18 +171,18 @@ public static class MdtParser
         var position = reader.BaseStream.Position;
         mdaFrame.ArraySize = reader.ReadUInt64();
         mdaFrame.CellSize = reader.ReadUInt32();
-        mdaFrame.NDimensions = reader.ReadInt32();
-        mdaFrame.NMesurands = reader.ReadInt32();
+        mdaFrame.DimensionsCount = reader.ReadInt32();
+        mdaFrame.MesurandsCount = reader.ReadInt32();
         reader.BaseStream.Seek(structLen + position, SeekOrigin.Begin);
         // Read dimensions
-        for (int i = 0; i < mdaFrame.NDimensions; i++)
+        for (int i = 0; i < mdaFrame.DimensionsCount; i++)
         {
             var calibration = ReadMdaCalibration(reader);
             mdaFrame.Dimensions.Add(calibration);
         }
 
         // Read mesurands
-        for (int i = 0; i < mdaFrame.NMesurands; i++)
+        for (int i = 0; i < mdaFrame.MesurandsCount; i++)
         {
             var calibration = ReadMdaCalibration(reader);
             mdaFrame.Mesurands.Add(calibration);
@@ -155,9 +200,9 @@ public static class MdtParser
 
         calibration.TotLen = reader.ReadUInt32();
         calibration.StructLen = reader.ReadUInt32();
-        
+
         var structPosition = reader.BaseStream.Position + calibration.StructLen;
-        
+
         calibration.NameLen = reader.ReadUInt32();
         calibration.CommentLen = reader.ReadUInt32();
         calibration.UnitLen = reader.ReadUInt32();
@@ -171,7 +216,7 @@ public static class MdtParser
         calibration.MaxIndex = reader.ReadUInt64();
         calibration.DataType = (MdaDataType)reader.ReadInt32();
         calibration.AuthorLen = reader.ReadUInt32();
-        
+
         reader.BaseStream.Seek(structPosition, SeekOrigin.Begin);
 
         if (calibration.NameLen > 0)

@@ -2,5 +2,7 @@
 
 public class CurvesFrame : MdtFrame
 {
-    
+    public CurvesFrame(MdtFrame frame) : base(frame)
+    {
+    }
 }

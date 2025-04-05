@@ -2,5 +2,7 @@
 
 public class SpectroscopyFrame : MdtFrame
 {
-    
+    public SpectroscopyFrame(MdtFrame frame) : base(frame)
+    {
+    }
 }
