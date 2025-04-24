@@ -18,20 +18,6 @@ class Program
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>()
             .UsePlatformDetect()
-            .With(new Win32PlatformOptions
-            {
-                RenderingMode = new []
-                {
-                    Win32RenderingMode.Vulkan
-                }
-            })
-            .With(new X11PlatformOptions(){RenderingMode =new[] { X11RenderingMode.Vulkan } })
-            .With(new VulkanOptions()
-            {
-                VulkanInstanceCreationOptions = new VulkanInstanceCreationOptions()
-                {
-                    UseDebug = true
-                }
-            })
-            .LogToTrace(LogEventLevel.Debug, "Vulkan");
+            .UseSkia()
+            .LogToTrace(LogEventLevel.Debug);
 }

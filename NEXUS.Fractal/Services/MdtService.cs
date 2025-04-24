@@ -5,7 +5,9 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -16,6 +18,7 @@ using FluentAvalonia.UI.Controls;
 using NEXUS.Extensions;
 using NEXUS.Fractal.ViewModels;
 using NEXUS.Parsers.MDT;
+using NEXUS.Parsers.MDT.Helpers;
 using NEXUS.Parsers.MDT.Models;
 using NEXUS.Parsers.MDT.Models.Enums;
 using NEXUS.Parsers.MDT.Models.Frames;
@@ -157,7 +160,66 @@ public class MdtService : ServiceBase
         if (imageFiles.Count == 0)
             return;
 
+        var index = 0;
         Mdt = MdtParser.Parse(imageFiles.First().Path.LocalPath);
+
+        // foreach (var frame in Mdt.Frames)
+        // {
+        //     if (frame is MdaFrame mdaFrame)
+        //     {
+        //         var proc = new FrameImageProcessor(mdaFrame);
+        //         var map = proc.GetHeightMap();
+        //         var stream = new FileStream($"MdaFrame_{++index}", FileMode.Create);
+        //         await JsonSerializer.SerializeAsync(stream, ConvertToJaggedArray(map));
+        //         stream.Close();
+        //     }
+        // }
+        
+    }
+    
+    public static double[,] ConvertFromJaggedArray(double[][] jaggedArray)
+    {
+        if (jaggedArray == null || jaggedArray.Length == 0)
+            return new double[0, 0];
+
+        // Get dimensions
+        int rows = jaggedArray.Length;
+        int cols = jaggedArray[0].Length;
+
+        // Validate that all rows have same number of columns
+        for (int i = 1; i < rows; i++)
+        {
+            if (jaggedArray[i].Length != cols)
+            {
+                throw new ArgumentException("Jagged array is not rectangular");
+            }
+        }
+
+        // Create and populate 2D array
+        double[,] array2D = new double[rows, cols];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                array2D[i, j] = jaggedArray[i][j];
+            }
+        }
+
+        return array2D;
+    }
+    
+    double[][] ConvertToJaggedArray(double[,] array)
+    {
+        double[][] jagged = new double[array.GetLength(0)][];
+        for (int i = 0; i < array.GetLength(0); i++)
+        {
+            jagged[i] = new double[array.GetLength(1)];
+            for (int j = 0; j < array.GetLength(1); j++)
+            {
+                jagged[i][j] = array[i, j];
+            }
+        }
+        return jagged;
     }
 
     private void LoadMdaFrames()

@@ -159,4 +159,34 @@ public class FrameImageProcessor
             _ => throw new NotSupportedException($"Data type {dataType} is not supported")
         };
     }
+
+    public double[,] GetHeightMap()
+    {
+        int width = (int)(_frame.Dimensions[0].MaxIndex - _frame.Dimensions[0].MinIndex + 1);
+        int height = (int)(_frame.Dimensions[1].MaxIndex - _frame.Dimensions[1].MinIndex + 1);
+        var dataType = _frame.Mesurands[0].DataType;
+    
+        // Получаем диапазон для нормализации
+        var range = _originalRange.MaxValue - _originalRange.MinValue;
+        if (range == 0) range = 1; // защита от деления на ноль
+    
+        var map = new double[height, width]; // Обратите внимание на порядок height/width
+    
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                // Правильный расчет индекса для двумерных данных
+                int index = y * width + x;
+            
+                // Чтение и нормализация значения
+                double value = ReadValue(_frame.ImageBuffer, dataType, index);
+                float normalized = (float)((value - _originalRange.MinValue) / range);
+            
+                map[y, x] = normalized;
+            }
+        }
+    
+        return map;
+    }
 }

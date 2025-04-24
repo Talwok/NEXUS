@@ -19,7 +19,11 @@
         <entry key="GpuRendering/App.axaml" value="GpuRendering/GpuRendering.csproj" />
         <entry key="GpuRendering/GpuDemo.axaml" value="GpuRendering/GpuRendering.csproj" />
         <entry key="GpuRendering/MainWindow.axaml" value="GpuRendering/GpuRendering.csproj" />
+        <entry key="ModelRendering/App.axaml" value="ModelRendering/ModelRendering.csproj" />
         <entry key="ModelRendering/GpuDemo.axaml" value="ModelRendering/ModelRendering.csproj" />
+        <entry key="ModelRendering/HeightMapView.axaml" value="ModelRendering/ModelRendering.csproj" />
+        <entry key="ModelRendering/MainWindow.axaml" value="ModelRendering/ModelRendering.csproj" />
+        <entry key="ModelRendering/Surface/Surface.axaml" value="ModelRendering/ModelRendering.csproj" />
         <entry key="NEXUS.Epitaxial/App.axaml" value="NEXUS.Epitaxial/NEXUS.Epitaxial.csproj" />
         <entry key="NEXUS.Epitaxial/Views/MainWindow.axaml" value="NEXUS.Epitaxial/NEXUS.Epitaxial.csproj" />
         <entry key="NEXUS.Epitaxial/Views/StartupScreenView.axaml" value="NEXUS.Epitaxial/NEXUS.Epitaxial.csproj" />
