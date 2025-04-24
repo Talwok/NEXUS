@@ -11,6 +11,6 @@ namespace NEXUS.Parsers.MDT.Models
         public byte[] Signature { get; set; }
         public uint Count { get; set; }
         public List<PaletteCollorTableMeta> MetaValue { get; } = [];
-        public List<PaletteCollorTable> Tables { get; } = [];
+        public List<PaletteColorTable> Tables { get; } = [];
     }
 }

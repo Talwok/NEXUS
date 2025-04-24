@@ -43,7 +43,7 @@ public class FrameImageProcessor
         return this;
     }
     
-    public Image<Rgba32> ApplyColorMap(PaletteCollorTable colorTable)
+    public Image<Rgba32> ApplyColorMap(PaletteColorTable colorTable)
     {
         var colors = colorTable.Colors
             .Select(c => new Rgba32(c.Red, c.Green, c.Blue, 255))

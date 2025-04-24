@@ -35,13 +35,13 @@ namespace NEXUS.Fractal.Services;
 
 public class MdtService : ServiceBase
 {
-    private readonly SourceCache<PaletteCollorTable, string> _palleteSource;
+    private readonly SourceCache<PaletteColorTable, string> _palleteSource;
     private readonly IStorageProvider _storageProvider;
 
     public MdtService(IStorageProvider storageProvider)
     {
         _storageProvider = storageProvider;
-        _palleteSource = new SourceCache<PaletteCollorTable, string>(pal => $"{pal.Parent.Path} {pal.Title}");
+        _palleteSource = new SourceCache<PaletteColorTable, string>(pal => $"{pal.Parent.Path} {pal.Title}");
         
         foreach (var filePath in PaletteParser.GetStandardPalleteFiles()) 
             _palleteSource.AddOrUpdate(filePath.Tables);
@@ -71,7 +71,7 @@ public class MdtService : ServiceBase
     [Reactive]
     public ObservableCollection<MdaFrameViewModel> Frames { get; set; }
     
-    private void UpdateImageColor(PaletteCollorTable? palleteFile)
+    private void UpdateImageColor(PaletteColorTable? palleteFile)
     {
         if (palleteFile != null && palleteFile.Colors.Count > 0)
         {
@@ -107,7 +107,7 @@ public class MdtService : ServiceBase
         }
     }
 
-    public ReadOnlyObservableCollection<PaletteCollorTable> ColorTables { get; }
+    public ReadOnlyObservableCollection<PaletteColorTable> ColorTables { get; }
 
     [Reactive]
     public ObservableCollection<MdtFrame> SelectedFrames { get; set; } = [];
@@ -125,7 +125,7 @@ public class MdtService : ServiceBase
     public double RangeEnd { get; set; } = 90;
     
     [Reactive] 
-    public PaletteCollorTable? SelectedColorTable { get; set; }
+    public PaletteColorTable? SelectedColorTable { get; set; }
 
     [Reactive] 
     public double ColorTableMaxLimit { get; set; }
@@ -162,19 +162,6 @@ public class MdtService : ServiceBase
 
         var index = 0;
         Mdt = MdtParser.Parse(imageFiles.First().Path.LocalPath);
-
-        // foreach (var frame in Mdt.Frames)
-        // {
-        //     if (frame is MdaFrame mdaFrame)
-        //     {
-        //         var proc = new FrameImageProcessor(mdaFrame);
-        //         var map = proc.GetHeightMap();
-        //         var stream = new FileStream($"MdaFrame_{++index}", FileMode.Create);
-        //         await JsonSerializer.SerializeAsync(stream, ConvertToJaggedArray(map));
-        //         stream.Close();
-        //     }
-        // }
-        
     }
     
     public static double[,] ConvertFromJaggedArray(double[][] jaggedArray)

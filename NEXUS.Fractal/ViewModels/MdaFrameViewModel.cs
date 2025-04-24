@@ -16,8 +16,12 @@ public class MdaFrameViewModel : ViewModelBase
 {
     private readonly FrameImageProcessor _frameProcessor;
 
-    public MdaFrameViewModel(MdaFrame frame, PaletteCollorTable table)
+    public MdaFrameViewModel(MdaFrame frame, PaletteColorTable table)
     {
+        Frame = frame;
+        
+        Table = table;
+        
         Title = frame.Title;
         
         _frameProcessor = frame.CreateFromMdaFrame();
@@ -40,6 +44,10 @@ public class MdaFrameViewModel : ViewModelBase
                     .ConvertToBitmap();
             });
     }
+
+    public PaletteColorTable Table { get; }
+
+    public MdaFrame Frame { get; }
     
     public string Title { get; }
     

@@ -8,18 +8,18 @@ using Avalonia.Input;
 
 namespace ModelRendering.Surface;
 
-public partial class Surface : UserControl
+public partial class MdaSurface : UserControl
 {
     private Point _lastMousePosition;
     private bool _isRotating;
     private bool _isPanning;
 
-    public Surface()
+    public MdaSurface()
     {
         InitializeComponent();
 
         // Загрузка данных высот
-        var jagged = JsonSerializer.Deserialize<float[][]>(File.ReadAllText("Assets/MdaFrame_7"));
+        var jagged = JsonSerializer.Deserialize<float[][]>(File.ReadAllText("Assets/MdaFrame_44"));
         SurfaceOpenGl.SetHeightMap(ConvertFromJaggedArray(jagged));
 
         // Обработчики событий мыши
@@ -62,19 +62,27 @@ public partial class Surface : UserControl
 
         if (_isRotating)
         {
-            // Вращение камеры
-            SurfaceOpenGl.CameraYaw += (float)(delta.X * 0.01);
-            SurfaceOpenGl.CameraPitch -= (float)(delta.Y * 0.01);
+            // Более плавное вращение с ограничением по вертикали
+            SurfaceOpenGl.CameraYaw -= (float)(delta.X * 0.005);
+            SurfaceOpenGl.CameraPitch = Math.Clamp(
+                SurfaceOpenGl.CameraPitch + (float)(delta.Y * 0.005),
+                -MathF.PI * 0.49f,
+                MathF.PI * 0.49f);
             e.Handled = true;
         }
         else if (_isPanning)
         {
-            // Панорамирование
-            float panSpeed = 0.01f * SurfaceOpenGl.CameraDistance;
+            // Панорамирование с учетом направления камеры
+            float panSpeed = 0.002f * SurfaceOpenGl.CameraDistance;
+        
+            // Векторы направления камеры
+            float cosYaw = MathF.Cos(SurfaceOpenGl.CameraYaw);
+            float sinYaw = MathF.Sin(SurfaceOpenGl.CameraYaw);
+        
             SurfaceOpenGl.PanOffset += new Vector3(
-                (float)(delta.X * panSpeed),
-                (float)(-delta.Y * panSpeed),
-                0
+                (float)(-delta.X * cosYaw - delta.Y * sinYaw) * panSpeed,
+                0,
+                (float)(delta.X * sinYaw - delta.Y * cosYaw) * panSpeed
             );
             e.Handled = true;
         }
@@ -82,12 +90,14 @@ public partial class Surface : UserControl
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        // Приближение/отдаление
-        float zoomFactor = 1.0f + (float)(e.Delta.Y * 0.1);
-        SurfaceOpenGl.CameraDistance /= zoomFactor;
+        // Более плавное приближение/отдаление с ограничениями
+        float zoomFactor = 1.0f + (float)(e.Delta.Y * 0.05);
+        SurfaceOpenGl.CameraDistance = Math.Clamp(
+            SurfaceOpenGl.CameraDistance / zoomFactor,
+            1.0f,
+            100.0f);
         e.Handled = true;
     }
-
     public static float[,] ConvertFromJaggedArray(float[][] jaggedArray)
     {
         if (jaggedArray == null || jaggedArray.Length == 0)

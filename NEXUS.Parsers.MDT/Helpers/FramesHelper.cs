@@ -323,7 +323,7 @@ public static class FramesHelper
         return colorImage;
     }
 
-    public static Color[] ToImageSharpColors(PaletteCollorTable table) 
+    public static Color[] ToImageSharpColors(PaletteColorTable table) 
         => table.Colors
             .Select(c => 
                 new Color(new Rgba32(c.Red, c.Green, c.Blue)))

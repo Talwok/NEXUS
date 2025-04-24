@@ -80,9 +80,9 @@ public static class PaletteParser
         };
     }
 
-    private static PaletteCollorTable ReadColorTable(PalleteFile parent, ushort index, BinaryReader reader)
+    private static PaletteColorTable ReadColorTable(PalleteFile parent, ushort index, BinaryReader reader)
     {
-        var colorTable = new PaletteCollorTable
+        var colorTable = new PaletteColorTable
         {
             Index = index,
             Parent = parent

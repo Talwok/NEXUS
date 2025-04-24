@@ -70,4 +70,8 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Controls\MdaSurface\MdaSurface.axaml" />
+    </ItemGroup>
 </Project>

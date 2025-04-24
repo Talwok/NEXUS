@@ -4,15 +4,13 @@ using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
+using NEXUS.Parsers.MDT.Models.Pallete;
 using static Avalonia.OpenGL.GlConsts;
 
-namespace ModelRendering.Surface;
+namespace NEXUS.Fractal.Controls.MdaSurface;
 
 /// <summary>
 /// Кастомный OpenGL-контрол для рендеринга 3D поверхности
@@ -76,67 +74,27 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
     private string _glShaderVersion = string.Empty; // Версия GLSL шейдеров
     private float _rotation; // Угол вращения камеры
-    private float[,]? _heightMap; // Карта высот для рендеринга поверхности
+    private double[,]? _heightMap; // Карта высот для рендеринга поверхности
 
     // Добавляем новые параметры камеры
-    private float _cameraDistance = 5.0f;
-    private float _cameraYaw;
-    private float _cameraPitch;
+    private Vector3 _cameraPosition = new(0, 0, 10);
     private Vector3 _cameraTarget = Vector3.Zero;
-    private Vector3 _panOffset = Vector3.Zero;
 
-    public float CameraDistance
-    {
-        get => _cameraDistance;
-        set
-        {
-            _cameraDistance = Math.Max(1.0f, value);
-            RequestNextFrameRendering();
-        }
-    }
+    private Matrix4x4 _modelMatrix = Matrix4x4.Identity;
+    private float _modelYaw;
+    private float _modelPitch;
 
-    public float CameraYaw
-    {
-        get => _cameraYaw;
-        set
-        {
-            _cameraYaw = value;
-            RequestNextFrameRendering();
-        }
-    }
-
-    public float CameraPitch
-    {
-        get => _cameraPitch;
-        set
-        {
-            // Ограничиваем угол наклона, чтобы не переворачивать камеру
-            _cameraPitch = Math.Clamp(value, -MathF.PI / 2 + 0.1f, MathF.PI / 2 - 0.1f);
-            RequestNextFrameRendering();
-        }
-    }
-
-    public Vector3 PanOffset
-    {
-        get => _panOffset;
-        set
-        {
-            _panOffset = value;
-            RequestNextFrameRendering();
-        }
-    }
-    
     /// <summary>
     /// Устанавливает карту высот для рендеринга
     /// </summary>
     /// <param name="heightMap">2D массив высот</param>
-    public void SetHeightMap(float[,] heightMap)
+    public void SetHeightMap(double[,] heightMap)
     {
         _heightMap = heightMap;
         // Можно раскомментировать для автоматического обновления:
         // RequestNextFrameRendering();
     }
-
+    
     /// <summary>
     /// Создаёт буферы вершин и индексов на основе карты высот
     /// </summary>
@@ -148,16 +106,16 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         int rows = _heightMap.GetLength(0);
         int cols = _heightMap.GetLength(1);
 
-        // Параметры поверхности
-        float sizeX = 10f; // общий размер по X
-        float sizeZ = 10f; // общий размер по Z
-        float maxHeight = 2f; // максимальная высота
+        // Параметры поверхности (оставляем как есть)
+        float sizeX = 10f;
+        float sizeZ = 10f;
+        float maxHeight = 2f;
 
-        // Вычисляем шаг между вершинами
+        // Шаги между вершинами
         float stepX = sizeX / (cols - 1);
         float stepZ = sizeZ / (rows - 1);
 
-        // Находим min/max высот для нормализации
+        // Находим min/max высот
         float minH = float.MaxValue;
         float maxH = float.MinValue;
         foreach (float h in _heightMap)
@@ -168,31 +126,28 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         float rangeH = Math.Max(maxH - minH, 0.001f);
 
-        // Создаем вершины
+        // Создаем вершины с центром в (0,0,0)
         List<OpenGlPoint> vertices = new();
         for (int z = 0; z < rows; z++)
         {
             for (int x = 0; x < cols; x++)
             {
-                // Нормализованная высота [0..1]
-                float normH = (_heightMap[z, x] - minH) / rangeH;
-
-                // Позиция вершины с центром в (0,0,0)
+                float normH = (float)((_heightMap[z, x] - minH) / rangeH);
+            
+                // Центрируем модель:
                 float posX = (x * stepX) - sizeX / 2;
                 float posZ = (z * stepZ) - sizeZ / 2;
-                float posY = normH * maxHeight;
+                float posY = normH * maxHeight - maxHeight/2; // Центрируем по Y
 
+                
                 // Цвет в зависимости от высоты
-                float r = normH;
-                float g = 0.5f - normH * 0.3f;
-                float b = 1f - normH;
-
-                vertices.Add(new OpenGlPoint(posX, posY, posZ, r, g, b));
+                int colorIndex = (int)(normH * (_colorTable.Colors.Count - 1));
+                colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
+                var color = _colorTable.Colors[colorIndex];
+                
+                vertices.Add(new OpenGlPoint(posX, posY, posZ, color.Red / 255f, color.Green / 255f, color.Blue / 255f));
             }
         }
-
-        // Центр модели (для камеры)
-        _cameraTarget = new Vector3(0, maxHeight*10, 0);
 
         // Создаем индексы
         List<uint> indices = new();
@@ -262,7 +217,18 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
     // Свойства для управления фоном
 
-    public Color Background { get; set; }
+
+    private SolidColorBrush _background;
+    private PaletteColorTable _colorTable;
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, SolidColorBrush> BackgroundProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, SolidColorBrush>(
+        nameof(Background), o => o.Background, (o, v) => o.Background = v);
+
+    public SolidColorBrush Background
+    {
+        get => _background;
+        set => SetAndRaise(BackgroundProperty, ref _background, value);
+    }
 
     /// <summary>
     /// Инициализация OpenGL
@@ -281,7 +247,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         // Создаем буферы
         RecreateBuffersFromHeightMap(gl);
 
-        // Включаем тест глубины
+        // Включаем тест глубины с правильными параметрами
         gl.Enable(GL_DEPTH_TEST);
 
         GlCheckError(gl, "Init");
@@ -311,43 +277,64 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     /// <summary>
     /// Основной цикл рендеринга
     /// </summary>
+    // Обновим метод OnOpenGlRender
     protected override void OnOpenGlRender(GlInterface gl, int fb)
     {
-        int width = (int)Bounds.Width * 2;
-        int height = (int)Bounds.Height * 2;
+        int width = (int)(Bounds.Width * 1.5f);
+        int height = (int)(Bounds.Height * 1.5f);
 
         gl.Viewport(0, 0, width, height);
-        gl.ClearColor(Background.R, Background.G, Background.B, Background.A);
+        gl.ClearColor(0, 0, 0, 0);
         gl.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        
         gl.UseProgram(_shaderProgram);
 
-        // Камера (вращение вокруг _center)
-        float camX = _cameraDistance * MathF.Cos(_cameraPitch) * MathF.Cos(_cameraYaw);
-        float camY = _cameraDistance * MathF.Sin(_cameraPitch);
-        float camZ = _cameraDistance * MathF.Cos(_cameraPitch) * MathF.Sin(_cameraYaw);
+        // Матрица модели с вращением и центрированием
+        _modelMatrix = Matrix4x4.CreateRotationY(_modelYaw) * 
+                       Matrix4x4.CreateRotationX(_modelPitch) * 
+                       Matrix4x4.CreateScale(5f) *
+                       Matrix4x4.CreateTranslation(0, 0, 0); // Явное центрирование
 
-        Vector3 cameraPos = _cameraTarget + new Vector3(camX, camY, camZ) + _panOffset;
-        Vector3 cameraTarget = _cameraTarget + _panOffset;
-        Vector3 cameraUp = MathF.Abs(_cameraPitch) > MathF.PI/2 ? -Vector3.UnitY : Vector3.UnitY;
-
-        Matrix4x4 model = Matrix4x4.CreateScale(5f); // масштабируем модель
+        // Камера смотрит строго в центр
         float aspectRatio = (float)width / height;
         Matrix4x4 projection = Matrix4x4.CreatePerspectiveFieldOfView(MathF.PI / 4, aspectRatio, 0.1f, 1000f);
-        Matrix4x4 view = Matrix4x4.CreateLookAt(cameraPos, cameraTarget, cameraUp);
+        Matrix4x4 view = Matrix4x4.CreateLookAt(
+            _cameraPosition,  // Камера сверху и сзади
+            _cameraTarget,            // Смотрим точно в центр
+            Vector3.UnitY);          // Верх камеры
 
+        var modelMatrix = _modelMatrix;
+        
         unsafe
         {
-            gl.UniformMatrix4fv(_model, 1, false, &model);
+            gl.UniformMatrix4fv(_model, 1, false, &modelMatrix);
             gl.UniformMatrix4fv(_view, 1, false, &view);
             gl.UniformMatrix4fv(_projection, 1, false, &projection);
         }
-        
+
         gl.BindVertexArray(_vao);
         gl.DrawElements(GL_TRIANGLES, 6 * (_heightMap!.GetLength(0) - 1) * (_heightMap!.GetLength(1) - 1),
             GlConsts.GL_UNSIGNED_INT, 0);
 
         GlCheckError(gl, "OnOpenGlRender");
+    }
+
+    public void RotateModel(float deltaYaw, float deltaPitch)
+    {
+        _modelYaw += deltaYaw;
+        _modelPitch += deltaPitch;
+        RequestNextFrameRendering();
+    }
+
+    public void ZoomCamera(float delta)
+    {
+        // Приближение/отдаление
+        Vector3 direction = Vector3.Normalize(_cameraTarget - _cameraPosition);
+        float distance = Vector3.Distance(_cameraPosition, _cameraTarget);
+        float newDistance = Math.Clamp(distance * (1 - delta * 0.1f), 1.0f, 300.0f);
+
+        _cameraPosition = _cameraTarget - direction * newDistance;
+        RequestNextFrameRendering();
     }
 
     /// <summary>
@@ -578,5 +565,10 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     protected void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public void SetColorTable(PaletteColorTable colorTable)
+    {
+        _colorTable = colorTable;
     }
 }
