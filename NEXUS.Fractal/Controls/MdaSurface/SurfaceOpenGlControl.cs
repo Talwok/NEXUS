@@ -38,25 +38,13 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         public float R; // Красная компонента цвета
         public float G; // Зелёная компонента цвета
         public float B; // Синяя компонента цвета
+        public float Nx, Ny, Nz; // Компоненты нормали
 
-        /// <summary>
-        /// Конструктор из вектора позиции и цвета
-        /// </summary>
-        public OpenGlPoint(Vector3 p, Color c) : this(p.X, p.Y, p.Z, c.R, c.G, c.B)
+        public OpenGlPoint(float x, float y, float z, float r, float g, float b, float nx, float ny, float nz)
         {
-        }
-
-        /// <summary>
-        /// Конструктор с явным заданием всех параметров
-        /// </summary>
-        public OpenGlPoint(float x, float y, float z, float r, float g, float b)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-            R = r;
-            G = g;
-            B = b;
+            X = x; Y = y; Z = z;
+            R = r; G = g; B = b;
+            Nx = nx; Ny = ny; Nz = nz;
         }
     }
 
@@ -67,6 +55,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private int _shaderProgram; // Шейдерная программа
     private int _fragmentShader; // Фрагментный шейдер
     private int _vertexShader; // Вершинный шейдер
+    private int _lightPos;
+    private int _viewPos;
 
     // Uniform-переменные шейдеров
     private int _model; // Матрица модели
@@ -129,6 +119,33 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         float rangeH = Math.Max(maxH - minH, 0.001f);
 
+        
+        var normals = new Vector3[rows, cols];
+
+        // Для каждой точки (x, z) вычисляем нормаль как кросс-продукт соседних высот
+        for (int z = 1; z < rows - 1; z++)
+        {
+            for (int x = 1; x < cols - 1; x++)
+            {
+                Vector3 dx = new Vector3(2 * stepX, (float)(_heightMap[z, x + 1] - _heightMap[z, x - 1]) * maxHeight, 0);
+                Vector3 dz = new Vector3(0, (float)(_heightMap[z + 1, x] - _heightMap[z - 1, x]) * maxHeight, 2 * stepZ);
+                var normal = Vector3.Normalize(Vector3.Cross(dz, dx));
+                normals[z, x] = normal;
+            }
+        }
+        
+        for (int z = 0; z < rows; z++)
+        {
+            normals[z, 0] = normals[z, 1];
+            normals[z, cols - 1] = normals[z, cols - 2];
+        }
+        for (int x = 0; x < cols; x++)
+        {
+            normals[0, x] = normals[1, x];
+            normals[rows - 1, x] = normals[rows - 2, x];
+        }
+
+        
         // Создаем вершины с центром в (0,0,0)
         List<OpenGlPoint> vertices = new();
         for (int z = 0; z < rows; z++)
@@ -148,10 +165,14 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
                 colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
                 var color = _colorTable.Colors[colorIndex];
                 
-                vertices.Add(new OpenGlPoint(posX, posY, posZ, color.Red / 255f, color.Green / 255f, color.Blue / 255f));
+                var normal = normals[z, x];
+                vertices.Add(new OpenGlPoint(
+                    posX, posY, posZ, 
+                    color.Red / 255f, color.Green / 255f, color.Blue / 255f, 
+                    normal.X, normal.Y, normal.Z));
             }
         }
-
+        
         // Создаем индексы
         List<uint> indices = new();
         for (int z = 0; z < rows - 1; z++)
@@ -210,12 +231,15 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         gl.BindVertexArray(_vao);
 
         // Атрибут 0: позиция вершины (3 компоненты float)
-        gl.VertexAttribPointer(0, 3, GL_FLOAT, 0, glPointBitSize, nint.Zero);
+        gl.VertexAttribPointer(0, 3, GL_FLOAT, 0, glPointBitSize, 0);                       // aPos
         gl.EnableVertexAttribArray(0);
-
+        
         // Атрибут 1: цвет вершины (3 компоненты float, смещение 3*sizeof(float))
-        gl.VertexAttribPointer(1, 3, GL_FLOAT, 0, glPointBitSize, 3 * sizeof(float));
+        gl.VertexAttribPointer(1, 3, GL_FLOAT, 0, glPointBitSize, 3 * sizeof(float));       // aColor
         gl.EnableVertexAttribArray(1);
+        
+        gl.VertexAttribPointer(2, 3, GL_FLOAT, 0, glPointBitSize, 6 * sizeof(float));       // aNormal
+        gl.EnableVertexAttribArray(2);
     }
 
     // Свойства для управления фоном
@@ -314,8 +338,17 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             gl.UniformMatrix4fv(_model, 1, false, &modelMatrix);
             gl.UniformMatrix4fv(_view, 1, false, &view);
             gl.UniformMatrix4fv(_projection, 1, false, &projection);
-        }
+            
+            // Передаем компоненты по отдельности
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "lightPosX"), 30f);
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "lightPosY"), 50f);
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "lightPosZ"), 30f);
 
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "cameraPositionX"), _cameraPosition.X);
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "cameraPositionY"), _cameraPosition.Y);
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "cameraPositionZ"), _cameraPosition.Z);
+        }
+        
         gl.BindVertexArray(_vao);
         gl.DrawElements(GL_TRIANGLES, 6 * (_heightMap!.GetLength(0) - 1) * (_heightMap!.GetLength(1) - 1),
             GlConsts.GL_UNSIGNED_INT, 0);
@@ -382,6 +415,10 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         _projection = gl.GetUniformLocationString(_shaderProgram, "projection");
         GlCheckError(gl, "Getting uniform projection variable");
+        
+        _lightPos = gl.GetUniformLocationString(_shaderProgram, "lightPos");
+        _viewPos = gl.GetUniformLocationString(_shaderProgram, "viewPos");
+
     }
 
     /// <summary>
@@ -435,34 +472,74 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     }
 
     // Вершинный шейдер
-    string VertexShaderSource => _glShaderVersion + @" 
+    string VertexShaderSource => _glShaderVersion + @"
     precision mediump float;
-    layout (location = 0) in vec3 aPos;    // Атрибут позиции
-    layout (location = 1) in vec3 aColor;  // Атрибут цвета
-    out vec3 ourColor;                     // Выходящая переменная цвета
-    uniform mat4 model;                    // Матрица модели
-    uniform mat4 view;                     // Матрица вида
-    uniform mat4 projection;               // Матрица проекции
-    
+
+    layout(location = 0) in vec3 aPos;
+    layout(location = 1) in vec3 aColor;
+    layout(location = 2) in vec3 aNormal;
+
+    out vec3 FragPos;
+    out vec3 Normal;
+    out vec3 VertexColor;
+
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
+
     void main()
     {
-        // Преобразуем позицию вершины
-        gl_Position = projection * view * model * vec4(aPos, 1.0);
-        // Передаем цвет во фрагментный шейдер
-        ourColor = aColor;
+        FragPos = vec3(model * vec4(aPos, 1.0));
+        Normal = mat3(transpose(inverse(model))) * aNormal;
+        VertexColor = aColor;
+        gl_Position = projection * view * vec4(FragPos, 1.0);
     }";
+
 
     // Фрагментный шейдер
     string FragmentShaderSource => _glShaderVersion + @"
     precision mediump float;
-    in vec3 ourColor;    // Входная переменная цвета из вершинного шейдера
-    out vec4 FragColor;  // Выходной цвет фрагмента
-    
+
+    in vec3 FragPos;
+    in vec3 Normal;
+    in vec3 VertexColor;
+
+    out vec4 FragColor;
+
+    uniform float lightPosX;
+    uniform float lightPosY;
+    uniform float lightPosZ;
+
+    uniform float cameraPositionX;
+    uniform float cameraPositionY;
+    uniform float cameraPositionZ;
+
     void main()
     {
-        // Просто используем переданный цвет
-        FragColor = vec4(ourColor, 1.0);
+        vec3 lightPos = vec3(lightPosX, lightPosY, lightPosZ);
+        vec3 viewPos = vec3(cameraPositionX, cameraPositionY, cameraPositionZ);
+
+        // Ambient
+        float ambientStrength = 0.3;
+        vec3 ambient = ambientStrength * VertexColor;
+
+        // Diffuse
+        vec3 norm = normalize(Normal);
+        vec3 lightDir = normalize(lightPos - FragPos);
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = diff * VertexColor;
+
+        // Specular
+        float specularStrength = 0.4;
+        vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 reflectDir = reflect(-lightDir, norm);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+        vec3 specular = specularStrength * spec * vec3(1.0); // Белый блик
+
+        vec3 result = ambient + diffuse + specular;
+        FragColor = vec4(result, 1.0);
     }";
+
 
     // Реализация INotifyPropertyChanged
     public new event PropertyChangedEventHandler? PropertyChanged;
