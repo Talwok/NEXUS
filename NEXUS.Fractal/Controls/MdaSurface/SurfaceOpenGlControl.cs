@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
+using NEXUS.Fractal.Models;
 using NEXUS.Parsers.MDT.Models.Pallete;
 using static Avalonia.OpenGL.GlConsts;
 
@@ -77,12 +78,13 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private double[,]? _heightMap; // Карта высот для рендеринга поверхности
 
     // Добавляем новые параметры камеры
-    private Vector3 _cameraPosition = new(0, 0, 10);
+    private static readonly Vector3 CameraStartPosition = new(0, 0, 75);
+    private Vector3 _cameraPosition = CameraStartPosition;
     private Vector3 _cameraTarget = Vector3.Zero;
 
     private Matrix4x4 _modelMatrix = Matrix4x4.Identity;
     private float _modelYaw;
-    private float _modelPitch;
+    private float _modelPitch = 1.5f;
 
     /// <summary>
     /// Устанавливает карту высот для рендеринга
@@ -91,8 +93,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     public void SetHeightMap(double[,] heightMap)
     {
         _heightMap = heightMap;
+        
         // Можно раскомментировать для автоматического обновления:
-        // RequestNextFrameRendering();
+        RequestNextFrameRendering();
     }
     
     /// <summary>
@@ -216,10 +219,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     }
 
     // Свойства для управления фоном
-
-
     private SolidColorBrush _background;
-    private PaletteColorTable _colorTable;
 
     public static readonly DirectProperty<SurfaceOpenGlControl, SolidColorBrush> BackgroundProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, SolidColorBrush>(
         nameof(Background), o => o.Background, (o, v) => o.Background = v);
@@ -230,6 +230,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         set => SetAndRaise(BackgroundProperty, ref _background, value);
     }
 
+    private PaletteColorTable _colorTable;
+
+    
     /// <summary>
     /// Инициализация OpenGL
     /// </summary>
@@ -268,6 +271,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         // Удаляем созданные объекты
         gl.DeleteBuffer(_vbo);
+        gl.DeleteBuffer(_ebo);
         gl.DeleteVertexArray(_vao);
         gl.DeleteProgram(_shaderProgram);
         gl.DeleteShader(_fragmentShader);
@@ -336,88 +340,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _cameraPosition = _cameraTarget - direction * newDistance;
         RequestNextFrameRendering();
     }
-
-    /// <summary>
-    /// Создает буферы для тестового куба (не используется для поверхности)
-    /// </summary>
-    protected void CreateVertexBuffer(GlInterface gl)
-    {
-        // Создаем VAO (Vertex Array Object)
-        _vao = gl.GenVertexArray();
-        gl.BindVertexArray(_vao);
-        GlCheckError(gl, "Create VAO 1");
-
-        // Вершины куба (8 точек с цветами)
-        OpenGlPoint[] vertices =
-        [
-            new OpenGlPoint(-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f), // 0
-            new OpenGlPoint(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f), // 1
-            new OpenGlPoint(1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f), // 2
-            new OpenGlPoint(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f), // 3
-            new OpenGlPoint(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f), // 4
-            new OpenGlPoint(1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f), // 5
-            new OpenGlPoint(1.0f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f), // 6
-            new OpenGlPoint(-1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.2f) // 7
-        ];
-
-        // Индексы для 12 треугольников (6 граней куба)
-        uint[] indices =
-        {
-            // Передняя грань
-            0, 1, 2, 2, 3, 0,
-            // Задняя грань
-            4, 5, 6, 6, 7, 4,
-            // Верхняя грань
-            3, 2, 6, 6, 7, 3,
-            // Нижняя грань
-            0, 1, 5, 5, 4, 0,
-            // Левая грань
-            0, 3, 7, 7, 4, 0,
-            // Правая грань
-            1, 2, 6, 6, 5, 1
-        };
-
-        // Создаем и заполняем VBO (Vertex Buffer Object)
-        int glPointBitSize = Marshal.SizeOf<OpenGlPoint>();
-        int verticesBitSize = glPointBitSize * vertices.Length;
-
-        _vbo = gl.GenBuffer();
-        gl.BindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-        unsafe
-        {
-            fixed (void* pVertices = vertices)
-            {
-                gl.BufferData(GL_ARRAY_BUFFER, verticesBitSize, (nint)pVertices, GL_STATIC_DRAW);
-            }
-        }
-
-        GlCheckError(gl, "Create VBO");
-
-        // Создаем и заполняем EBO (Element Buffer Object)
-        int indicesBitSize = sizeof(uint) * indices.Length;
-        _ebo = gl.GenBuffer();
-        gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-        unsafe
-        {
-            fixed (void* pIndices = indices)
-            {
-                gl.BufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBitSize, (nint)pIndices, GL_STATIC_DRAW);
-            }
-        }
-
-        GlCheckError(gl, "Create EBO");
-
-        // Настраиваем атрибуты вершин
-        gl.VertexAttribPointer(0, 3, GL_FLOAT, 0, glPointBitSize, nint.Zero);
-        gl.EnableVertexAttribArray(0);
-
-        gl.VertexAttribPointer(1, 3, GL_FLOAT, 0, glPointBitSize, 3 * sizeof(float));
-        gl.EnableVertexAttribArray(1);
-
-        GlCheckError(gl, "Create VAO 2");
-    }
-
+    
     /// <summary>
     /// Настраивает шейдеры
     /// </summary>
@@ -541,24 +464,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         FragColor = vec4(ourColor, 1.0);
     }";
 
-    /// <summary>
-    /// Угол вращения камеры
-    /// При изменении вызывает обновление отображения
-    /// </summary>
-    public double Rotation
-    {
-        get => _rotation;
-        set
-        {
-            if (Math.Abs(_rotation - value) > Double.Epsilon)
-            {
-                _rotation = (float)value;
-                OnPropertyChanged(nameof(Rotation));
-                RequestNextFrameRendering();
-            }
-        }
-    }
-
     // Реализация INotifyPropertyChanged
     public new event PropertyChangedEventHandler? PropertyChanged;
 
@@ -570,5 +475,31 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     public void SetColorTable(PaletteColorTable colorTable)
     {
         _colorTable = colorTable;
+    }
+
+    public void SetCameraPreset(AxisViewType view)
+    {
+        _cameraPosition = CameraStartPosition;
+        switch (view)
+        {
+            case AxisViewType.Top:
+                _modelYaw = 0;
+                _modelPitch = 1.5f;
+                break;
+            case AxisViewType.Front:
+                _modelYaw = 0;
+                _modelPitch = 0;
+                break;
+            case AxisViewType.Side:
+                _modelYaw = 1.75f;
+                _modelPitch = 0;
+                break;
+            case AxisViewType.Isometric:
+            default:
+                _modelYaw = 0.75f;
+                _modelPitch = 0.65f;
+                break;
+        }
+        RequestNextFrameRendering();
     }
 }

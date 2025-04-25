@@ -74,4 +74,12 @@
     <ItemGroup>
       <AdditionalFiles Include="Controls\MdaSurface\MdaSurface.axaml" />
     </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Controls\AxisMiniature\AxisMiniature.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AvaloniaXaml Remove="Views\Test.axaml" />
+    </ItemGroup>
 </Project>

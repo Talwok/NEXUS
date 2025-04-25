@@ -1,8 +1,7 @@
-﻿using System;
-using System.Numerics;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using NEXUS.Fractal.Models;
 using NEXUS.Parsers.MDT.Helpers;
 using NEXUS.Parsers.MDT.Models.Frames.MDA;
 using NEXUS.Parsers.MDT.Models.Pallete;
@@ -93,5 +92,10 @@ public partial class MdaSurface : UserControl
     {
         SurfaceOpenGl.ZoomCamera((float)e.Delta.Y);
         e.Handled = true;
+    }
+
+    private void OnViewCubeViewSelected(AxisViewType axisViewType)
+    {
+        SurfaceOpenGl.SetCameraPreset(axisViewType);
     }
 }
