@@ -151,9 +151,12 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         int rows = _heightMap.GetLength(0);
         int cols = _heightMap.GetLength(1);
 
+        var ratioX = cols / (float)rows;
+        var ratioY = rows / (float)cols;
+
         // Параметры поверхности
-        float sizeX = 10f;
-        float sizeZ = 10f;
+        float sizeX = 10f * (ratioX >= 1f ? 1f : ratioX);
+        float sizeZ = 10f * (ratioY >= 1f ? 1f : ratioY);
 
         // Шаги между вершинами
         float stepX = sizeX / (cols - 1);

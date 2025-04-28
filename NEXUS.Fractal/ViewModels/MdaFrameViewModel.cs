@@ -25,11 +25,14 @@ public class MdaFrameViewModel : ViewModelBase
         Title = frame.Title;
         
         _frameProcessor = frame.CreateFromMdaFrame();
+        if (_frameProcessor != null)
+        {
+            var range = _frameProcessor.GetOriginalRange();
 
-        var range = _frameProcessor.GetOriginalRange();
-
-        MinZLimit = MinZValue = range.MinValue;
-        MaxZLimit = MaxZValue = range.MaxValue;
+            MinZLimit = MinZValue = range.MinValue;
+            MaxZLimit = MaxZValue = range.MaxValue;    
+        }
+        
 
         this.WhenAnyValue(
                 vm => vm.MinZValue,
@@ -38,10 +41,11 @@ public class MdaFrameViewModel : ViewModelBase
             {
                 var (minZValue, maxZValue) = props;
                 
-                Image = _frameProcessor
-                    .WithRange(minZValue, maxZValue)
-                    .ApplyColorMap(table)
-                    .ConvertToBitmap();
+                if (_frameProcessor != null)
+                    Image = _frameProcessor
+                        .WithRange(minZValue, maxZValue)
+                        .ApplyColorMap(table)
+                        .ConvertToBitmap();
             });
     }
 
