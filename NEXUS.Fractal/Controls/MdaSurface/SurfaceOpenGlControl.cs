@@ -39,18 +39,26 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         public float G; // Зелёная компонента цвета
         public float B; // Синяя компонента цвета
         public float Nx, Ny, Nz; // Компоненты нормали
+        public float IsBasement;
 
-        public OpenGlPoint(float x, float y, float z, float r, float g, float b, float nx, float ny, float nz)
+        public OpenGlPoint(float x, float y, float z, float r, float g, float b, float nx, float ny, float nz,
+            bool isBasement)
         {
-            X = x; Y = y; Z = z;
-            R = r; G = g; B = b;
-            Nx = nx; Ny = ny; Nz = nz;
+            X = x;
+            Y = y;
+            Z = z;
+            R = r;
+            G = g;
+            B = b;
+            Nx = nx;
+            Ny = ny;
+            Nz = nz;
+            IsBasement = isBasement ? 1 : 0;
         }
     }
 
     // Идентификаторы OpenGL объектов
     private int _vbo; // Vertex Buffer Object (буфер вершин)
-    private int _vao; // Vertex Array Object (массив вершин)
     private int _ebo; // Element Buffer Object (буфер индексов)
     private int _shaderProgram; // Шейдерная программа
     private int _fragmentShader; // Фрагментный шейдер
@@ -75,7 +83,42 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private Matrix4x4 _modelMatrix = Matrix4x4.Identity;
     private float _modelYaw;
     private float _modelPitch = 1.5f;
+    private float _heightMultiplier = 1f;
+    
+    /// <summary>
+    /// Множитель высоты поверхности
+    /// </summary>
+    public float HeightMultiplier
+    {
+        get => _heightMultiplier;
+        set
+        {
+            if (Math.Abs(_heightMultiplier - value) > float.Epsilon)
+            {
+                _heightMultiplier = value;
+                OnPropertyChanged(nameof(HeightMultiplier));
+                RegenerateModel();
+            }
+        }
+    }
 
+    private bool _showFoundation = true;
+
+    public bool ShowFoundation
+    {
+        get => _showFoundation;
+        set
+        {
+            if (_showFoundation != value)
+            {
+                _showFoundation = value;
+                RequestNextFrameRendering();
+            }
+        }
+    }
+
+    private Color _foundationColor = Colors.LightGray;
+    
     /// <summary>
     /// Устанавливает карту высот для рендеринга
     /// </summary>
@@ -83,11 +126,20 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     public void SetHeightMap(double[,] heightMap)
     {
         _heightMap = heightMap;
-        
-        // Можно раскомментировать для автоматического обновления:
-        RequestNextFrameRendering();
+        RegenerateModel();
     }
-    
+
+    /// <summary>
+    /// Пересоздает модель с текущими параметрами
+    /// </summary>
+    private void RegenerateModel()
+    {
+        if (_heightMap != null)
+        {
+            RequestNextFrameRendering();
+        }
+    }
+
     /// <summary>
     /// Создаёт буферы вершин и индексов на основе карты высот
     /// </summary>
@@ -99,10 +151,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         int rows = _heightMap.GetLength(0);
         int cols = _heightMap.GetLength(1);
 
-        // Параметры поверхности (оставляем как есть)
+        // Параметры поверхности
         float sizeX = 10f;
         float sizeZ = 10f;
-        float maxHeight = 2f;
 
         // Шаги между вершинами
         float stepX = sizeX / (cols - 1);
@@ -119,7 +170,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         float rangeH = Math.Max(maxH - minH, 0.001f);
 
-        
         var normals = new Vector3[rows, cols];
 
         // Для каждой точки (x, z) вычисляем нормаль как кросс-продукт соседних высот
@@ -127,25 +177,25 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         {
             for (int x = 1; x < cols - 1; x++)
             {
-                Vector3 dx = new Vector3(2 * stepX, (float)(_heightMap[z, x + 1] - _heightMap[z, x - 1]) * maxHeight, 0);
-                Vector3 dz = new Vector3(0, (float)(_heightMap[z + 1, x] - _heightMap[z - 1, x]) * maxHeight, 2 * stepZ);
+                Vector3 dx = new Vector3(2 * stepX, (float)(_heightMap[z, x + 1] - _heightMap[z, x - 1]), 0);
+                Vector3 dz = new Vector3(0, (float)(_heightMap[z + 1, x] - _heightMap[z - 1, x]), 2 * stepZ);
                 var normal = Vector3.Normalize(Vector3.Cross(dz, dx));
                 normals[z, x] = normal;
             }
         }
-        
+
         for (int z = 0; z < rows; z++)
         {
             normals[z, 0] = normals[z, 1];
             normals[z, cols - 1] = normals[z, cols - 2];
         }
+
         for (int x = 0; x < cols; x++)
         {
             normals[0, x] = normals[1, x];
             normals[rows - 1, x] = normals[rows - 2, x];
         }
 
-        
         // Создаем вершины с центром в (0,0,0)
         List<OpenGlPoint> vertices = new();
         for (int z = 0; z < rows; z++)
@@ -153,28 +203,46 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             for (int x = 0; x < cols; x++)
             {
                 float normH = (float)((_heightMap[z, x] - minH) / rangeH);
-            
+
                 // Центрируем модель:
                 float posX = (x * stepX) - sizeX / 2;
                 float posZ = (z * stepZ) - sizeZ / 2;
-                float posY = normH * maxHeight - maxHeight/2; // Центрируем по Y
+                float posY = normH; // Центрируем по Y
 
-                
                 // Цвет в зависимости от высоты
                 int colorIndex = (int)(normH * (_colorTable.Colors.Count - 1));
                 colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
                 var color = _colorTable.Colors[colorIndex];
-                
+
                 var normal = normals[z, x];
                 vertices.Add(new OpenGlPoint(
-                    posX, posY, posZ, 
-                    color.Red / 255f, color.Green / 255f, color.Blue / 255f, 
-                    normal.X, normal.Y, normal.Z));
+                    posX, posY, posZ,
+                    color.Red / 255f, color.Green / 255f, color.Blue / 255f,
+                    normal.X, normal.Y, normal.Z, false));
             }
         }
-        
-        // Создаем индексы
+
+        // Добавляем вершины для фундамента
+        for (int z = 0; z < rows; z++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                float posX = (x * stepX) - sizeX / 2;
+                float posZ = (z * stepZ) - sizeZ / 2;
+
+                // Вершина фундамента (Y = 0)
+                vertices.Add(new OpenGlPoint(
+                    posX, 0, posZ,
+                    _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f, // Серый цвет для фундамента
+                    0, 1, 0, true)); // Нормаль вверх
+            }
+        }
+
+        // Создаем индексы для поверхности и фундамента
         List<uint> indices = new();
+        int surfaceVertexCount = rows * cols;
+
+        // Индексы для поверхности
         for (int z = 0; z < rows - 1; z++)
         {
             for (int x = 0; x < cols - 1; x++)
@@ -194,6 +262,170 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             }
         }
 
+        // Индексы для фундамента
+        int foundationStartIndex = surfaceVertexCount;
+        for (int z = 0; z < rows - 1; z++)
+        {
+            for (int x = 0; x < cols - 1; x++)
+            {
+                uint i0 = (uint)(foundationStartIndex + z * cols + x);
+                uint i1 = (uint)(foundationStartIndex + z * cols + x + 1);
+                uint i2 = (uint)(foundationStartIndex + (z + 1) * cols + x);
+                uint i3 = (uint)(foundationStartIndex + (z + 1) * cols + x + 1);
+
+                // Два треугольника на квад
+                indices.Add(i0);
+                indices.Add(i2);
+                indices.Add(i1);
+                indices.Add(i1);
+                indices.Add(i2);
+                indices.Add(i3);
+            }
+        }
+
+        // Добавляем вершины и индексы для боковых стенок
+        int wallStartIndex = vertices.Count;
+
+        // Создаем стенки по периметру
+        // 1. Нижняя граница (z = 0)
+        for (int x = 0; x < cols; x++)
+        {
+            // Вершина поверхности
+            var surfaceVert = vertices[x];
+            // Вершина фундамента
+            var foundationVert = vertices[foundationStartIndex + x];
+
+            // Добавляем обе вершины (дублируем для нормалей)
+            vertices.Add(new OpenGlPoint(
+                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f, // Темно-серый цвет для стенок
+                0, 0, -1, true)); // Нормаль наружу
+
+            vertices.Add(new OpenGlPoint(
+                foundationVert.X, foundationVert.Y, foundationVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
+                0, 0, -1, true));
+        }
+
+        // Индексы для нижней стенки
+        for (int x = 0; x < cols - 1; x++)
+        {
+            uint i0 = (uint)(wallStartIndex + x * 2);
+            uint i1 = (uint)(wallStartIndex + x * 2 + 1);
+            uint i2 = (uint)(wallStartIndex + (x + 1) * 2);
+            uint i3 = (uint)(wallStartIndex + (x + 1) * 2 + 1);
+
+            indices.Add(i0);
+            indices.Add(i2);
+            indices.Add(i1);
+            indices.Add(i1);
+            indices.Add(i2);
+            indices.Add(i3);
+        }
+
+        // 2. Верхняя граница (z = rows-1)
+        wallStartIndex = vertices.Count;
+        int topRowStart = (rows - 1) * cols;
+        for (int x = 0; x < cols; x++)
+        {
+            var surfaceVert = vertices[topRowStart + x];
+            var foundationVert = vertices[foundationStartIndex + topRowStart + x];
+
+            vertices.Add(new OpenGlPoint(
+                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
+                0, 0, 1, true));
+
+            vertices.Add(new OpenGlPoint(
+                foundationVert.X, foundationVert.Y, foundationVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
+                0, 0, 1, true));
+        }
+
+        // Индексы для верхней стенки
+        for (int x = 0; x < cols - 1; x++)
+        {
+            uint i0 = (uint)(wallStartIndex + x * 2);
+            uint i1 = (uint)(wallStartIndex + x * 2 + 1);
+            uint i2 = (uint)(wallStartIndex + (x + 1) * 2);
+            uint i3 = (uint)(wallStartIndex + (x + 1) * 2 + 1);
+
+            indices.Add(i0);
+            indices.Add(i1);
+            indices.Add(i2);
+            indices.Add(i1);
+            indices.Add(i3);
+            indices.Add(i2);
+        }
+
+        // 3. Левая граница (x = 0)
+        wallStartIndex = vertices.Count;
+        for (int z = 0; z < rows; z++)
+        {
+            var surfaceVert = vertices[z * cols];
+            var foundationVert = vertices[foundationStartIndex + z * cols];
+
+            vertices.Add(new OpenGlPoint(
+                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
+                -1, 0, 0, true));
+
+            vertices.Add(new OpenGlPoint(
+                foundationVert.X, foundationVert.Y, foundationVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
+                -1, 0, 0, true));
+        }
+
+        // Индексы для левой стенки
+        for (int z = 0; z < rows - 1; z++)
+        {
+            uint i0 = (uint)(wallStartIndex + z * 2);
+            uint i1 = (uint)(wallStartIndex + z * 2 + 1);
+            uint i2 = (uint)(wallStartIndex + (z + 1) * 2);
+            uint i3 = (uint)(wallStartIndex + (z + 1) * 2 + 1);
+
+            indices.Add(i0);
+            indices.Add(i2);
+            indices.Add(i1);
+            indices.Add(i1);
+            indices.Add(i2);
+            indices.Add(i3);
+        }
+
+        // 4. Правая граница (x = cols-1)
+        wallStartIndex = vertices.Count;
+        for (int z = 0; z < rows; z++)
+        {
+            var surfaceVert = vertices[z * cols + cols - 1];
+            var foundationVert = vertices[foundationStartIndex + z * cols + cols - 1];
+
+            vertices.Add(new OpenGlPoint(
+                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
+                1, 0, 0, true));
+
+            vertices.Add(new OpenGlPoint(
+                foundationVert.X, foundationVert.Y, foundationVert.Z,
+                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
+                1, 0, 0, true));
+        }
+
+        // Индексы для правой стенки
+        for (int z = 0; z < rows - 1; z++)
+        {
+            uint i0 = (uint)(wallStartIndex + z * 2);
+            uint i1 = (uint)(wallStartIndex + z * 2 + 1);
+            uint i2 = (uint)(wallStartIndex + (z + 1) * 2);
+            uint i3 = (uint)(wallStartIndex + (z + 1) * 2 + 1);
+
+            indices.Add(i0);
+            indices.Add(i1);
+            indices.Add(i2);
+            indices.Add(i1);
+            indices.Add(i3);
+            indices.Add(i2);
+        }
+
         UploadBuffers(gl, vertices.ToArray(), indices.ToArray());
     }
 
@@ -202,7 +434,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     /// </summary>
     private void UploadBuffers(GlInterface gl, OpenGlPoint[] vertices, uint[] indices)
     {
-        // Размер структуры GlPoint в байтах
         int glPointBitSize = Marshal.SizeOf<OpenGlPoint>();
 
         // Создаем и настраиваем буфер вершин (VBO)
@@ -227,26 +458,28 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             }
         }
 
-        // Настраиваем атрибуты вершин в VAO
-        gl.BindVertexArray(_vao);
-
         // Атрибут 0: позиция вершины (3 компоненты float)
-        gl.VertexAttribPointer(0, 3, GL_FLOAT, 0, glPointBitSize, 0);                       // aPos
+        gl.VertexAttribPointer(0, 3, GL_FLOAT, 0, glPointBitSize, 0); // aPos
         gl.EnableVertexAttribArray(0);
-        
+
         // Атрибут 1: цвет вершины (3 компоненты float, смещение 3*sizeof(float))
-        gl.VertexAttribPointer(1, 3, GL_FLOAT, 0, glPointBitSize, 3 * sizeof(float));       // aColor
+        gl.VertexAttribPointer(1, 3, GL_FLOAT, 0, glPointBitSize, 3 * sizeof(float)); // aColor
         gl.EnableVertexAttribArray(1);
-        
-        gl.VertexAttribPointer(2, 3, GL_FLOAT, 0, glPointBitSize, 6 * sizeof(float));       // aNormal
+
+        gl.VertexAttribPointer(2, 3, GL_FLOAT, 0, glPointBitSize, 6 * sizeof(float)); // aNormal
         gl.EnableVertexAttribArray(2);
+
+        // Атрибут 3: IsBasement (1 компонент float, смещение 9 * sizeof(float))
+        gl.VertexAttribPointer(3, 1, GL_FLOAT, 0, glPointBitSize, 9 * sizeof(float));
+        gl.EnableVertexAttribArray(3);
     }
 
     // Свойства для управления фоном
     private SolidColorBrush _background;
 
-    public static readonly DirectProperty<SurfaceOpenGlControl, SolidColorBrush> BackgroundProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, SolidColorBrush>(
-        nameof(Background), o => o.Background, (o, v) => o.Background = v);
+    public static readonly DirectProperty<SurfaceOpenGlControl, SolidColorBrush> BackgroundProperty =
+        AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, SolidColorBrush>(
+            nameof(Background), o => o.Background, (o, v) => o.Background = v);
 
     public SolidColorBrush Background
     {
@@ -256,7 +489,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
     private PaletteColorTable _colorTable;
 
-    
+
     /// <summary>
     /// Инициализация OpenGL
     /// </summary>
@@ -296,7 +529,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         // Удаляем созданные объекты
         gl.DeleteBuffer(_vbo);
         gl.DeleteBuffer(_ebo);
-        gl.DeleteVertexArray(_vao);
         gl.DeleteProgram(_shaderProgram);
         gl.DeleteShader(_fragmentShader);
         gl.DeleteShader(_vertexShader);
@@ -314,12 +546,12 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         gl.Viewport(0, 0, width, height);
         gl.ClearColor(0, 0, 0, 0);
         gl.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
         gl.UseProgram(_shaderProgram);
 
         // Матрица модели с вращением и центрированием
-        _modelMatrix = Matrix4x4.CreateRotationY(_modelYaw) * 
-                       Matrix4x4.CreateRotationX(_modelPitch) * 
+        _modelMatrix = Matrix4x4.CreateRotationY(_modelYaw) *
+                       Matrix4x4.CreateRotationX(_modelPitch) *
                        Matrix4x4.CreateScale(5f) *
                        Matrix4x4.CreateTranslation(0, 0, 0); // Явное центрирование
 
@@ -327,18 +559,20 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         float aspectRatio = (float)width / height;
         Matrix4x4 projection = Matrix4x4.CreatePerspectiveFieldOfView(MathF.PI / 4, aspectRatio, 0.1f, 1000f);
         Matrix4x4 view = Matrix4x4.CreateLookAt(
-            _cameraPosition,  // Камера сверху и сзади
-            _cameraTarget,            // Смотрим точно в центр
-            Vector3.UnitY);          // Верх камеры
+            _cameraPosition, // Камера сверху и сзади
+            _cameraTarget, // Смотрим точно в центр
+            Vector3.UnitY); // Верх камеры
 
         var modelMatrix = _modelMatrix;
-        
+
         unsafe
         {
             gl.UniformMatrix4fv(_model, 1, false, &modelMatrix);
             gl.UniformMatrix4fv(_view, 1, false, &view);
             gl.UniformMatrix4fv(_projection, 1, false, &projection);
-            
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "heightMultiplier"), _heightMultiplier);
+            gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "showFoundation"), _showFoundation ? 1f : 0f);
+
             // Передаем компоненты по отдельности
             gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "lightPosX"), 30f);
             gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "lightPosY"), 50f);
@@ -348,10 +582,13 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "cameraPositionY"), _cameraPosition.Y);
             gl.Uniform1f(gl.GetUniformLocationString(_shaderProgram, "cameraPositionZ"), _cameraPosition.Z);
         }
+
+        int rows = _heightMap.GetLength(0) - 1;
+        int cols = _heightMap.GetLength(1) - 1;
+        int totalIndices = 12 * rows * cols + 12 * (rows + cols);
+
         
-        gl.BindVertexArray(_vao);
-        gl.DrawElements(GL_TRIANGLES, 6 * (_heightMap!.GetLength(0) - 1) * (_heightMap!.GetLength(1) - 1),
-            GlConsts.GL_UNSIGNED_INT, 0);
+        gl.DrawElements(GL_TRIANGLES, totalIndices, GlConsts.GL_UNSIGNED_INT, 0);
 
         GlCheckError(gl, "OnOpenGlRender");
     }
@@ -373,7 +610,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _cameraPosition = _cameraTarget - direction * newDistance;
         RequestNextFrameRendering();
     }
-    
+
     /// <summary>
     /// Настраивает шейдеры
     /// </summary>
@@ -387,7 +624,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         GlCheckError(gl, "Create vertex shader");
 
         var res = gl.CompileShaderAndGetError(_vertexShader, VertexShaderSource);
-        if (res != null) throw new Exception("Vertex shader compile error: " + res);
+        if (!string.IsNullOrEmpty(res)) throw new Exception("Vertex shader compile error: " + res);
 
         gl.AttachShader(_shaderProgram, _vertexShader);
 
@@ -396,7 +633,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         GlCheckError(gl, "Create fragment shader");
 
         res = gl.CompileShaderAndGetError(_fragmentShader, FragmentShaderSource);
-        if (res != null)
+        if (!string.IsNullOrEmpty(res))
             throw new Exception("Fragment shader compile error: " + res);
 
         gl.AttachShader(_shaderProgram, _fragmentShader);
@@ -415,10 +652,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         _projection = gl.GetUniformLocationString(_shaderProgram, "projection");
         GlCheckError(gl, "Getting uniform projection variable");
-        
+
         _lightPos = gl.GetUniformLocationString(_shaderProgram, "lightPos");
         _viewPos = gl.GetUniformLocationString(_shaderProgram, "viewPos");
-
     }
 
     /// <summary>
@@ -478,21 +714,25 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     layout(location = 0) in vec3 aPos;
     layout(location = 1) in vec3 aColor;
     layout(location = 2) in vec3 aNormal;
+    layout(location = 3) in float aIsBasement;
 
     out vec3 FragPos;
     out vec3 Normal;
     out vec3 VertexColor;
+    out float IsBasement;
 
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
+    uniform float heightMultiplier;
 
     void main()
     {
-        FragPos = vec3(model * vec4(aPos, 1.0));
+        FragPos = vec3(model * vec4(aPos.x, aPos.y * heightMultiplier, aPos.z, 1.0));
         Normal = mat3(transpose(inverse(model))) * aNormal;
         VertexColor = aColor;
         gl_Position = projection * view * vec4(FragPos, 1.0);
+        IsBasement = aIsBasement;
     }";
 
 
@@ -503,6 +743,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     in vec3 FragPos;
     in vec3 Normal;
     in vec3 VertexColor;
+    in float IsBasement;
 
     out vec4 FragColor;
 
@@ -513,9 +754,15 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     uniform float cameraPositionX;
     uniform float cameraPositionY;
     uniform float cameraPositionZ;
+    uniform bool showFoundation;
 
     void main()
     {
+        if (!showFoundation && IsBasement > 0.5) 
+        {
+            discard; // Пропускаем отрисовку фундамента
+        }
+
         vec3 lightPos = vec3(lightPosX, lightPosY, lightPosZ);
         vec3 viewPos = vec3(cameraPositionX, cameraPositionY, cameraPositionZ);
 
@@ -536,8 +783,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
         vec3 specular = specularStrength * spec * vec3(1.0); // Белый блик
 
-        vec3 result = ambient + diffuse + specular;
-        FragColor = vec4(result, 1.0);
+
+        vec3 result =  IsBasement > 0.5 ? VertexColor : ambient + diffuse + specular;
+        FragColor = vec4(result, 1.0);  
     }";
 
 
@@ -577,6 +825,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
                 _modelPitch = 0.65f;
                 break;
         }
+
         RequestNextFrameRendering();
     }
 }

@@ -13,11 +13,14 @@
 	</Design.PreviewWith>
 	<Panel>
 		<mdaSurface:SurfaceOpenGlControl Name="SurfaceOpenGl" Background="{StaticResource ThemeBackgroundBrush}"/>
-		<Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
+		<Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto, Auto, *">
 			<viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
 			                          Margin="-20 -10"
 			                          Width="120" Height="120"
 			                          ViewSelected="OnViewCubeViewSelected"/>
+			<Slider Grid.Row="1" Grid.Column="1" Value="{Binding #SurfaceOpenGl.HeightMultiplier}" Minimum="0" Maximum="5"/>
+			<ToggleButton Grid.Row="2" Grid.Column="1" Content="Foundation" IsChecked="{Binding #SurfaceOpenGl.ShowFoundation}"/>
+
 		</Grid>
 	</Panel>
 </UserControl>
