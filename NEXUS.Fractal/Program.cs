@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using System;
+using Avalonia.OpenGL;
 using Avalonia.ReactiveUI;
 
 namespace NEXUS.Fractal;
@@ -17,6 +18,10 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .With(new Win32PlatformOptions
+            {
+                RenderingMode = [Win32RenderingMode.Wgl]
+            })
             .WithInterFont()
             .LogToTrace()
             .UseReactiveUI();
