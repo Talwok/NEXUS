@@ -16,6 +16,7 @@
         <PackageReference Include="Avalonia" Version="11.2.6" />
         <PackageReference Include="Avalonia.Controls.PanAndZoom" Version="11.2.0" />
         <PackageReference Include="Avalonia.Desktop" Version="11.2.6" />
+        <PackageReference Include="Avalonia.Svg.Skia" Version="11.2.7" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.6" />
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.6" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
@@ -35,6 +36,10 @@
 
     <ItemGroup>
       <AvaloniaResource Include="Assets\FractalSurface.ico" />
+      <None Remove="Assets\DigitalSurf.svg" />
+      <AvaloniaResource Include="Assets\DigitalSurf.svg" />
+      <None Remove="Assets\NTMDT.svg" />
+      <AvaloniaResource Include="Assets\NTMDT.svg" />
     </ItemGroup>
 
     <ItemGroup>
@@ -81,5 +86,11 @@
 
     <ItemGroup>
       <AvaloniaXaml Remove="Views\Test.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Avalonia.Svg.Skia">
+        <HintPath>..\..\..\Users\VitalyAnofriev\.nuget\packages\avalonia.svg.skia\11.2.7.1\lib\net8.0\Avalonia.Svg.Skia.dll</HintPath>
+      </Reference>
     </ItemGroup>
 </Project>

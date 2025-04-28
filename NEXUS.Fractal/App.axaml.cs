@@ -31,9 +31,7 @@ public partial class App : Application
         serviceCollection.AddSingleton<Application>(this);
 
         serviceCollection.AddCommon();
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        // Или для файловой версии:
-        var fileVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+        
         serviceCollection.AddSingleton<ImageService>(); 
         serviceCollection.AddSingleton<ChartService>(); 
         serviceCollection.AddSingleton<InfoService>();

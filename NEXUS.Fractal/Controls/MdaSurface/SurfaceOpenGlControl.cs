@@ -63,8 +63,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private int _shaderProgram; // Шейдерная программа
     private int _fragmentShader; // Фрагментный шейдер
     private int _vertexShader; // Вершинный шейдер
-    private int _lightPos;
-    private int _viewPos;
 
     // Uniform-переменные шейдеров
     private int _model; // Матрица модели
@@ -439,8 +437,11 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     {
         int glPointBitSize = Marshal.SizeOf<OpenGlPoint>();
 
+        _vao = gl.GenVertexArray();
+        gl.BindVertexArray(_vao);
+        
         // Создаем и настраиваем буфер вершин (VBO)
-        if (_vbo == 0) _vbo = gl.GenBuffer();
+        _vbo = gl.GenBuffer();
         gl.BindBuffer(GL_ARRAY_BUFFER, _vbo);
         unsafe
         {
@@ -451,7 +452,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         }
 
         // Создаем и настраиваем буфер индексов (EBO)
-        if (_ebo == 0) _ebo = gl.GenBuffer();
+        _ebo = gl.GenBuffer();
         gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
         unsafe
         {
@@ -477,21 +478,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         gl.EnableVertexAttribArray(3);
     }
 
-    // Свойства для управления фоном
-    private SolidColorBrush _background;
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, SolidColorBrush> BackgroundProperty =
-        AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, SolidColorBrush>(
-            nameof(Background), o => o.Background, (o, v) => o.Background = v);
-
-    public SolidColorBrush Background
-    {
-        get => _background;
-        set => SetAndRaise(BackgroundProperty, ref _background, value);
-    }
-
     private PaletteColorTable _colorTable;
-
+    private int _vao;
 
     /// <summary>
     /// Инициализация OpenGL
@@ -530,6 +518,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         gl.UseProgram(0);
 
         // Удаляем созданные объекты
+        gl.DeleteVertexArray(_vao);
         gl.DeleteBuffer(_vbo);
         gl.DeleteBuffer(_ebo);
         gl.DeleteProgram(_shaderProgram);
@@ -590,7 +579,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         int cols = _heightMap.GetLength(1) - 1;
         int totalIndices = 12 * rows * cols + 12 * (rows + cols);
 
-        
         gl.DrawElements(GL_TRIANGLES, totalIndices, GlConsts.GL_UNSIGNED_INT, 0);
 
         GlCheckError(gl, "OnOpenGlRender");
@@ -655,9 +643,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         _projection = gl.GetUniformLocationString(_shaderProgram, "projection");
         GlCheckError(gl, "Getting uniform projection variable");
-
-        _lightPos = gl.GetUniformLocationString(_shaderProgram, "lightPos");
-        _viewPos = gl.GetUniformLocationString(_shaderProgram, "viewPos");
     }
 
     /// <summary>
@@ -691,7 +676,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             minor = match.Groups[2].Success ? int.Parse(match.Groups[2].Value) : 0;
         }
 
-        // Обработка для macOS
+        // Обработка для macOS 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && !isOpenGlEs)
         {
             // Fallback для старых версий

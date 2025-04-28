@@ -12,7 +12,7 @@
 		<mdaSurface:MdaSurface/>
 	</Design.PreviewWith>
 	<Panel>
-		<mdaSurface:SurfaceOpenGlControl Name="SurfaceOpenGl" Background="{StaticResource ThemeBackgroundBrush}"/>
+		<mdaSurface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
 		<Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto, Auto, *">
 			<viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
 			                          Margin="-20 -10"

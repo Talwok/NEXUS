@@ -7,7 +7,6 @@
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
              xmlns:mda="clr-namespace:NEXUS.Parsers.MDT.Models.Frames.MDA;assembly=NEXUS.Parsers.MDT"
-             xmlns:converters1="clr-namespace:NEXUS.Fractal.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Fractal.Views.MdtScreenView"
              x:DataType="viewModels:MdtScreenViewModel">
