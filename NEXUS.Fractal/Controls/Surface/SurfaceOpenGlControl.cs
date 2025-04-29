@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using NEXUS.Fractal.Models;
 using NEXUS.Parsers.MDT.Models.Pallete;
+using OpenTK.Graphics.OpenGL;
 using static Avalonia.OpenGL.GlConsts;
 
 namespace NEXUS.Fractal.Controls.MdaSurface;
@@ -500,7 +502,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         // Включаем тест глубины с правильными параметрами
         gl.Enable(GL_DEPTH_TEST);
-
+        gl.DepthFunc(GL_LESS);
+        
         GlCheckError(gl, "Init");
     }
 
@@ -532,8 +535,20 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     // Обновим метод OnOpenGlRender
     protected override void OnOpenGlRender(GlInterface gl, int fb)
     {
-        int width = (int)(Bounds.Width * 1.5f);
-        int height = (int)(Bounds.Height * 1.5f);
+        // Явно привязываем целевой фреймбуфер
+        gl.BindFramebuffer(GL_FRAMEBUFFER, fb);
+    
+        // Проверяем его статус
+        int status = gl.CheckFramebufferStatus(GL_FRAMEBUFFER);
+        if(status != GL_FRAMEBUFFER_COMPLETE)
+        {
+            Console.WriteLine($"Framebuffer incomplete: 0x{status:X}");
+            return;
+        }
+        
+        var window = TopLevel.GetTopLevel(this) as Window;
+        int width = (int)(Bounds.Width * window?.DesktopScaling ?? 1);
+        int height = (int)(Bounds.Height * window?.DesktopScaling ?? 1);
 
         gl.Viewport(0, 0, width, height);
         gl.ClearColor(0, 0, 0, 0);
@@ -650,8 +665,15 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     /// </summary>
     void GlCheckError(GlInterface gl, string what = "no info")
     {
-        int error = gl.GetError();
-        if (error != GL_NO_ERROR) throw new Exception("GL task failed: " + what + $", ErrorCode {error}");
+        try
+        {
+            int error = gl.GetError();
+            if (error != GL_NO_ERROR) throw OpenGlException.GetFormattedException(what, error);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     /// <summary>

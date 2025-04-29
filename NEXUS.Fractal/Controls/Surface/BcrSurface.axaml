@@ -1,0 +1,24 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mdaSurface="clr-namespace:NEXUS.Fractal.Controls.MdaSurface"
+             xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
+             xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Controls.Surface.BcrSurface"
+             x:DataType="surface:BcrSurface"
+             Background="Transparent">
+    <Panel>
+        <mdaSurface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
+        <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto, Auto, *">
+            <viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
+                                      Margin="-20 -10"
+                                      Width="120" Height="120"
+                                      ViewSelected="OnViewCubeViewSelected"/>
+            <Slider Grid.Row="1" Grid.Column="1" Value="{Binding #SurfaceOpenGl.HeightMultiplier}" Minimum="0" Maximum="5"/>
+            <ToggleButton Grid.Row="2" Grid.Column="1" Content="Foundation" IsChecked="{Binding #SurfaceOpenGl.ShowFoundation}"/>
+
+        </Grid>
+    </Panel>
+</UserControl>

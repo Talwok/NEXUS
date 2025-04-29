@@ -7,27 +7,27 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace NEXUS.Parsers.MDT.Helpers;
 
-public static class FramesPipeline
+public static class MdaFramesPipeline
 {
-    public static FrameImageProcessor CreateFromMdaFrame(this MdaFrame frame)
+    public static MdaFrameImageProcessor CreateFromMdaFrame(this MdaFrame frame)
     {
         if (frame.Dimensions.Count < 2 || frame.ImageBuffer.Length == 0)
             return null;
 
-        return new FrameImageProcessor(frame);
+        return new MdaFrameImageProcessor(frame);
     }
 }
 
-public class FrameImageProcessor
+public class MdaFrameImageProcessor
 {
-   private readonly MdaFrame _frame;
+    private readonly MdaFrame _frame;
     private MinMax _originalRange;
     private MinMax _currentRange;
     private Image<Rgba32> _image;
     private Rgba32 _belowThresholdColor = new(0, 0, 0, 255);    // Черный для значений ниже минимума
     private Rgba32 _aboveThresholdColor = new(255, 255, 255, 255); // Белый для значений выше максимума
 
-    public FrameImageProcessor(MdaFrame frame)
+    public MdaFrameImageProcessor(MdaFrame frame)
     {
         _frame = frame;
         _originalRange = CalculateDataRange();
@@ -35,7 +35,7 @@ public class FrameImageProcessor
         _image = CreateBaseImage();
     }
     
-    public FrameImageProcessor WithRange(double min, double max)
+    public MdaFrameImageProcessor WithRange(double min, double max)
     {
         _currentRange = new MinMax(
             Math.Max(min, _originalRange.MinValue),

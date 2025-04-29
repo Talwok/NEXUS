@@ -6,7 +6,7 @@ using NEXUS.Parsers.MDT.Helpers;
 using NEXUS.Parsers.MDT.Models.Frames.MDA;
 using NEXUS.Parsers.MDT.Models.Pallete;
 
-namespace NEXUS.Fractal.Controls.MdaSurface;
+namespace NEXUS.Fractal.Controls.Surface;
 
 public partial class MdaSurface : UserControl
 {
@@ -51,7 +51,7 @@ public partial class MdaSurface : UserControl
         base.OnAttachedToVisualTree(e);
         
         // Загрузка данных высот
-        var processor = new FrameImageProcessor(MdaFrame);
+        var processor = new MdaFrameImageProcessor(MdaFrame);
         SurfaceOpenGl.SetHeightMap(processor.GetHeightMap());
         SurfaceOpenGl.SetColorTable(ColorTable);
     }

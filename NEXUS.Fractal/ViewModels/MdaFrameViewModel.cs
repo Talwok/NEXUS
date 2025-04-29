@@ -14,7 +14,7 @@ namespace NEXUS.Fractal.ViewModels;
 
 public class MdaFrameViewModel : ViewModelBase
 {
-    private readonly FrameImageProcessor _frameProcessor;
+    private readonly MdaFrameImageProcessor _mdaFrameProcessor;
 
     public MdaFrameViewModel(MdaFrame frame, PaletteColorTable table)
     {
@@ -24,10 +24,10 @@ public class MdaFrameViewModel : ViewModelBase
         
         Title = frame.Title;
         
-        _frameProcessor = frame.CreateFromMdaFrame();
-        if (_frameProcessor != null)
+        _mdaFrameProcessor = frame.CreateFromMdaFrame();
+        if (_mdaFrameProcessor != null)
         {
-            var range = _frameProcessor.GetOriginalRange();
+            var range = _mdaFrameProcessor.GetOriginalRange();
 
             MinZLimit = MinZValue = range.MinValue;
             MaxZLimit = MaxZValue = range.MaxValue;    
@@ -41,8 +41,8 @@ public class MdaFrameViewModel : ViewModelBase
             {
                 var (minZValue, maxZValue) = props;
                 
-                if (_frameProcessor != null)
-                    Image = _frameProcessor
+                if (_mdaFrameProcessor != null)
+                    Image = _mdaFrameProcessor
                         .WithRange(minZValue, maxZValue)
                         .ApplyColorMap(table)
                         .ConvertToBitmap();

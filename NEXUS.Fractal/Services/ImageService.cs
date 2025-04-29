@@ -45,7 +45,8 @@ public class ImageService : ServiceBase
             new(MatrixType.Kirsch3x3Vertical, Filter.Kirsch3x3VerticalFilter)
         ]);
 
-    private static readonly string[] SearchPatterns = ["*.png", "*.jpg", "*.jpeg", "*.bmp"];
+    private static readonly string[] ImageSearchPatterns = ["*.png", "*.jpg", "*.jpeg", "*.bmp"];
+    private static readonly FilePickerFileType ImageFileType = new("Файлы изображений") { Patterns = ImageSearchPatterns };
 
     private static readonly string NameGroup = "name";
     private static readonly string GuidGroup = "guid";
@@ -119,7 +120,7 @@ public class ImageService : ServiceBase
         if (string.IsNullOrEmpty(Folder))
             return;
 
-        var fileGroups = SearchPatterns
+        var fileGroups = ImageSearchPatterns
             .SelectMany(pattern => Directory.GetFiles(Folder, pattern))
             .Distinct()
             .Select(filePath =>
@@ -195,13 +196,7 @@ public class ImageService : ServiceBase
             {
                 Title = "Выберите изображения",
                 AllowMultiple = true,
-                FileTypeFilter =
-                [
-                    new FilePickerFileType("Изображение")
-                    {
-                        Patterns = SearchPatterns
-                    }
-                ]
+                FileTypeFilter = [ImageFileType]
             });
 
             if (imageFiles.Count == 0)

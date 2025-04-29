@@ -35,12 +35,18 @@ namespace NEXUS.Fractal.Services;
 
 public class MdtService : ServiceBase
 {
+    private static readonly string[] MdtSearchPatterns = ["*.mdt"];
+    private static readonly FilePickerFileType MdtFileType = new("Файлы NT-MDT") { Patterns = MdtSearchPatterns };
+    
     private readonly SourceCache<PaletteColorTable, string> _palleteSource;
     private readonly IStorageProvider _storageProvider;
+    private readonly InfoService _infoService;
 
-    public MdtService(IStorageProvider storageProvider)
+    public MdtService(IStorageProvider storageProvider, InfoService infoService)
     {
         _storageProvider = storageProvider;
+        _infoService = infoService;
+        
         _palleteSource = new SourceCache<PaletteColorTable, string>(pal => $"{pal.Parent.Path} {pal.Title}");
         
         foreach (var filePath in PaletteParser.GetStandardPalleteFiles()) 
@@ -164,51 +170,6 @@ public class MdtService : ServiceBase
         Mdt = MdtParser.Parse(imageFiles.First().Path.LocalPath);
     }
     
-    public static double[,] ConvertFromJaggedArray(double[][] jaggedArray)
-    {
-        if (jaggedArray == null || jaggedArray.Length == 0)
-            return new double[0, 0];
-
-        // Get dimensions
-        int rows = jaggedArray.Length;
-        int cols = jaggedArray[0].Length;
-
-        // Validate that all rows have same number of columns
-        for (int i = 1; i < rows; i++)
-        {
-            if (jaggedArray[i].Length != cols)
-            {
-                throw new ArgumentException("Jagged array is not rectangular");
-            }
-        }
-
-        // Create and populate 2D array
-        double[,] array2D = new double[rows, cols];
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                array2D[i, j] = jaggedArray[i][j];
-            }
-        }
-
-        return array2D;
-    }
-    
-    double[][] ConvertToJaggedArray(double[,] array)
-    {
-        double[][] jagged = new double[array.GetLength(0)][];
-        for (int i = 0; i < array.GetLength(0); i++)
-        {
-            jagged[i] = new double[array.GetLength(1)];
-            for (int j = 0; j < array.GetLength(1); j++)
-            {
-                jagged[i][j] = array[i, j];
-            }
-        }
-        return jagged;
-    }
-
     private void LoadMdaFrames()
     {
         if (SelectedFrames.Count > 0 && SelectedColorTable != null)

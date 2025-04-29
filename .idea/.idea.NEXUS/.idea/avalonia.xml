@@ -31,8 +31,13 @@
         <entry key="NEXUS.Fractal/App.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Controls/AxisView/AxisView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Controls/MdaSurface/MdaSurface.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Controls/Surface/BcrSurface.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Controls/Surface/MdaSurface.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/MainWindow.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Views/BcrFrameView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Views/BcrScreenViewModel.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/ChartsScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Views/DataScreen.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/ImageFileView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/ImagesScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/InfoMessageView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />

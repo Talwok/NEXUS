@@ -9,12 +9,6 @@ public class ParsingTests
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
-
-    [Test]
-    public void Test1()
-    {
-        Assert.Pass();
-    }
     
     [Test]
     [TestCase("Bcr/Mo80 11 10 24 (20,2).bcr")]

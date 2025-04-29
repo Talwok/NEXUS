@@ -4,11 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             xmlns:mdaSurface="clr-namespace:NEXUS.Fractal.Controls.MdaSurface"
              xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NEXUS.Fractal.Views.MdaFrameView"
-             x:DataType="viewModels:MdaFrameViewModel">
+             x:Class="NEXUS.Fractal.Views.BcrFrameView"
+             x:DataType="viewModels:BcrFrameViewModel">
+    
     <TabControl SelectedIndex="0" TabStripPlacement="Bottom">
         <TabItem>
             <TabItem.Header>
@@ -36,7 +36,7 @@
                     <TextBlock Text="3D"/>
                 </StackPanel>    
             </TabItem.Header>
-            <surface:MdaSurface MdaFrame="{Binding Frame}" ColorTable="{Binding Table}"/>
+            <surface:BcrSurface BcrFrame="{Binding Frame}" ColorTable="{Binding Table}"/>
         </TabItem>
     </TabControl>
 </UserControl>

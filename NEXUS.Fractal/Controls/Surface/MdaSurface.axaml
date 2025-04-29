@@ -4,12 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:mdaSurface="clr-namespace:NEXUS.Fractal.Controls.MdaSurface"
              xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
+             xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NEXUS.Fractal.Controls.MdaSurface.MdaSurface"
-             x:DataType="mdaSurface:MdaSurface"
+             x:Class="NEXUS.Fractal.Controls.Surface.MdaSurface"
+             x:DataType="surface:MdaSurface"
              Background="Transparent">
 	<Design.PreviewWith>
-		<mdaSurface:MdaSurface/>
+		<surface:MdaSurface/>
 	</Design.PreviewWith>
 	<Panel>
 		<mdaSurface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>

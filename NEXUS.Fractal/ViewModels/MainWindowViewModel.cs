@@ -25,12 +25,14 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
         ChartsScreenViewModel charts,
         SettingsScreenViewModel settings,
         MdtScreenViewModel mdt,
+        BcrScreenViewModel bcr,
         InfoService infoService)
     {
         ChartsMenuItem.Screen = charts;
         ImagesMenuItem.Screen = images;
         SettingsMenuItem.Screen = settings;
         MdtMenuItem.Screen = mdt;
+        BcrMenuItem.Screen = bcr;
         
         InfoService = infoService;
         
@@ -91,6 +93,12 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
     {
         Name = "MDT",
         Icon = MaterialIconKind.Microscope,
+    };
+    
+    public ScreenMenuItem BcrMenuItem { get; } = new()
+    {
+        Name = "BCR",
+        Icon = MaterialIconKind.Scanner,
     };
     
     public ScreenMenuItem SettingsMenuItem { get; } = new()

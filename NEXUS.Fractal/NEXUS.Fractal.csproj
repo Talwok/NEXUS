@@ -54,6 +54,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NEXUS.Parsers.BCR\NEXUS.Parsers.BCR.csproj" />
       <ProjectReference Include="..\NEXUS.Parsers.MDT\NEXUS.Parsers.MDT.csproj" />
       <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
@@ -77,7 +78,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Controls\MdaSurface\MdaSurface.axaml" />
+      <AdditionalFiles Include="Controls\Surface\MdaSurface.axaml" />
     </ItemGroup>
 
     <ItemGroup>

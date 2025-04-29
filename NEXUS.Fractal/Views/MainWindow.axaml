@@ -73,6 +73,9 @@
                 <controls:NavigationViewItem DataContext="{Binding MdtMenuItem}" Content="{Binding Name}"
                                              IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
                 </controls:NavigationViewItem>
+                <controls:NavigationViewItem DataContext="{Binding BcrMenuItem}" Content="{Binding Name}"
+                                             IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
+                </controls:NavigationViewItem>
                 <controls:NavigationViewItem DataContext="{Binding ChartsMenuItem}" Content="{Binding Name}"
                                              IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
                     <controls:NavigationViewItem.InfoBadge>
