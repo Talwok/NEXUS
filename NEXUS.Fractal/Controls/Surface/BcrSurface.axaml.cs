@@ -55,9 +55,9 @@ public partial class BcrSurface : UserControl
         base.OnAttachedToVisualTree(e);
         
         // Загрузка данных высот
-        var processor = new BcrFrameImageProcessor(BcrFrame);
-        SurfaceOpenGl.SetHeightMap(processor.GetHeightMap());
         SurfaceOpenGl.SetColorTable(ColorTable);
+        var processor = BcrFrame.CreateFromBcrFrame();
+        SurfaceOpenGl.SetHeightMap(Normalize(processor.GetHeightMap()));
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -101,5 +101,51 @@ public partial class BcrSurface : UserControl
     private void OnViewCubeViewSelected(AxisViewType axisViewType)
     {
         SurfaceOpenGl.SetCameraPreset(axisViewType);
+    }
+    
+    public static double[,] Normalize(double[,] data)
+    {
+        if (data == null || data.Length == 0)
+            return data;
+
+        int rows = data.GetLength(0);
+        int cols = data.GetLength(1);
+    
+        // Find min and max values in the array
+        double min = data[0, 0];
+        double max = data[0, 0];
+    
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                if (data[i, j] < min) min = data[i, j];
+                if (data[i, j] > max) max = data[i, j];
+            }
+        }
+    
+        // Handle case where all values are the same (avoid division by zero)
+        if (min == max)
+        {
+            // You can choose to return all zeros, all 0.5, or the original array
+            // Here we return all 0.5 since it's in the middle of [0,1]
+            double[,] result = new double[rows, cols];
+            for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                result[i, j] = 0.5;
+            return result;
+        }
+    
+        // Normalize the data
+        double[,] normalized = new double[rows, cols];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                normalized[i, j] = (data[i, j] - min) / (max - min);
+            }
+        }
+    
+        return normalized;
     }
 }

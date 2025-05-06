@@ -2,9 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:mdaSurface="clr-namespace:NEXUS.Fractal.Controls.MdaSurface"
              xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
              xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
+             xmlns:openGl="clr-namespace:NEXUS.Fractal.Controls.OpenGL"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Fractal.Controls.Surface.MdaSurface"
              x:DataType="surface:MdaSurface"
@@ -13,7 +13,7 @@
 		<surface:MdaSurface/>
 	</Design.PreviewWith>
 	<Panel>
-		<mdaSurface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
+		<surface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
 		<Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto, Auto, *">
 			<viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
 			                          Margin="-20 -10"

@@ -51,9 +51,9 @@ public partial class MdaSurface : UserControl
         base.OnAttachedToVisualTree(e);
         
         // Загрузка данных высот
-        var processor = new MdaFrameImageProcessor(MdaFrame);
-        SurfaceOpenGl.SetHeightMap(processor.GetHeightMap());
         SurfaceOpenGl.SetColorTable(ColorTable);
+        var processor = MdaFrame.CreateFromMdaFrame();;
+        SurfaceOpenGl.SetHeightMap(processor.GetHeightMap());
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
