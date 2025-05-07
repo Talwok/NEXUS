@@ -4,24 +4,105 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
              xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
-             xmlns:openGl="clr-namespace:NEXUS.Fractal.Controls.OpenGL"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Fractal.Controls.Surface.MdaSurface"
              x:DataType="surface:MdaSurface"
              Background="Transparent">
-	<Design.PreviewWith>
-		<surface:MdaSurface/>
-	</Design.PreviewWith>
-	<Panel>
-		<surface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
-		<Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto, Auto, *">
-			<viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
-			                          Margin="-20 -10"
-			                          Width="120" Height="120"
-			                          ViewSelected="OnViewCubeViewSelected"/>
-			<Slider Grid.Row="1" Grid.Column="1" Value="{Binding #SurfaceOpenGl.HeightMultiplier}" Minimum="0" Maximum="5"/>
-			<ToggleButton Grid.Row="2" Grid.Column="1" Content="Foundation" IsChecked="{Binding #SurfaceOpenGl.ShowFoundation}"/>
-
-		</Grid>
-	</Panel>
+	<SplitView PanePlacement="Right" IsPaneOpen="{Binding #PaneButton.IsChecked}" DisplayMode="Inline">
+        <SplitView.Pane>
+            <Border BorderBrush="{DynamicResource SystemAccentColor}" BorderThickness="0.5 0 0 0">
+                <ScrollViewer>
+                    <StackPanel Spacing="8" Margin="8">
+                        <TextBlock Text="Приближение камеры" Classes="Title"
+                                   Foreground="{DynamicResource SystemAccentColor}" />
+                        <Grid ColumnDefinitions="*, 8, Auto, 8"
+                              RowDefinitions="Auto, 8, Auto, 8, Auto, 8">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Текущее" />
+                            <NumericUpDown Grid.Row="0" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=Magnify}" 
+                                           Value="{Binding #SurfaceOpenGl.Zoom}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Минимум" />
+                            <NumericUpDown Grid.Row="2" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=ZoomOutOutline}" 
+                                           Value="{Binding #SurfaceOpenGl.MinZoom}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Максимум" />
+                            <NumericUpDown Grid.Row="4" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=ZoomInOutline}" 
+                                           Value="{Binding #SurfaceOpenGl.MaxZoom}"/>
+                        </Grid>
+                        <Rectangle Fill="{DynamicResource SystemAccentColor}" HorizontalAlignment="Stretch" Height="2" />
+                        <TextBlock Text="Вращение камеры" Classes="Title"
+                                   Foreground="{DynamicResource SystemAccentColor}" />
+                        <Grid ColumnDefinitions="*, 8, Auto, 8"
+                              RowDefinitions="Auto, 8, Auto, 8">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Поворот" />
+                            <NumericUpDown Grid.Row="0" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=AxisZRotateClockwise}" 
+                                           Value="{Binding #SurfaceOpenGl.ModelYaw}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Наклон" />
+                            <NumericUpDown Grid.Row="2" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=AxisXRotateClockwise}" 
+                                           Value="{Binding #SurfaceOpenGl.ModelPitch}"/>
+                        </Grid>
+                        <Rectangle Fill="{DynamicResource SystemAccentColor}" HorizontalAlignment="Stretch" Height="2" />
+                        <TextBlock Text="Коэффициент усиления высоты" Classes="Title"
+                                   Foreground="{DynamicResource SystemAccentColor}" />
+                        <Grid ColumnDefinitions="*, 8, Auto, 8"
+                              RowDefinitions="Auto, 8">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Текущий" />
+                            <NumericUpDown Grid.Row="0" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=Mountain}" 
+                                           Value="{Binding #SurfaceOpenGl.HeightMultiplier}" Minimum="0" Maximum="5"/>
+                        </Grid>
+                        <Rectangle Fill="{DynamicResource SystemAccentColor}" HorizontalAlignment="Stretch" Height="2" />
+                        <TextBlock Text="Положение света" Classes="Title"
+                                   Foreground="{DynamicResource SystemAccentColor}" />
+                        <Grid ColumnDefinitions="*, 8, Auto, 8"
+                              RowDefinitions="Auto, 8, Auto, 8, Auto, 8">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Коорд. X" />
+                            <NumericUpDown Grid.Row="0" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=AxisXArrow}" 
+                                           Value="{Binding #SurfaceOpenGl.LightPositionX}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Коорд. Y" />
+                            <NumericUpDown Grid.Row="2" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=AxisZArrow}" 
+                                           Value="{Binding #SurfaceOpenGl.LightPositionY}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Коорд. Z" />
+                            <NumericUpDown Grid.Row="4" Grid.Column="2" Width="200"
+                                           InnerLeftContent="{avalonia:MaterialIconExt Kind=AxisYArrow}" 
+                                           Value="{Binding #SurfaceOpenGl.LightPositionZ}"/>
+                        </Grid>
+                        <Rectangle Fill="{DynamicResource SystemAccentColor}" HorizontalAlignment="Stretch" Height="2" />
+                        <TextBlock Text="Подложка" Classes="Title"
+                                   Foreground="{DynamicResource SystemAccentColor}" />
+                        <Grid ColumnDefinitions="*, 8, Auto, 8"
+                              RowDefinitions="Auto, 8">
+                            <ToggleSwitch Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                                          OnContent="{avalonia:MaterialIconTextExt Kind=CubeOutline, Text=Подложка включена}"
+                                          OffContent="{avalonia:MaterialIconTextExt Kind=CubeOffOutline, Text=Подложка выключена}"
+                                          IsChecked="{Binding #SurfaceOpenGl.ShowFoundation}"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </SplitView.Pane>
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="8 0">
+                <ToggleButton DockPanel.Dock="Right"
+                              Name="PaneButton"
+                              Content="{avalonia:MaterialIconExt Kind=DockRight}" ToolTip.Tip="Свойства модели" />
+            </DockPanel>
+            <Panel>
+                <surface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
+                <Image Source="{Binding #SurfaceOpenGl.Image}"/>
+                <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
+                    <viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
+                                              Margin="-20 -10"
+                                              Width="120" Height="120"
+                                              ViewSelected="OnViewCubeViewSelected"/>
+                </Grid>
+            </Panel>
+        </DockPanel>
+    </SplitView>
 </UserControl>

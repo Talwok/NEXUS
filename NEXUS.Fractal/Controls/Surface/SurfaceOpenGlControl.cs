@@ -5,12 +5,19 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using NEXUS.Fractal.Models;
+using NEXUS.Fractal.ViewModels;
 using NEXUS.Parsers.MDT.Models.Pallete;
 using Silk.NET.OpenGL;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using Color = Avalonia.Media.Color;
 
 namespace NEXUS.Fractal.Controls.Surface;
 
@@ -68,7 +75,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private int _lightPositionLocation;
     private int _cameraPositionLocation;
 
-    private string _glShaderVersion = "#version 330 core";
+    private string _glShaderVersion = "#version 300 es";
     private double[,]? _heightMap;
 
     // Camera parameters
@@ -84,9 +91,10 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private Color _foundationColor = Colors.LightGray;
     private PaletteColorTable _colorTable;
     private int _indicesCount;
-    private Vector3 _lightPosition = new (0, 0, 100);
+    private Vector3 _lightPosition = new(0, 0, 100);
     private float _minZoom = 1;
     private float _maxZoom = 300;
+    private Color _backgroundColor;
 
     /// <summary>
     /// Height multiplier for the surface
@@ -123,7 +131,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             UpdateRender();
         }
     }
-    
+
     public float ModelYaw
     {
         get => _modelYaw;
@@ -180,6 +188,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             UpdateRender();
         }
     }
+
     public float MinZoom
     {
         get => _minZoom;
@@ -187,9 +196,10 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         {
             _minZoom = value;
             OnPropertyChanged(nameof(MinZoom));
-            UpdateRender();       
+            UpdateRender();
         }
     }
+
     public float MaxZoom
     {
         get => _maxZoom;
@@ -200,7 +210,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             UpdateRender();
         }
     }
-    
+
+    public Bitmap Image { get; set; }
+
     /// <summary>
     /// Sets the height map for rendering
     /// </summary>
@@ -503,21 +515,22 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private void UploadBuffers(OpenGlPoint[] vertices, uint[] indices)
     {
         _indicesCount = indices.Length;
-        _gl.GenVertexArrays(1, out _vao);
-        _gl.BindVertexArray(_vao);
+
+        // Index Buffer
+        _ebo = _gl.GenBuffer();
+        _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
+        _gl.BufferData<uint>(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * Marshal.SizeOf<uint>()),
+            indices, BufferUsageARB.StaticDraw);
 
         // Vertex Buffer
-        _gl.GenBuffers(1, out _vbo);
+        _vbo = _gl.GenBuffer();
         _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
         _gl.BufferData<OpenGlPoint>(BufferTargetARB.ArrayBuffer,
             (nuint)(vertices.Length * Marshal.SizeOf<OpenGlPoint>()),
             vertices, BufferUsageARB.StaticDraw);
 
-        // Index Buffer
-        _gl.GenBuffers(1, out _ebo);
-        _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
-        _gl.BufferData<uint>(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * sizeof(uint)),
-            indices, BufferUsageARB.StaticDraw);
+        _gl.GenVertexArrays(1, out _vao);
+        _gl.BindVertexArray(_vao);
 
         var pointSize = Marshal.SizeOf<OpenGlPoint>();
         var floatSize = Marshal.SizeOf<float>();
@@ -546,6 +559,17 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         _gl.Enable(EnableCap.DepthTest);
         _gl.DepthFunc(DepthFunction.Less);
+        
+        if (this.TryFindResource("SolidBackgroundFillColorTertiary",
+                ActualThemeVariant,
+                out var backgroundTertiary)
+            && backgroundTertiary is Color backgroundColor)
+        {
+            _backgroundColor = backgroundColor;
+        }
+        
+        _gl.ClearColor(_backgroundColor.R / 255f, _backgroundColor.G / 255f, _backgroundColor.B / 255f, 1);
+
     }
 
     protected override void OnOpenGlDeinit(GlInterface gl)
@@ -567,8 +591,10 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
     protected override void OnOpenGlRender(GlInterface gl, int fb)
     {
-        _gl.ClearColor(0, 0, 0, 0);
+        _gl.ClearColor(_backgroundColor.R / 255f, _backgroundColor.G / 255f, _backgroundColor.B / 255f, 1);
         _gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+        _gl.Enable(EnableCap.DepthTest);
 
         var window = TopLevel.GetTopLevel(this) as Window;
         int width = (int)(Bounds.Width * window?.DesktopScaling ?? 1);
@@ -576,11 +602,11 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         _gl.Viewport(0, 0, (uint)width, (uint)height);
 
-        _gl.UseProgram(_shaderProgram);
-
         _gl.BindVertexArray(_vao);
         _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
         _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
+
+        _gl.UseProgram(_shaderProgram);
 
         // Model matrix
         _modelMatrix = Matrix4x4.CreateRotationY(ModelYaw) *
@@ -609,11 +635,52 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         if (_heightMap != null)
         {
             _gl.DrawElements<uint>(PrimitiveType.Triangles, (uint)_indicesCount, DrawElementsType.UnsignedInt, null);
+            SetFrameBufferToBitmap(width, height);
+        }
+    }
+
+    private unsafe void SetFrameBufferToBitmap(int width, int height)
+    {
+        try
+        {
+            // Allocate a byte array for the pixel data
+            byte[] pixels = new byte[width * height * 4]; // 4 bytes per pixel (RGBA)
+
+            // Pin the array to get a pointer
+            fixed (byte* ptr = pixels)
+            {
+                // Read the pixel data into the pinned array
+                _gl.ReadPixels(0, 0, (uint)width, (uint)height, GLEnum.Rgba, GLEnum.UnsignedByte, ptr);
+            }
+
+            Rgba32[] pixelsRgba32 = new Rgba32[pixels.Length / 4];;
+            for (int i = 0; i < pixels.Length; i += 4)
+            {
+                pixelsRgba32[i / 4] = new Rgba32(
+                    pixels[i], 
+                    pixels[i + 1], 
+                    pixels[i + 2], 
+                    pixels[i + 3]);
+            }
+
+            // Save the pixel data to a PNG file using ImageSharp
+            using var image =
+                SixLabors.ImageSharp.Image.LoadPixelData(new ReadOnlySpan<Rgba32>(pixelsRgba32), width,
+                    height);
+            image.Mutate(ctx => ctx.Flip(FlipMode.Vertical));
+            Image = image.ConvertToBitmap();
+            OnPropertyChanged(nameof(Image));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load frame buffer: {ex.Message}");
         }
     }
 
     private void ConfigureShaders()
     {
+        var version = _gl.GetStringS(StringName.Version);
+
         _vertexShader = _gl.CreateShader(ShaderType.VertexShader);
         _gl.ShaderSource(_vertexShader, VertexShaderSource);
         _gl.CompileShader(_vertexShader);
@@ -638,6 +705,11 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _showFoundationLocation = _gl.GetUniformLocation(_shaderProgram, "showFoundation");
         _lightPositionLocation = _gl.GetUniformLocation(_shaderProgram, "lightPosition");
         _cameraPositionLocation = _gl.GetUniformLocation(_shaderProgram, "cameraPosition");
+
+        _gl.DetachShader(_shaderProgram, _vertexShader);
+        _gl.DetachShader(_shaderProgram, _fragmentShader);
+        _gl.DeleteShader(_vertexShader);
+        _gl.DeleteShader(_fragmentShader);
     }
 
     private void CheckShaderCompileError(uint shader)
@@ -706,26 +778,22 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     {
         Dispatcher.UIThread.Post(RequestNextFrameRendering, DispatcherPriority.Background);
     }
-    
+
     // Shader sources remain the same as in original
     private string VertexShaderSource => _glShaderVersion + @"
-    
-
+    precision mediump float;
     layout(location = 0) in vec3 aPos;
     layout(location = 1) in vec3 aColor;
     layout(location = 2) in vec3 aNormal;
     layout(location = 3) in float aIsBasement;
-
-    out vec3 FragPos;
-    out vec3 Normal;
-    out vec3 VertexColor;
-    out float IsBasement;
-
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
     uniform float heightMultiplier;
-
+    out vec3 FragPos;
+    out vec3 Normal;
+    out vec3 VertexColor;
+    out float IsBasement;
     void main()
     {
         FragPos = vec3(model * vec4(aPos.x, aPos.y * heightMultiplier, aPos.z, 1.0));
@@ -736,48 +804,39 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     }";
 
     private string FragmentShaderSource => _glShaderVersion + @"
-    
-
+    precision mediump float; 
     in vec3 FragPos;
     in vec3 Normal;
     in vec3 VertexColor;
     in float IsBasement;
-
-    out vec4 FragColor;
-
     uniform vec3 lightPosition;
-
-    uniform vec3 cameraPosition;
-    
+    uniform vec3 cameraPosition;    
     uniform float showFoundation;
-
+    out vec4 FragColor;
     void main()
     {
         if (showFoundation < 0.5 && IsBasement > 0.5) 
         {
             discard;
         }
-
         // Ambient
         float ambientStrength = 0.3;
         vec3 ambient = ambientStrength * VertexColor;
-
         // Diffuse
         vec3 norm = normalize(Normal);
         vec3 lightDir = normalize(lightPosition - FragPos);
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = diff * VertexColor;
-
         // Specular
         float specularStrength = 0.4;
         vec3 viewDir = normalize(cameraPosition - FragPos);
         vec3 reflectDir = reflect(-lightDir, norm);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
         vec3 specular = specularStrength * spec * vec3(1.0);
-
         vec3 result = IsBasement > 0.5 ? VertexColor : ambient + diffuse + specular;
         FragColor = vec4(result, 1.0);  
     }";
+
 
     public new event PropertyChangedEventHandler? PropertyChanged;
 

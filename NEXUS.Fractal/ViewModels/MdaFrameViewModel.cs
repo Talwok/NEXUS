@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using NEXUS.Parsers.MDT.Models.Pallete;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace NEXUS.Fractal.ViewModels;

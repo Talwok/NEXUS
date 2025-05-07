@@ -16,7 +16,7 @@
         <PackageReference Include="Avalonia" Version="11.3.0" />
         <PackageReference Include="Avalonia.Controls.PanAndZoom" Version="11.2.0" />
         <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
-        <PackageReference Include="Avalonia.Svg.Skia" Version="11.2.7.1" />
+        <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
@@ -26,12 +26,9 @@
         <PackageReference Include="Material.Icons.Avalonia" Version="2.4.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
-        <PackageReference Include="OpenTK" Version="4.9.4" />
         <PackageReference Include="ReactiveUI" Version="20.2.45" />
         <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
-        <PackageReference Include="Silk.NET.Input" Version="2.22.0" />
         <PackageReference Include="Silk.NET.OpenGL" Version="2.22.0" />
-        <PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
     </ItemGroup>
 
     <ItemGroup>

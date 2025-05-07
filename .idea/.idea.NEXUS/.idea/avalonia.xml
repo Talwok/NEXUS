@@ -49,6 +49,7 @@
         <entry key="NEXUS.Fractal/Views/SettingsScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/Test.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/UserControl1.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Views/UserControlView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Growth/App.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Growth/Views/MainWindow.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />
         <entry key="NEXUS.Growth/Views/SettingsScreenView.axaml" value="NEXUS.Growth/NEXUS.Growth.csproj" />

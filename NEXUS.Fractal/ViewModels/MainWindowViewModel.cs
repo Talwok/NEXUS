@@ -36,12 +36,13 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
         
         InfoService = infoService;
         
+#if !DEBUG
         if (Version != null)
         {
             _updater = new GitHubUpdater(ApplicationType.Fractal, Version);
         }
-        
         _ = CheckForUpdates();
+#endif
         
         UpdateCommand = ReactiveCommand.CreateFromTask(
             async () =>

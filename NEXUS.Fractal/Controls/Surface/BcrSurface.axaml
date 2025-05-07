@@ -95,6 +95,7 @@
             </DockPanel>
             <Panel>
                 <surface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
+                <Image Source="{Binding #SurfaceOpenGl.Image}"/>
                 <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
                     <viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
                                               Margin="-20 -10"
