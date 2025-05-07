@@ -96,6 +96,7 @@
         <entry key="NEXUS/Styles/Control/Styles/FlyoutPresenter.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/MaterialIcon.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/NexusRangeSlider.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Styles/NumberBox.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/NumericUpDown.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/TabView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/TabViewItem.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />

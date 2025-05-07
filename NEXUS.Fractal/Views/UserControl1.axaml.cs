@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace NEXUS.Fractal.Views;
 
-public partial class UserControlView : UserControl
+public partial class UserControl1 : UserControl
 {
-    public UserControlView()
+    public UserControl1()
     {
         InitializeComponent();
     }

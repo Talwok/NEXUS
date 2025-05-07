@@ -74,6 +74,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private int _showFoundationLocation;
     private int _lightPositionLocation;
     private int _cameraPositionLocation;
+    private int _ambientStrengthLocation;
+    private int _specularStrengthLocation;
 
     private string _glShaderVersion = "#version 300 es";
     private double[,]? _heightMap;
@@ -95,7 +97,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private float _minZoom = 1;
     private float _maxZoom = 300;
     private Color _backgroundColor;
-
+    private float _ambientStrength = 0.3f;
+    private float _specularStrength = 0.4f;
+    
     /// <summary>
     /// Height multiplier for the surface
     /// </summary>
@@ -213,6 +217,28 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
     public Bitmap Image { get; set; }
 
+    public float AmbientStrength
+    {
+        get => _ambientStrength;
+        set
+        {
+            _ambientStrength = value;
+            OnPropertyChanged(nameof(AmbientStrength));
+            UpdateRender();
+        }
+    }
+
+    public float SpecularStrength
+    {
+        get => _specularStrength;
+        set
+        {
+            _specularStrength = value;
+            OnPropertyChanged(nameof(SpecularStrength));
+            UpdateRender();
+        }
+    }
+    
     /// <summary>
     /// Sets the height map for rendering
     /// </summary>
@@ -632,6 +658,9 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _gl.Uniform3(_lightPositionLocation, _lightPosition);
         _gl.Uniform3(_cameraPositionLocation, _cameraPosition);
 
+        _gl.Uniform1(_ambientStrengthLocation, _ambientStrength);
+        _gl.Uniform1(_specularStrengthLocation, _specularStrength);
+        
         if (_heightMap != null)
         {
             _gl.DrawElements<uint>(PrimitiveType.Triangles, (uint)_indicesCount, DrawElementsType.UnsignedInt, null);
@@ -705,7 +734,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _showFoundationLocation = _gl.GetUniformLocation(_shaderProgram, "showFoundation");
         _lightPositionLocation = _gl.GetUniformLocation(_shaderProgram, "lightPosition");
         _cameraPositionLocation = _gl.GetUniformLocation(_shaderProgram, "cameraPosition");
-
+        _ambientStrengthLocation = _gl.GetUniformLocation(_shaderProgram, "ambientStrength");
+        _specularStrengthLocation = _gl.GetUniformLocation(_shaderProgram, "specularStrength");
         _gl.DetachShader(_shaderProgram, _vertexShader);
         _gl.DetachShader(_shaderProgram, _fragmentShader);
         _gl.DeleteShader(_vertexShader);
@@ -812,6 +842,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     uniform vec3 lightPosition;
     uniform vec3 cameraPosition;    
     uniform float showFoundation;
+    uniform float ambientStrength;
+    uniform float specularStrength;
     out vec4 FragColor;
     void main()
     {
@@ -820,7 +852,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             discard;
         }
         // Ambient
-        float ambientStrength = 0.3;
         vec3 ambient = ambientStrength * VertexColor;
         // Diffuse
         vec3 norm = normalize(Normal);
@@ -828,7 +859,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = diff * VertexColor;
         // Specular
-        float specularStrength = 0.4;
         vec3 viewDir = normalize(cameraPosition - FragPos);
         vec3 reflectDir = reflect(-lightDir, norm);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);

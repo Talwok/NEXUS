@@ -6,6 +6,7 @@
                 <ResourceInclude Source="TabView.axaml" />
                 <ResourceInclude Source="TabViewItem.axaml" />
                 <ResourceInclude Source="TabViewListView.axaml" />
+                <ResourceInclude Source="NumberBox.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Styles.Resources>
