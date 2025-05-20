@@ -160,7 +160,7 @@ public class MdaFrameImageProcessor
         };
     }
 
-    public double[,] GetHeightMap()
+    public float[,] GetHeightMap()
     {
         int width = (int)(_frame.Dimensions[0].MaxIndex - _frame.Dimensions[0].MinIndex + 1);
         int height = (int)(_frame.Dimensions[1].MaxIndex - _frame.Dimensions[1].MinIndex + 1);
@@ -170,7 +170,7 @@ public class MdaFrameImageProcessor
         var range = _originalRange.MaxValue - _originalRange.MinValue;
         if (range == 0) range = 1; // защита от деления на ноль
     
-        var map = new double[height, width]; // Обратите внимание на порядок height/width
+        var map = new float[height, width]; // Обратите внимание на порядок height/width
     
         for (int y = 0; y < height; y++)
         {

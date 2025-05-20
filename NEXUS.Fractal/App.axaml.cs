@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -36,27 +37,42 @@ public partial class App : Application
         serviceCollection.AddSingleton<ChartService>(); 
         serviceCollection.AddSingleton<InfoService>();
         serviceCollection.AddSingleton<CalculationService>();
-        serviceCollection.AddSingleton<MdtService>();
-        serviceCollection.AddSingleton<BcrService>();
+        serviceCollection.AddSingleton<StatefulServiceBase, ProjectService>();
         
-        serviceCollection.AddSingleton<ImagesScreenViewModel>();
-        serviceCollection.AddSingleton<ChartsScreenViewModel>();
         serviceCollection.AddSingleton<SettingsScreenViewModel>();
-        serviceCollection.AddSingleton<MdtScreenViewModel>();
-        serviceCollection.AddSingleton<BcrScreenViewModel>();
+        
+        serviceCollection.AddSingleton<StatefulViewModelBase, SettingsViewModel>();
         
         serviceCollection.AddSingleton<MainWindowViewModel>();
 
         var mainWindow = new MainWindow();
-        
+        mainWindow.Closing += (sender, args) =>
+        {
+            var statefulVms = ServiceProvider.GetServices<StatefulViewModelBase>();
+            var statefulSvcs = ServiceProvider.GetServices<StatefulServiceBase>();
+
+            foreach (var statefulVm in statefulVms)
+            {
+                _ = statefulVm.Save();
+            }
+            foreach (var statefulSvc in statefulSvcs)
+            {
+                _ = statefulSvc.Save();
+            }
+        };
         serviceCollection.AddSingleton(mainWindow.StorageProvider);
         serviceCollection.AddSingleton(mainWindow);
         
         ServiceProvider = serviceCollection.BuildServiceProvider();
         
-        foreach (var statefulViewModelBase in ServiceProvider.GetServices<StatefulViewModelBase>())
+        foreach (var statefulVm in ServiceProvider.GetServices<StatefulViewModelBase>())
         {
-            _ = statefulViewModelBase.Load();
+            _ = statefulVm.Load();
+        }
+        
+        foreach (var statefulSvc in ServiceProvider.GetServices<StatefulServiceBase>())
+        {
+            _ = statefulSvc.Load();
         }
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

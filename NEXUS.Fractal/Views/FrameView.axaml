@@ -1,0 +1,70 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
+             xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Views.FrameView"
+             x:DataType="viewModels:FrameViewModel">
+    <TabControl SelectedIndex="{Binding SelectedViewTabIndex, Mode=TwoWay}" TabStripPlacement="Bottom">
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <avalonia:MaterialIcon Kind="SquareOutline" />
+                    <TextBlock Text="2D" />
+                </StackPanel>
+            </TabItem.Header>
+            <ScrollViewer x:Name="ScrollViewer"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto">
+                <ZoomBorder Name="ZoomBorder" Stretch="None" ZoomSpeed="1.2"
+                            EnableConstrains="True"
+                            PanButton="Left"
+                            ClipToBounds="True" Focusable="True"
+                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Image Source="{Binding FrameImage}" />
+                </ZoomBorder>
+            </ScrollViewer>
+        </TabItem>
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <avalonia:MaterialIcon Kind="CubeOutline" />
+                    <TextBlock Text="3D" />
+                </StackPanel>
+            </TabItem.Header>
+            <Panel Background="Transparent" 
+                   PointerPressed="InputElement_OnPointerPressed"
+                   PointerReleased="InputElement_OnPointerReleased"
+                   PointerMoved="InputElement_OnPointerMoved"
+                   PointerWheelChanged="InputElement_OnPointerWheelChanged">
+                <Panel Name="ViewPanel">
+                    <surface:SurfaceOpenGlControl Name="SurfaceOpenGl" 
+                                                  HeightMap="{Binding HeightMap, Mode=TwoWay}"
+                                                  ColorTable="{Binding ColorTable, Mode=TwoWay}"
+                                                  AmbientStrength="{Binding AmbientStrength, Mode=TwoWay}"
+                                                  SpecularStrength="{Binding SpecularStrength, Mode=TwoWay}"
+                                                  HeightMultiplier="{Binding HeightMultiplier, Mode=TwoWay}"
+                                                  LightPositionX="{Binding LightPositionX, Mode=TwoWay}"
+                                                  LightPositionY="{Binding LightPositionY, Mode=TwoWay}"
+                                                  LightPositionZ="{Binding LightPositionZ, Mode=TwoWay}"
+                                                  Zoom="{Binding Zoom, Mode=TwoWay}"
+                                                  ModelYaw="{Binding ModelYaw, Mode=TwoWay}"
+                                                  ModelPitch="{Binding ModelPitch, Mode=TwoWay}"
+                                                  ShowFoundation="{Binding ShowFoundation, Mode=TwoWay}"/>
+                </Panel>
+                <Image Source="{Binding #SurfaceOpenGl.Image}" />
+                <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
+                    <viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
+                                              Margin="-20 -10"
+                                              Width="120" Height="120"
+                                              ViewSelected="OnViewCubeViewSelected" />
+                </Grid>
+            </Panel>
+            <!-- <surface:Surface Frame="{Binding .}"/> -->
+        </TabItem>
+    </TabControl>
+</UserControl>

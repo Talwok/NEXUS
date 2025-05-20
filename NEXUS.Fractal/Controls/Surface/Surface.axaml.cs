@@ -2,17 +2,18 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using NEXUS.Fractal.Models;
-using NEXUS.Parsers.MDT.Helpers;
-using NEXUS.Parsers.MDT.Models.Frames.MDA;
-using NEXUS.Parsers.MDT.Models.Pallete;
+using NEXUS.Fractal.ViewModels;
+using ReactiveUI;
+using System;
 
 namespace NEXUS.Fractal.Controls.Surface;
 
-public partial class MdaSurface : UserControl
+public partial class Surface : UserControl
 {
     private Point _lastMousePosition;
     private bool _isRotating;
-    public MdaSurface()
+    
+    public Surface()
     {
         InitializeComponent();
         
@@ -23,37 +24,29 @@ public partial class MdaSurface : UserControl
         PointerWheelChanged += OnPointerWheelChanged;
     }
 
-    private MdaFrame _mdaFrame;
+    private FrameViewModel _frame;
 
-    public static readonly DirectProperty<MdaSurface, MdaFrame> MdaFrameProperty = AvaloniaProperty.RegisterDirect<MdaSurface, MdaFrame>(
-        nameof(MdaFrame), o => o.MdaFrame, (o, v) => o.MdaFrame = v);
+    public static readonly DirectProperty<Surface, FrameViewModel> FrameProperty = AvaloniaProperty.RegisterDirect<Surface, FrameViewModel>(
+        nameof(Frame), o => o.Frame, (o, v) => o.Frame = v);
 
-    public MdaFrame MdaFrame
+    public FrameViewModel Frame
     {
-        get => _mdaFrame;
-        set => SetAndRaise(MdaFrameProperty, ref _mdaFrame, value);
+        get => _frame;
+        set => SetAndRaise(FrameProperty, ref _frame, value);
     }
-
-    private PaletteColorTable _colorTable;
-
-    public static readonly DirectProperty<MdaSurface, PaletteColorTable> ColorTableProperty = AvaloniaProperty.RegisterDirect<MdaSurface, PaletteColorTable>(
-        nameof(ColorTable), o => o.ColorTable, (o, v) => o.ColorTable = v);
-
-    public PaletteColorTable ColorTable
-    {
-        get => _colorTable;
-        set => SetAndRaise(ColorTableProperty, ref _colorTable, value);
-    }
-    
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
         
-        // Загрузка данных высот
-        SurfaceOpenGl.SetColorTable(ColorTable);
-        var processor = MdaFrame.CreateFromMdaFrame();;
-        SurfaceOpenGl.SetHeightMap(processor.GetHeightMap());
+        Frame.WhenAnyValue(
+                vm => vm.HeightMap,
+                vm => vm.ColorTable)
+            .Subscribe(_ =>
+            {
+                ViewPanel.Children.Remove(SurfaceOpenGl);
+                ViewPanel.Children.Add(SurfaceOpenGl);
+            });
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)

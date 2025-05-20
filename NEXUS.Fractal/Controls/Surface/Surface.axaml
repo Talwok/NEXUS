@@ -7,8 +7,8 @@
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NEXUS.Fractal.Controls.Surface.BcrSurface"
-             x:DataType="surface:BcrSurface"
+             x:Class="NEXUS.Fractal.Controls.Surface.Surface"
+             x:DataType="surface:Surface"
              Background="Transparent">
     <SplitView PanePlacement="Right" IsPaneOpen="{Binding #PaneButton.IsChecked}" DisplayMode="Inline">
         <SplitView.Pane>
@@ -26,10 +26,6 @@
                         </StackPanel.Styles>
                         <avalonia:MaterialIconText Kind="Cctv" Text="Камера" Classes="Title" 
                                                    Foreground="{DynamicResource SystemAccentColor}"/>
-                        <controls:NumberBox Header="{avalonia:MaterialIconTextExt Kind=ZoomOutOutline, Text=Минимум приближения}" 
-                                            Value="{Binding #SurfaceOpenGl.MinZoom}"/>
-                        <controls:NumberBox Header="{avalonia:MaterialIconTextExt Kind=ZoomInOutline, Text=Максимум приближения}" 
-                                            Value="{Binding #SurfaceOpenGl.MaxZoom}"/>
                         <controls:NumberBox Header="{avalonia:MaterialIconTextExt Kind=Magnify, Text=Текущее приближение}" 
                                             Value="{Binding #SurfaceOpenGl.Zoom}"/>
                         <controls:NumberBox Header="{avalonia:MaterialIconTextExt Kind=AxisZRotateClockwise, Text=Поворот камеры}" 
@@ -68,7 +64,9 @@
                               Content="{avalonia:MaterialIconExt Kind=DockRight}" ToolTip.Tip="Свойства модели" />
             </DockPanel>
             <Panel>
-                <surface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
+                <Panel Name="ViewPanel">
+                    <surface:SurfaceOpenGlControl Name="SurfaceOpenGl"/>
+                </Panel>
                 <Image Source="{Binding #SurfaceOpenGl.Image}"/>
                 <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
                     <viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"

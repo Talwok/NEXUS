@@ -127,5 +127,18 @@ public class BcrFrameImageProcessor
     }
 
 
-    public double[,] GetHeightMap() => _frame.Data;
+    public float[,] GetHeightMap() => ConvertToFloatHeightMap(_frame.Data);
+
+    private float[,] ConvertToFloatHeightMap(double[,] heightMap)
+    {
+        var floatHeightMap = new float[
+            heightMap.GetLength(0), 
+            heightMap.GetLength(1)];
+        
+        for (int i = 0; i < heightMap.GetLength(0); i++)
+        for (int j = 0; j < heightMap.GetLength(1); j++) 
+            floatHeightMap[i, j] = (float)heightMap[i, j];
+        
+        return floatHeightMap;
+    }
 }

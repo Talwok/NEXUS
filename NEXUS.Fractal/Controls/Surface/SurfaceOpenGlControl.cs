@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -33,12 +35,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     /// </summary>
     private struct OpenGlPoint
     {
-        public float X;
-        public float Y;
-        public float Z;
-        public float R;
-        public float G;
-        public float B;
+        public float X, Y, Z;
+        public float R, G, B;
         public float Nx, Ny, Nz;
         public float IsBasement;
 
@@ -78,8 +76,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private int _specularStrengthLocation;
 
     private string _glShaderVersion = "#version 300 es";
-    private double[,]? _heightMap;
-
     // Camera parameters
     private static readonly Vector3 CameraStartPosition = new(0, 0, 75);
     private Vector3 _cameraPosition = CameraStartPosition;
@@ -91,178 +87,205 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     private float _heightMultiplier = 1f;
     private bool _showFoundation = true;
     private Color _foundationColor = Colors.LightGray;
-    private PaletteColorTable _colorTable;
     private int _indicesCount;
-    private Vector3 _lightPosition = new(0, 0, 100);
     private float _minZoom = 1;
     private float _maxZoom = 300;
     private Color _backgroundColor;
     private float _ambientStrength = 0.3f;
     private float _specularStrength = 0.4f;
     
-    /// <summary>
-    /// Height multiplier for the surface
-    /// </summary>
+    // ColorTable
+    public static readonly DirectProperty<SurfaceOpenGlControl, PaletteColorTable> ColorTableProperty =
+        AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, PaletteColorTable>(
+            nameof(ColorTable),
+            o => o.ColorTable,
+            (o, v) => o.ColorTable = v,
+            enableDataValidation: false);
+
+    private PaletteColorTable _colorTable;
+    public PaletteColorTable ColorTable
+    {
+        get => _colorTable;
+        set
+        {
+            SetAndRaise(ColorTableProperty, ref _colorTable, value);
+            RecreateBuffersFromHeightMap();
+            UpdateRender();
+        }
+    }
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float[,]> HeightMapProperty =
+        AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float[,]>(
+            nameof(HeightMap),
+            o => o.HeightMap,
+            (o, v) => o.HeightMap = v);
+
+    private float[,] _heightMap;
+    public float[,] HeightMap
+    {
+        get => _heightMap;
+        set
+        {
+            SetAndRaise(HeightMapProperty, ref _heightMap, value);
+            RecreateBuffersFromHeightMap();
+            UpdateRender();
+        }
+    }
+
+    
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> HeightMultiplierProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(HeightMultiplier), o => o.HeightMultiplier, (o, v) => o.HeightMultiplier = v);
+
     public float HeightMultiplier
     {
         get => _heightMultiplier;
         set
         {
-            _heightMultiplier = value;
-            OnPropertyChanged(nameof(HeightMultiplier));
+            SetAndRaise(HeightMultiplierProperty, ref _heightMultiplier, value);
             UpdateRender();
         }
     }
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, bool> ShowFoundationProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, bool>(
+        nameof(ShowFoundation), o => o.ShowFoundation, (o, v) => o.ShowFoundation = v);
 
     public bool ShowFoundation
     {
         get => _showFoundation;
         set
         {
-            _showFoundation = value;
-            OnPropertyChanged(nameof(ShowFoundation));
+            SetAndRaise(ShowFoundationProperty, ref _showFoundation, value);
             UpdateRender();
         }
     }
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> ModelPitchProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(ModelPitch), o => o.ModelPitch, (o, v) => o.ModelPitch = v);
 
     public float ModelPitch
     {
         get => _modelPitch;
         set
         {
-            _modelPitch = value;
-            OnPropertyChanged(nameof(ModelPitch));
+            SetAndRaise(ModelPitchProperty, ref _modelPitch, value);
             UpdateRender();
         }
     }
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> ModelYawProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(ModelYaw), o => o.ModelYaw, (o, v) => o.ModelYaw = v);
 
     public float ModelYaw
     {
         get => _modelYaw;
         set
         {
-            _modelYaw = value;
-            OnPropertyChanged(nameof(ModelYaw));
+            SetAndRaise(ModelYawProperty, ref _modelYaw, value);
             UpdateRender();
         }
     }
+
+    private float _lightPositionX;
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> LightPositionXProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(LightPositionX), o => o.LightPositionX, (o, v) => o.LightPositionX = v);
 
     public float LightPositionX
     {
-        get => _lightPosition.X;
+        get => _lightPositionX;
         set
         {
-            _lightPosition.X = value;
-            OnPropertyChanged(nameof(LightPositionX));
+            SetAndRaise(LightPositionXProperty, ref _lightPositionX, value);
             UpdateRender();
         }
     }
+
+    private float _lightPositionY;
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> LightPositionYProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(LightPositionY), o => o.LightPositionY, (o, v) => o.LightPositionY = v);
 
     public float LightPositionY
     {
-        get => _lightPosition.Y;
+        get => _lightPositionY;
         set
         {
-            _lightPosition.Y = value;
-            OnPropertyChanged(nameof(LightPositionY));
+            SetAndRaise(LightPositionYProperty, ref _lightPositionY, value);
             UpdateRender();
         }
     }
+
+    private float _lightPositionZ;
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> LightPositionZProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(LightPositionZ), o => o.LightPositionZ, (o, v) => o.LightPositionZ = v);
 
     public float LightPositionZ
     {
-        get => _lightPosition.Z;
+        get => _lightPositionZ;
         set
         {
-            _lightPosition.Z = value;
-            OnPropertyChanged(nameof(LightPositionZ));
+            SetAndRaise(LightPositionZProperty, ref _lightPositionZ, value);
             UpdateRender();
         }
     }
+
+    private float _zoom;
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> ZoomProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(Zoom), o => o.Zoom, (o, v) => o.Zoom = v);
 
     public float Zoom
     {
-        get => Vector3.Distance(_cameraPosition, _cameraTarget);
+        get => _zoom;
         set
         {
+            if(value < 1)
+                return;
+            
+            SetAndRaise(ZoomProperty, ref _zoom, value);
             var direction = Vector3.Normalize(_cameraTarget - _cameraPosition);
-            var newDistance = Math.Clamp(value, MinZoom, MaxZoom);
+            var newDistance = Math.Clamp(value, _minZoom, _maxZoom);
             _cameraPosition = _cameraTarget - direction * newDistance;
-            OnPropertyChanged(nameof(Zoom));
             UpdateRender();
         }
     }
-
-    public float MinZoom
-    {
-        get => _minZoom;
-        set
-        {
-            _minZoom = value;
-            OnPropertyChanged(nameof(MinZoom));
-            UpdateRender();
-        }
-    }
-
-    public float MaxZoom
-    {
-        get => _maxZoom;
-        set
-        {
-            _maxZoom = value;
-            OnPropertyChanged(nameof(MaxZoom));
-            UpdateRender();
-        }
-    }
-
-    public Bitmap Image { get; set; }
+    
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> AmbientStrengthProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(AmbientStrength), o => o.AmbientStrength, (o, v) => o.AmbientStrength = v);
 
     public float AmbientStrength
     {
         get => _ambientStrength;
         set
         {
-            _ambientStrength = value;
-            OnPropertyChanged(nameof(AmbientStrength));
+            SetAndRaise(AmbientStrengthProperty, ref _ambientStrength, value);
             UpdateRender();
         }
     }
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> SpecularStrengthProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(SpecularStrength), o => o.SpecularStrength, (o, v) => o.SpecularStrength = v);
 
     public float SpecularStrength
     {
         get => _specularStrength;
         set
         {
-            _specularStrength = value;
-            OnPropertyChanged(nameof(SpecularStrength));
+            SetAndRaise(SpecularStrengthProperty, ref _specularStrength, value);
             UpdateRender();
         }
     }
     
-    /// <summary>
-    /// Sets the height map for rendering
-    /// </summary>
-    public void SetHeightMap(double[,] heightMap)
-    {
-        _heightMap = heightMap;
-        RegenerateModel();
-    }
-
-    private void RegenerateModel()
-    {
-        if (_heightMap != null)
-        {
-            UpdateRender();
-        }
-    }
-
+    public Bitmap Image { get; set; }
+    
     /// <summary>
     /// Creates vertex and index buffers from height map
     /// </summary>
     private void RecreateBuffersFromHeightMap()
     {
-        if (_heightMap == null || _gl == null) return;
-
+        if (_heightMap == null || _gl == null || _colorTable == null) return;
+        
         int rows = _heightMap.GetLength(0);
         int cols = _heightMap.GetLength(1);
 
@@ -546,14 +569,14 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _ebo = _gl.GenBuffer();
         _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
         _gl.BufferData<uint>(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * Marshal.SizeOf<uint>()),
-            indices, BufferUsageARB.StaticDraw);
-
+            indices, BufferUsageARB.StreamDraw);
+        
         // Vertex Buffer
         _vbo = _gl.GenBuffer();
         _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
         _gl.BufferData<OpenGlPoint>(BufferTargetARB.ArrayBuffer,
             (nuint)(vertices.Length * Marshal.SizeOf<OpenGlPoint>()),
-            vertices, BufferUsageARB.StaticDraw);
+            vertices, BufferUsageARB.StreamDraw);
 
         _gl.GenVertexArrays(1, out _vao);
         _gl.BindVertexArray(_vao);
@@ -564,7 +587,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         // Vertex Attributes
         _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint)pointSize, 0);
         _gl.EnableVertexAttribArray(0);
-
+        
         _gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (uint)pointSize, 3 * floatSize);
         _gl.EnableVertexAttribArray(1);
 
@@ -574,18 +597,18 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _gl.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, (uint)pointSize, 9 * floatSize);
         _gl.EnableVertexAttribArray(3);
     }
-
+    
     protected override void OnOpenGlInit(GlInterface gl)
     {
         base.OnOpenGlInit(gl);
         _gl = GL.GetApi(gl.GetProcAddress);
-
+        
         ConfigureShaders();
         RecreateBuffersFromHeightMap();
 
         _gl.Enable(EnableCap.DepthTest);
         _gl.DepthFunc(DepthFunction.Less);
-        
+
         if (this.TryFindResource("SolidBackgroundFillColorTertiary",
                 ActualThemeVariant,
                 out var backgroundTertiary)
@@ -593,9 +616,8 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         {
             _backgroundColor = backgroundColor;
         }
-        
-        _gl.ClearColor(_backgroundColor.R / 255f, _backgroundColor.G / 255f, _backgroundColor.B / 255f, 1);
 
+        _gl.ClearColor(_backgroundColor.R / 255f, _backgroundColor.G / 255f, _backgroundColor.B / 255f, 1);
     }
 
     protected override void OnOpenGlDeinit(GlInterface gl)
@@ -655,12 +677,12 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _gl.Uniform1(_heightMultiplierLocation, _heightMultiplier);
         _gl.Uniform1(_showFoundationLocation, _showFoundation ? 1f : 0f);
 
-        _gl.Uniform3(_lightPositionLocation, _lightPosition);
+        _gl.Uniform3(_lightPositionLocation, new Vector3(LightPositionX, LightPositionY, LightPositionZ));;
         _gl.Uniform3(_cameraPositionLocation, _cameraPosition);
 
         _gl.Uniform1(_ambientStrengthLocation, _ambientStrength);
         _gl.Uniform1(_specularStrengthLocation, _specularStrength);
-        
+
         if (_heightMap != null)
         {
             _gl.DrawElements<uint>(PrimitiveType.Triangles, (uint)_indicesCount, DrawElementsType.UnsignedInt, null);
@@ -682,13 +704,14 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
                 _gl.ReadPixels(0, 0, (uint)width, (uint)height, GLEnum.Rgba, GLEnum.UnsignedByte, ptr);
             }
 
-            Rgba32[] pixelsRgba32 = new Rgba32[pixels.Length / 4];;
+            Rgba32[] pixelsRgba32 = new Rgba32[pixels.Length / 4];
+            
             for (int i = 0; i < pixels.Length; i += 4)
             {
                 pixelsRgba32[i / 4] = new Rgba32(
-                    pixels[i], 
-                    pixels[i + 1], 
-                    pixels[i + 2], 
+                    pixels[i],
+                    pixels[i + 1],
+                    pixels[i + 2],
                     pixels[i + 3]);
             }
 
@@ -697,7 +720,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
                 SixLabors.ImageSharp.Image.LoadPixelData(new ReadOnlySpan<Rgba32>(pixelsRgba32), width,
                     height);
             image.Mutate(ctx => ctx.Flip(FlipMode.Vertical));
-            Image = image.ConvertToBitmap();
+            Image = ConvertToBitmap(image);
             OnPropertyChanged(nameof(Image));
         }
         catch (Exception ex)
@@ -706,10 +729,18 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         }
     }
 
+    private Bitmap ConvertToBitmap(Image<Rgba32> image)
+    {
+        var stream = new MemoryStream();
+        image.SaveAsBmp(stream);
+        stream.Seek(0, SeekOrigin.Begin);
+        var bitmap = new Bitmap(stream);
+        stream.Close();
+        return bitmap;
+    }
+
     private void ConfigureShaders()
     {
-        var version = _gl.GetStringS(StringName.Version);
-
         _vertexShader = _gl.CreateShader(ShaderType.VertexShader);
         _gl.ShaderSource(_vertexShader, VertexShaderSource);
         _gl.CompileShader(_vertexShader);
@@ -736,10 +767,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _cameraPositionLocation = _gl.GetUniformLocation(_shaderProgram, "cameraPosition");
         _ambientStrengthLocation = _gl.GetUniformLocation(_shaderProgram, "ambientStrength");
         _specularStrengthLocation = _gl.GetUniformLocation(_shaderProgram, "specularStrength");
-        _gl.DetachShader(_shaderProgram, _vertexShader);
-        _gl.DetachShader(_shaderProgram, _fragmentShader);
-        _gl.DeleteShader(_vertexShader);
-        _gl.DeleteShader(_fragmentShader);
+        
     }
 
     private void CheckShaderCompileError(uint shader)
@@ -772,12 +800,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     {
         Zoom *= 1 - delta * 0.1f;
     }
-
-    public void SetColorTable(PaletteColorTable colorTable)
-    {
-        _colorTable = colorTable;
-    }
-
+    
     public void SetCameraPreset(AxisViewType view)
     {
         switch (view)

@@ -33,12 +33,14 @@
         <entry key="NEXUS.Fractal/Controls/MdaSurface/MdaSurface.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Controls/Surface/BcrSurface.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Controls/Surface/MdaSurface.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Controls/Surface/Surface.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/MainWindow.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/BcrFrameView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/BcrScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/BcrScreenViewModel.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/ChartsScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/DataScreen.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS.Fractal/Views/FrameView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/ImageFileView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/ImagesScreenView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS.Fractal/Views/InfoMessageView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
@@ -92,6 +94,7 @@
         <entry key="NEXUS/Styles/Control/Custom/Controls.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Custom/RangeSlider/NexusRangeSlider.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Custom/TreeViewItem/TreeViewItemRemovable.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Styles/ComboBox.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/Controls.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/FlyoutPresenter.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/MaterialIcon.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
@@ -102,6 +105,9 @@
         <entry key="NEXUS/Styles/Control/Styles/TabViewItem.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/TabViewListView.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Control/Styles/TextBlock.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Styles/TextBox.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Styles/ToolTip.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
+        <entry key="NEXUS/Styles/Control/Styles/WrapPanel.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Resources/Brushes.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Resources/Colors.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />
         <entry key="NEXUS/Styles/Resources/Images.axaml" value="NEXUS.Fractal/NEXUS.Fractal.csproj" />

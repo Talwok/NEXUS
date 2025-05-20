@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
+using NEXUS.Extensions;
+using NEXUS.Fractal.Extensions;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.Services;
 using NEXUS.Fractal.Views;
@@ -21,19 +28,12 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
     private readonly GitHubUpdater? _updater;
 
     public MainWindowViewModel(
-        ImagesScreenViewModel images,
-        ChartsScreenViewModel charts,
         SettingsScreenViewModel settings,
-        MdtScreenViewModel mdt,
-        BcrScreenViewModel bcr,
+        IEnumerable<StatefulServiceBase> statefulServices,
         InfoService infoService)
     {
-        ChartsMenuItem.Screen = charts;
-        ImagesMenuItem.Screen = images;
-        SettingsMenuItem.Screen = settings;
-        MdtMenuItem.Screen = mdt;
-        BcrMenuItem.Screen = bcr;
-        
+        SettingsMenuItemScreen = settings;
+        ProjectService = statefulServices.FirstOrDefault<ProjectService>();
         InfoService = infoService;
         
 #if !DEBUG
@@ -74,39 +74,28 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
                 if (success)
                     mainWindow?.Close();
             }, outputScheduler: AvaloniaScheduler.Instance);
+
+        OpenRecentProjectCommand = ReactiveCommand.CreateFromTask<string>(ProjectService.OpenRecentProject, outputScheduler: RxApp.MainThreadScheduler);
+        CreateProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.CreateProject, outputScheduler: RxApp.MainThreadScheduler);
+        OpenProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.OpenProject, outputScheduler: RxApp.MainThreadScheduler);
+        SaveProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.SaveProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
+        SaveAsProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.SaveProjectAs, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
+        ExportFromProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.ExportFromProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
+        ImportToProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.ImportToProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
     }
 
+    public ProjectService? ProjectService { get; set; }
+    
+    public SettingsScreenViewModel SettingsMenuItemScreen { get; set; }
+    
+    public ICommand OpenRecentProjectCommand { get; set; }
+    public ICommand CreateProjectCommand { get; set; }
+    public ICommand OpenProjectCommand { get; set; }
+    public ICommand SaveProjectCommand { get; set; }
+    public ICommand SaveAsProjectCommand { get; set; }
+    public ICommand ExportFromProjectCommand { get; set; } 
+    public ICommand ImportToProjectCommand { get; set; }
     public ICommand UpdateCommand { get; set; }
-
-    public ScreenMenuItem ChartsMenuItem { get; } = new()
-    {
-        Name = "Графики",
-        Icon = MaterialIconKind.ChartBoxOutline,
-    };
-
-    public ScreenMenuItem ImagesMenuItem { get; } = new()
-    {
-        Name = "Изображения",
-        Icon = MaterialIconKind.Images,
-    };
-
-    public ScreenMenuItem MdtMenuItem { get; } = new()
-    {
-        Name = "MDT",
-        Icon = MaterialIconKind.Microscope,
-    };
-    
-    public ScreenMenuItem BcrMenuItem { get; } = new()
-    {
-        Name = "BCR",
-        Icon = MaterialIconKind.Scanner,
-    };
-    
-    public ScreenMenuItem SettingsMenuItem { get; } = new()
-    {
-        Name = "Настройки",
-        Icon = MaterialIconKind.SettingsOutline,
-    };
 
     [Reactive]
     public Version? UpdateVersion { get; set; }
@@ -114,7 +103,7 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
     public bool IsUpdateFound { get; set; }
     public InfoService InfoService { get; }
     public Version? Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
-    
+
     private async Task CheckForUpdates()
     {
         try
