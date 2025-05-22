@@ -132,9 +132,8 @@
             </Interaction.Behaviors>
             <Border IsVisible="{Binding SettingsMenuItemScreen.Settings.LeftPaneOpened}" Grid.Column="0" Margin="4 2"
                     CornerRadius="5" Background="{DynamicResource ButtonBackground}">
-                <ScrollViewer>
-                    <StackPanel Spacing="8" Margin="8">
-
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="8">
                         <ToggleButton Name="ProjectNameToggle"
                                       HorizontalAlignment="Stretch"
                                       HorizontalContentAlignment="Left"
@@ -164,13 +163,15 @@
                                         <Rectangle Grid.Column="2"
                                                    Width="100"
                                                    Height="20"
-                                                   Fill="{Binding Colors, Converter={x:Static converters:ColorsToGradientConverter.Instance}}" />
+                                                   Fill="{Binding Colors, Converter={x:Static converters:HorizontalColorsToGradientConverter.Instance}}" />
                                     </Grid>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        <Expander Background="Transparent" BorderBrush="Transparent">
-                            <Expander.Header>
+                    </StackPanel>
+                    <TabControl>
+                        <TabItem>
+                            <TabItem.Header>
                                 <StackPanel ToolTip.Tip="Список данных в 2D и 3D представлении"
                                             Background="Transparent" Orientation="Horizontal" Spacing="8">
                                     <avalonia:MaterialIconText Spacing="8" Kind="Frame" Text="Фреймы" />
@@ -181,7 +182,7 @@
                                         <TextBlock Margin="4 0" Text="{Binding ProjectService.Project.Frames.Count}" />
                                     </Border>
                                 </StackPanel>
-                            </Expander.Header>
+                            </TabItem.Header>
                             <TreeView ItemsSource="{Binding  ProjectService.Project.Frames}"
                                       SelectedItem="{Binding ProjectService.SelectedItem}">
                                 <TreeView.DataTemplates>
@@ -191,9 +192,9 @@
                                     </TreeDataTemplate>
                                 </TreeView.DataTemplates>
                             </TreeView>
-                        </Expander>
-                        <Expander Background="Transparent" BorderBrush="Transparent">
-                            <Expander.Header>
+                        </TabItem>
+                        <TabItem>
+                            <TabItem.Header>
                                 <StackPanel ToolTip.Tip="Список графиков данных по выбранному изменению"
                                             Background="Transparent" Orientation="Horizontal" Spacing="8">
                                     <avalonia:MaterialIconText Spacing="8" Kind="ChartBar" Text="Графики" />
@@ -204,14 +205,14 @@
                                                    Text="{Binding ProjectService.Project.Researches.Count}" />
                                     </Border>
                                 </StackPanel>
-                            </Expander.Header>
+                            </TabItem.Header>
                             <ListBox ItemsSource="{Binding ProjectService.Project.Researches}"
                                      SelectedItem="{Binding ProjectService.SelectedItem}">
 
                             </ListBox>
-                        </Expander>
-                    </StackPanel>
-                </ScrollViewer>
+                        </TabItem>
+                    </TabControl>
+                </DockPanel>
             </Border>
 
             <GridSplitter IsVisible="{Binding SettingsMenuItemScreen.Settings.LeftPaneOpened}" Grid.Column="1"
@@ -225,23 +226,15 @@
                 <ContentControl Content="{Binding ProjectService.SelectedItem}">
                     <ContentControl.DataTemplates>
                         <DataTemplate x:DataType="viewModels:FrameViewModel">
-                            <ScrollViewer>
-                                <StackPanel Spacing="8" Margin="8">
-                                    <StackPanel.Styles>
-                                        <Style Selector="controls|NumberBox">
-                                            <Setter Property="HorizontalAlignment" Value="Stretch" />
-                                            <Setter Property="SpinButtonPlacementMode" Value="Compact" />
-                                            <Setter Property="LargeChange" Value="1" />
-                                            <Setter Property="SmallChange" Value="0.1" />
-                                            <Setter Property="SimpleNumberFormat" Value="F4" />
-                                        </Style>
-                                    </StackPanel.Styles>
+                            <DockPanel>
+                                <Panel DockPanel.Dock="Top">
                                     <ToggleButton Name="FrameNameToggle"
                                                   HorizontalAlignment="Stretch"
                                                   HorizontalContentAlignment="Left"
                                                   Theme="{StaticResource TransparentButton}"
                                                   IsVisible="{Binding !#FrameNameToggle.IsChecked}">
-                                        <avalonia:MaterialIconText Kind="PackageVariant" Text="{Binding #FrameNameTextBox.Text}" />
+                                        <avalonia:MaterialIconText Kind="PackageVariant"
+                                                                   Text="{Binding #FrameNameTextBox.Text}" />
                                     </ToggleButton>
                                     <Grid IsVisible="{Binding #FrameNameToggle.IsChecked}"
                                           ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="8">
@@ -254,50 +247,92 @@
                                                       Content="{avalonia:MaterialIconExt Kind=TextBoxCheck}"
                                                       ToolTip.Tip="Закончить редактирование" />
                                     </Grid>
-                                    <avalonia:MaterialIconText Kind="Cctv" Text="Камера" Classes="Title"
-                                                               Foreground="{DynamicResource SystemAccentColor}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=Magnify, Text=Текущее приближение}"
-                                        Value="{Binding Zoom}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=AxisZRotateClockwise, Text=Поворот камеры}"
-                                        Value="{Binding ModelYaw}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=AxisXRotateClockwise, Text=Наклон камеры}"
-                                        Value="{Binding ModelPitch}" />
-                                    <Rectangle Fill="{DynamicResource SystemAccentColor}" HorizontalAlignment="Stretch"
-                                               Height="2" />
-                                    <avalonia:MaterialIconText Kind="TextureBox" Text="Поверхность" Classes="Title"
-                                                               Foreground="{DynamicResource SystemAccentColor}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=Mountain, Text=Коэффициент усиления высоты}"
-                                        Value="{Binding HeightMultiplier}" Minimum="0" Maximum="5" />
-                                    <ToggleSwitch
-                                        OnContent="{avalonia:MaterialIconTextExt Kind=CubeOutline, Text=Подложка включена}"
-                                        OffContent="{avalonia:MaterialIconTextExt Kind=CubeOffOutline, Text=Подложка выключена}"
-                                        IsChecked="{Binding ShowFoundation}" />
-                                    <Rectangle Fill="{DynamicResource SystemAccentColor}" HorizontalAlignment="Stretch"
-                                               Height="2" />
-                                    <avalonia:MaterialIconText Kind="LightbulbOnOutline" Text="Освещение"
-                                                               Classes="Title"
-                                                               Foreground="{DynamicResource SystemAccentColor}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=AxisXArrow, Text=Координата X}"
-                                        Value="{Binding LightPositionX}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=AxisYArrow, Text=Координата Y}"
-                                        Value="{Binding LightPositionY}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=AxisZArrow, Text=Координата Z}"
-                                        Value="{Binding LightPositionZ}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=Brightness6, Text=Яркость}"
-                                        Value="{Binding AmbientStrength}" />
-                                    <controls:NumberBox
-                                        Header="{avalonia:MaterialIconTextExt Kind=Glasses, Text=Зеркальность}"
-                                        Value="{Binding SpecularStrength}" />
-                                </StackPanel>
-                            </ScrollViewer>
+                                </Panel>
+                                <ScrollViewer IsVisible="{Binding SelectedViewTabIndex, Converter={x:Static converters:ValueEqualityConverter.Instance}, ConverterParameter={x:Static viewModels:FrameViewModel.Tab2DIndex}}">
+                                    <StackPanel Spacing="8" Margin="8">
+                                        <StackPanel.Styles>
+                                            <Style Selector="controls|NumberBox">
+                                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                                <Setter Property="SpinButtonPlacementMode" Value="Compact" />
+                                                <Setter Property="LargeChange" Value="1" />
+                                                <Setter Property="SmallChange" Value="0.1" />
+                                                <Setter Property="SimpleNumberFormat" Value="F4" />
+                                            </Style>
+                                        </StackPanel.Styles>
+                                        <avalonia:MaterialIconText Kind="Palette" Text="Цветовая палетка" Classes="Title"
+                                                                   Foreground="{DynamicResource SystemAccentColor}" />
+                                        <controls:NumberBox Name="ColorTableMax"
+                                            Header="{avalonia:MaterialIconTextExt Kind=FormatVerticalAlignTop, Text=Максимальный предел высоты}"
+                                            Value="{Binding ColorTableMaximum}" />
+                                        <controls:NumberBox Name="ColorTableMin"
+                                            Header="{avalonia:MaterialIconTextExt Kind=FormatVerticalAlignBottom, Text=Минимальный предел высоты}"
+                                            Value="{Binding ColorTableMinimum}" />
+                                        <controls:NumberBox Name="ColorTableUpper" Minimum="{ReflectionBinding #ColorTableLower.Value}" Maximum="{ReflectionBinding #ColorTableMax.Value}"
+                                            Header="{avalonia:MaterialIconTextExt Kind=ArrowUpThin, Text=Верхнее значение высоты}"
+                                            Value="{Binding ColorTableUpperSelection}" />
+                                        <controls:NumberBox Name="ColorTableLower" Minimum="{ReflectionBinding #ColorTableMin.Value}" Maximum="{ReflectionBinding #ColorTableUpper.Value}"
+                                            Header="{avalonia:MaterialIconTextExt Kind=ArrowDownThin, Text=Нижнее значение высоты}"
+                                            Value="{Binding ColorTableLowerSelection}" />
+                                    </StackPanel>
+                                </ScrollViewer>
+                                <ScrollViewer IsVisible="{Binding SelectedViewTabIndex, Converter={x:Static converters:ValueEqualityConverter.Instance}, ConverterParameter={x:Static viewModels:FrameViewModel.Tab3DIndex}}">
+                                    <StackPanel Spacing="8" Margin="8">
+                                        <StackPanel.Styles>
+                                            <Style Selector="controls|NumberBox">
+                                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                                <Setter Property="SpinButtonPlacementMode" Value="Compact" />
+                                                <Setter Property="LargeChange" Value="1" />
+                                                <Setter Property="SmallChange" Value="0.1" />
+                                                <Setter Property="SimpleNumberFormat" Value="F4" />
+                                            </Style>
+                                        </StackPanel.Styles>
+                                        <avalonia:MaterialIconText Kind="Cctv" Text="Камера" Classes="Title"
+                                                                   Foreground="{DynamicResource SystemAccentColor}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=Magnify, Text=Текущее приближение}"
+                                            Value="{Binding Zoom}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=AxisZRotateClockwise, Text=Поворот камеры}"
+                                            Value="{Binding ModelYaw}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=AxisXRotateClockwise, Text=Наклон камеры}"
+                                            Value="{Binding ModelPitch}" />
+                                        <Rectangle Fill="{DynamicResource SystemAccentColor}"
+                                                   HorizontalAlignment="Stretch"
+                                                   Height="2" />
+                                        <avalonia:MaterialIconText Kind="TextureBox" Text="Поверхность" Classes="Title"
+                                                                   Foreground="{DynamicResource SystemAccentColor}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=Mountain, Text=Коэффициент усиления высоты}"
+                                            Value="{Binding HeightMultiplier}" Minimum="0" Maximum="5" />
+                                        <ToggleSwitch
+                                            OnContent="{avalonia:MaterialIconTextExt Kind=CubeOutline, Text=Подложка включена}"
+                                            OffContent="{avalonia:MaterialIconTextExt Kind=CubeOffOutline, Text=Подложка выключена}"
+                                            IsChecked="{Binding ShowFoundation}" />
+                                        <Rectangle Fill="{DynamicResource SystemAccentColor}"
+                                                   HorizontalAlignment="Stretch"
+                                                   Height="2" />
+                                        <avalonia:MaterialIconText Kind="LightbulbOnOutline" Text="Освещение"
+                                                                   Classes="Title"
+                                                                   Foreground="{DynamicResource SystemAccentColor}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=AxisXArrow, Text=Координата X}"
+                                            Value="{Binding LightPositionX}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=AxisYArrow, Text=Координата Y}"
+                                            Value="{Binding LightPositionY}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=AxisZArrow, Text=Координата Z}"
+                                            Value="{Binding LightPositionZ}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=Brightness6, Text=Яркость}"
+                                            Value="{Binding AmbientStrength}" />
+                                        <controls:NumberBox
+                                            Header="{avalonia:MaterialIconTextExt Kind=Glasses, Text=Зеркальность}"
+                                            Value="{Binding SpecularStrength}" />
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </DockPanel>
                         </DataTemplate>
                     </ContentControl.DataTemplates>
                 </ContentControl>
@@ -305,67 +340,4 @@
             </Border>
         </Grid>
     </DockPanel>
-    <!--<DockPanel>
-        
-        <DockPanel Height="32" DockPanel.Dock="Bottom">
-            <Button VerticalAlignment="Stretch" 
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    VerticalContentAlignment="Stretch"
-                    Padding="0"
-                    Margin="0"
-                    IsVisible="{Binding InfoService.Messages.Count}">
-                <controls:InfoBar Padding="0"
-                                  Margin="0"
-                                  Title="{Binding InfoService.LastMessage.Title}"
-                                  Message="{Binding InfoService.LastMessage.Message}"
-                                  IconSource="{Binding InfoService.LastMessage.Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}"
-                                  Severity="{Binding InfoService.LastMessage.Severity}"
-                                  IsOpen="True"
-                                  IsClosable="False"
-                                  IsIconVisible="True"/>
-                <Button.Flyout>
-                    <Flyout>
-                        <ItemsControl HorizontalAlignment="Right" 
-                                      ItemsSource="{Binding InfoService.Messages}"/>   
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
-        </DockPanel>
-        <controls:NavigationView PaneDisplayMode="LeftCompact"
-                                 IsPaneOpen="False"
-                                 IsPaneToggleButtonVisible="False"
-                                 IsSettingsVisible="False"
-                                 SelectionChanged="NavigationView_OnSelectionChanged"
-                                 Name="Navigation">
-            <controls:NavigationView.MenuItems>
-                <controls:NavigationViewItem DataContext="{Binding ImagesMenuItem}" Content="{Binding Name}"
-                                             IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
-                    <controls:NavigationViewItem.InfoBadge>
-                        <controls:InfoBadge DataContext="{Binding Screen}"
-                                            IsVisible="{Binding ImageService.TreeImages.Count, DataType=viewModels:ImagesScreenViewModel}"
-                                            Value="{Binding ImageService.TreeImages.Count, DataType=viewModels:ImagesScreenViewModel}" />
-                    </controls:NavigationViewItem.InfoBadge>
-                </controls:NavigationViewItem>
-                <controls:NavigationViewItem DataContext="{Binding MdtMenuItem}" Content="{Binding Name}"
-                                             IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
-                </controls:NavigationViewItem>
-                <controls:NavigationViewItem DataContext="{Binding BcrMenuItem}" Content="{Binding Name}"
-                                             IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
-                </controls:NavigationViewItem>
-                <controls:NavigationViewItem DataContext="{Binding ChartsMenuItem}" Content="{Binding Name}"
-                                             IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
-                    <controls:NavigationViewItem.InfoBadge>
-                        <controls:InfoBadge DataContext="{Binding Screen}"
-                                            IsVisible="{Binding ChartService.Charts.Count, DataType=viewModels:ChartsScreenViewModel}"
-                                            Value="{Binding ChartService.Charts.Count, DataType=viewModels:ChartsScreenViewModel}" />
-                    </controls:NavigationViewItem.InfoBadge>
-                </controls:NavigationViewItem>
-            </controls:NavigationView.MenuItems>
-            <controls:NavigationView.FooterMenuItems>
-                <controls:NavigationViewItem DataContext="{Binding SettingsMenuItem}" Content="{Binding Name}"
-                                             IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}" />
-            </controls:NavigationView.FooterMenuItems>
-        </controls:NavigationView>
-    </DockPanel>-->
 </Window>

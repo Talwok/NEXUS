@@ -1,6 +1,6 @@
 ﻿namespace NEXUS.Fractal.Models;
 
-public class MainArguments
+public class MainArgumentsModel
 {
     
 }

@@ -1,4 +1,4 @@
-﻿namespace NEXUS.Fractal.Models;
+﻿namespace NEXUS.Fractal.Enums;
 
 public enum AxisViewType
 {

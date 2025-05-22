@@ -12,7 +12,6 @@ using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Extensions;
-using NEXUS.Fractal.Extensions;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.Services;
 using NEXUS.Fractal.Views;
@@ -23,7 +22,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Fractal.ViewModels;
 
-public class MainWindowViewModel : MainViewModel<MainArguments>
+public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
 {
     private readonly GitHubUpdater? _updater;
 

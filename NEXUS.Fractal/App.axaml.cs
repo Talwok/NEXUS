@@ -33,8 +33,6 @@ public partial class App : Application
 
         serviceCollection.AddCommon();
         
-        serviceCollection.AddSingleton<ImageService>(); 
-        serviceCollection.AddSingleton<ChartService>(); 
         serviceCollection.AddSingleton<InfoService>();
         serviceCollection.AddSingleton<CalculationService>();
         serviceCollection.AddSingleton<StatefulServiceBase, ProjectService>();

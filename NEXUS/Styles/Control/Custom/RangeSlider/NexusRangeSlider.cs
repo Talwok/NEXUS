@@ -1,926 +1,706 @@
-﻿using System.Collections.Concurrent;
-using Avalonia;
+﻿using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Mixins;
 using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Shapes;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Threading;
+using Avalonia.Media;
+using Avalonia.Reactive;
 using Avalonia.Utilities;
-using FluentAvalonia.UI.Controls;
+using NEXUS.Styles.Control.Custom.RangeSlider.Primitives;
+using RangeBase = NEXUS.Styles.Control.Custom.RangeSlider.Primitives.RangeBase;
 
 namespace NEXUS.Styles.Control.Custom.RangeSlider;
 
-public partial class NexusRangeSlider : TemplatedControl
-{
-    public static readonly StyledProperty<Orientation> OrientationProperty =
-        AvaloniaProperty.Register<NexusRangeSlider, Orientation>(nameof(Orientation), Orientation.Horizontal);
+using RangeBase = Primitives.RangeBase;
 
+/// <summary>
+/// Enum which describes how to position the flyout in a <see cref="NexusRangeSlider"/>.
+/// </summary>
+public enum ThumbFlyoutPlacement
+{
+    /// <summary>
+    /// No flyout will appear.
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// Flyout will appear above the track for a horizontal <see cref="NexusRangeSlider"/>, or to the left of the track for a vertical <see cref="NexusRangeSlider"/>.
+    /// </summary>
+    TopLeft,
+
+    /// <summary>
+    /// Flyout will appear below the track for a horizontal <see cref="NexusRangeSlider"/>, or to the right of the track for a vertical <see cref="NexusRangeSlider"/>.
+    /// </summary>
+    BottomRight,
+}
+
+/// <summary>
+/// A control that lets the user select from a range of values by moving a Thumb control along a Track.
+/// </summary>
+[PseudoClasses(":vertical", ":horizontal", ":pressed")]
+public class NexusRangeSlider : RangeBase
+{
+    private enum TrackThumb
+    {
+        None,
+        Upper,
+        InnerUpper,
+        OuterUpper,
+        Lower,
+        InnerLower,
+        OuterLower,
+        Both,
+        Overlapped
+    };
+
+    public class RangeSliderTemplateSettings : AvaloniaObject
+    {
+        private Rect _thumbBoundsRect;
+
+        /// <summary>
+        /// Defines the <see cref="ThumbBoundsRect"/> property.
+        /// </summary>
+        public static readonly DirectProperty<RangeSliderTemplateSettings, Rect> ThumbBoundsRectProperty =
+            AvaloniaProperty.RegisterDirect<RangeSliderTemplateSettings, Rect>(
+                nameof(ThumbBoundsRect),
+                p => p.ThumbBoundsRect,
+                (p, o) => p.ThumbBoundsRect = o);
+
+        /// <summary>
+        /// Used by <see cref="NexusRangeSlider.Avalonia.Themes.Fluent"/> to define the thumb width.
+        /// </summary>
+        public Rect ThumbBoundsRect
+        {
+            get => _thumbBoundsRect;
+            set => SetAndRaise(ThumbBoundsRectProperty, ref _thumbBoundsRect, value);
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the TemplateSettings for the <see cref="NexusRangeSlider"/>.
+    /// </summary>
+    public RangeSliderTemplateSettings TemplateSettings { get; } = new RangeSliderTemplateSettings();
+
+    /// <summary>
+    /// Defines the <see cref="Orientation"/> property.
+    /// </summary>
+    public static readonly StyledProperty<Orientation> OrientationProperty =
+        ScrollBar.OrientationProperty.AddOwner<NexusRangeSlider>();
+
+    /// <summary>
+    /// Defines the <see cref="IsDirectionReversed"/> property.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsDirectionReversedProperty =
+        RangeTrack.IsDirectionReversedProperty.AddOwner<NexusRangeSlider>();
+
+    /// <summary>
+    /// Defines the <see cref="IsThumbOverlapProperty"/> property.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsThumbOverlapProperty =
+        RangeTrack.IsThumbOverlapProperty.AddOwner<NexusRangeSlider>();
+
+    /// <summary>
+    /// Defines the <see cref="FlyoutPlacement"/> property.
+    /// </summary>
+    public static readonly StyledProperty<ThumbFlyoutPlacement> ThumbFlyoutPlacementProperty =
+        AvaloniaProperty.Register<TickBar, ThumbFlyoutPlacement>(nameof(ThumbFlyoutPlacement), ThumbFlyoutPlacement.None);
+
+    /// <summary>
+    /// Defines the <see cref="IsSnapToTickEnabled"/> property.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsSnapToTickEnabledProperty =
+        AvaloniaProperty.Register<NexusRangeSlider, bool>(nameof(IsSnapToTickEnabled), false);
+
+    /// <summary>
+    /// Defines the <see cref="MoveWholeRange"/> property.
+    /// </summary>
+    public static readonly StyledProperty<bool> MoveWholeRangeProperty =
+        AvaloniaProperty.Register<NexusRangeSlider, bool>(nameof(MoveWholeRange), false);
+
+    /// <summary>
+    /// Defines the <see cref="TickFrequency"/> property.
+    /// </summary>
+    public static readonly StyledProperty<double> TickFrequencyProperty =
+        AvaloniaProperty.Register<NexusRangeSlider, double>(nameof(TickFrequency), 0.0);
+
+    /// <summary>
+    /// Defines the <see cref="TickPlacement"/> property.
+    /// </summary>
+    public static readonly StyledProperty<TickPlacement> TickPlacementProperty =
+        AvaloniaProperty.Register<TickBar, TickPlacement>(nameof(TickPlacement), 0d);
+
+    /// <summary>
+    /// Defines the <see cref="TicksProperty"/> property.
+    /// </summary>
+    public static readonly StyledProperty<AvaloniaList<double>?> TicksProperty =
+        TickBar.TicksProperty.AddOwner<NexusRangeSlider>();
+    
+    public static readonly StyledProperty<GradientStops> ColorPaletteProperty =
+        AvaloniaProperty.Register<NexusRangeSlider, GradientStops>(nameof(ColorPalette));
+    
+    // Slider required parts
+    private double _previousValue = 0.0;
+    private bool _isDragging = false;
+    private RangeTrack _track = null!;
+    private Thumb _lowerThumb = null!;
+    private Thumb _upperThumb = null!;
+    private TrackThumb _currentTrackThumb = TrackThumb.None;
+    private IDisposable? _lowerThumbBoundsChangedListener;
+
+    private const double Tolerance = 0.0001;
+
+    /// <summary>
+    /// Initializes static members of the <see cref="NexusRangeSlider"/> class. 
+    /// </summary>
+    static NexusRangeSlider()
+    {
+        PressedMixin.Attach<NexusRangeSlider>();
+        FocusableProperty.OverrideDefaultValue<NexusRangeSlider>(true);
+        OrientationProperty.OverrideDefaultValue(typeof(NexusRangeSlider), Orientation.Horizontal);
+
+        LowerSelectedValueProperty.OverrideMetadata<NexusRangeSlider>(new DirectPropertyMetadata<double>(enableDataValidation: true));
+        UpperSelectedValueProperty.OverrideMetadata<NexusRangeSlider>(new DirectPropertyMetadata<double>(enableDataValidation: true));
+
+        ThumbFlyoutPlacementProperty.Changed.AddClassHandler<NexusRangeSlider>((x, e) => x.ThumbFlyoutPlacementChanged(e));
+    }
+
+    /// <summary>
+    /// Instantiates a new instance of the <see cref="NexusRangeSlider"/> class. 
+    /// </summary>
+    public NexusRangeSlider()
+    {
+        UpdatePseudoClasses(Orientation);
+    }
+
+    /// <summary>
+    /// Defines the ticks to be drawn on the tick bar.
+    /// </summary>
+    public AvaloniaList<double>? Ticks
+    {
+        get => GetValue(TicksProperty);
+        set => SetValue(TicksProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the orientation of a <see cref="NexusRangeSlider"/>.
+    /// </summary>
     public Orientation Orientation
     {
-        get => GetValue(OrientationProperty);
-        set => SetValue(OrientationProperty, value);
+        get { return GetValue(OrientationProperty); }
+        set { SetValue(OrientationProperty, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets a value allowing to move the whole selected range.
+    /// </summary>
+    public bool MoveWholeRange
+    {
+        get { return GetValue(MoveWholeRangeProperty); }
+        set { SetValue(MoveWholeRangeProperty, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets the direction of increasing value.
+    /// </summary>
+    /// <value>
+    /// true if the direction of increasing value is to the left for a horizontal slider or
+    /// down for a vertical slider; otherwise, false. The default is false.
+    /// </value>
+    public bool IsDirectionReversed
+    {
+        get { return GetValue(IsDirectionReversedProperty); }
+        set { SetValue(IsDirectionReversedProperty, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the current value will be displayed above <see cref="Thumb"/>.
+    /// </summary>
+    public ThumbFlyoutPlacement ThumbFlyoutPlacement
+    {
+        get { return GetValue(ThumbFlyoutPlacementProperty); }
+        set { SetValue(ThumbFlyoutPlacementProperty, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets a value that indicates whether the <see cref="NexusRangeSlider"/> automatically moves the <see cref="Thumb"/> to the closest tick mark.
+    /// </summary>
+    public bool IsSnapToTickEnabled
+    {
+        get { return GetValue(IsSnapToTickEnabledProperty); }
+        set { SetValue(IsSnapToTickEnabledProperty, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets a value that indicates whether the <see cref="Thumb"/> can overlap.
+    /// </summary>
+    public bool IsThumbOverlap
+    {
+        get { return GetValue(IsThumbOverlapProperty); }
+        set { SetValue(IsThumbOverlapProperty, value);}
+    }
+    /// <summary>
+    /// Gets or sets the interval between tick marks.
+    /// </summary>
+    public double TickFrequency
+    {
+        get { return GetValue(TickFrequencyProperty); }
+        set { SetValue(TickFrequencyProperty, value); }
+    }
+
+    /// <summary>
+    /// Gets or sets a value that indicates where to draw 
+    /// tick marks in relation to the track.
+    /// </summary>
+    public TickPlacement TickPlacement
+    {
+        get { return GetValue(TickPlacementProperty); }
+        set { SetValue(TickPlacementProperty, value); }
+    }
+
+    public GradientStops ColorPalette
+    {
+        get => GetValue(ColorPaletteProperty);
+        set => SetValue(ColorPaletteProperty, value);
+    }
+    
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+
+        _lowerThumbBoundsChangedListener?.Dispose();
+
+        _track = e.NameScope.Get<RangeTrack>("PART_Track");
+        _lowerThumb = e.NameScope.Get<Thumb>("PART_LowerThumb");
+        _upperThumb = e.NameScope.Get<Thumb>("PART_UpperThumb");
+
+        ApplyThumbFlyoutPlacement(ThumbFlyoutPlacement);
+
+        AddHandler(PointerPressedEvent, TrackPressed, RoutingStrategies.Tunnel);
+        AddHandler(PointerMovedEvent, TrackMoved, RoutingStrategies.Tunnel);
+        AddHandler(PointerReleasedEvent, TrackReleased, RoutingStrategies.Tunnel);
+
+        _lowerThumb.AddHandler(PointerMovedEvent, PointerOverThumb, RoutingStrategies.Tunnel);
+        _upperThumb.AddHandler(PointerMovedEvent, PointerOverThumb, RoutingStrategies.Tunnel);
+
+        _lowerThumbBoundsChangedListener = _lowerThumb.GetPropertyChangedObservable(BoundsProperty)
+            .Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs>(_ => UpdateTemplateSettings()));
+
+        UpdateTemplateSettings();
+    }
+
+    private void UpdateTemplateSettings()
+    {
+        var scale = IsThumbOverlap ? 1d : 2d;
+
+        TemplateSettings.ThumbBoundsRect = _lowerThumb.Bounds * scale;
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Handled || e.KeyModifiers != KeyModifiers.None) return;
+
+        var handled = true;
+
+        switch (e.Key)
+        {
+            case Key.Down:
+            case Key.Left:
+                MoveToNextTick(IsDirectionReversed ? SmallChange : -SmallChange);
+                break;
+
+            case Key.Up:
+            case Key.Right:
+                MoveToNextTick(IsDirectionReversed ? -SmallChange : SmallChange);
+                break;
+
+            case Key.PageUp:
+                MoveToNextTick(IsDirectionReversed ? -LargeChange : LargeChange);
+                break;
+
+            case Key.PageDown:
+                MoveToNextTick(IsDirectionReversed ? LargeChange : -LargeChange);
+                break;
+
+            case Key.Home:
+                LowerSelectedValue = Minimum;
+                break;
+
+            case Key.End:
+                UpperSelectedValue = Maximum;
+                break;
+
+            default:
+                handled = false;
+                break;
+        }
+
+        e.Handled = handled;
+    }
+
+    private void MoveToNextTick(double direction)
+    {
+        if (direction == 0.0) return;
+
+        var value = LowerSelectedValue;
+
+        // Find the next value by snapping
+        var next = SnapToTick(Math.Max(Minimum, Math.Min(Maximum, value + direction)));
+
+        var greaterThan = direction > 0; //search for the next tick greater than value?
+
+        // If the snapping brought us back to value, find the next tick point
+        if (Math.Abs(next - value) < Tolerance
+            && !(greaterThan && Math.Abs(value - Maximum) < Tolerance) // Stop if searching up if already at Max
+            && !(!greaterThan && Math.Abs(value - Minimum) < Tolerance)) // Stop if searching down if already at Min
+        {
+            var ticks = Ticks;
+
+            // If ticks collection is available, use it.
+            // Note that ticks may be unsorted.
+            if (ticks != null && ticks.Count > 0)
+            {
+                foreach (var tick in ticks)
+                {
+                    // Find the smallest tick greater than value or the largest tick less than value
+                    if (greaterThan && MathUtilities.GreaterThan(tick, value) &&
+                        (MathUtilities.LessThan(tick, next) || Math.Abs(next - value) < Tolerance)
+                        || !greaterThan && MathUtilities.LessThan(tick, value) &&
+                        (MathUtilities.GreaterThan(tick, next) || Math.Abs(next - value) < Tolerance))
+                    {
+                        next = tick;
+                    }
+                }
+            }
+            else if (MathUtilities.GreaterThan(TickFrequency, 0.0))
+            {
+                // Find the current tick we are at
+                var tickNumber = Math.Round((value - Minimum) / TickFrequency);
+
+                if (greaterThan)
+                    tickNumber += 1.0;
+                else
+                    tickNumber -= 1.0;
+
+                next = Minimum + tickNumber * TickFrequency;
+            }
+        }
+
+        // Update if we've found a better value
+        if (Math.Abs(next - value) > Tolerance)
+        {
+            LowerSelectedValue = next;
+        }
+    }
+
+    private void PointerOverThumb(object? sender, PointerEventArgs e)
+    {
+        if (ThumbFlyoutPlacement == ThumbFlyoutPlacement.None)
+            return;
+
+        //if (sender is Thumb thumb)
+            //FlyoutBase.ShowAttachedFlyout(thumb);
+    }
+
+    private void TrackPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            _isDragging = true;
+
+            var pointerCoord = e.GetCurrentPoint(_track).Position;
+            _previousValue = GetValueByPointOnTrack(pointerCoord);
+            _currentTrackThumb = GetNearestTrackThumb(pointerCoord);
+
+            if (!IsPressedOnTrackBetweenThumbs() && MoveWholeRange)
+                MoveToPoint(pointerCoord, _currentTrackThumb);
+            else if (!MoveWholeRange && _currentTrackThumb != TrackThumb.Overlapped)
+                MoveToPoint(pointerCoord, _currentTrackThumb);
+        }
+    }
+
+    private void TrackReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        _isDragging = false;
+        _currentTrackThumb = TrackThumb.None;
+    }
+
+    private void TrackMoved(object? sender, PointerEventArgs e)
+    {
+        if (_isDragging)
+        {
+            var pointerCoord = e.GetCurrentPoint(_track).Position;
+
+            if (_currentTrackThumb == TrackThumb.Overlapped)
+                SelectThumbBasedOnPointerDirection(pointerCoord);
+
+            if (!IsPressedOnTrackBetweenThumbs() && MoveWholeRange)
+                MoveToPoint(pointerCoord, _currentTrackThumb);
+            if (IsPressedOnTrackBetweenThumbs() && MoveWholeRange)
+                MoveToPoint(pointerCoord, TrackThumb.Both);
+            else if (!MoveWholeRange)
+                MoveToPoint(pointerCoord, _currentTrackThumb);
+        }
+    }
+
+    private void MoveToPoint(Point pointerCoord, TrackThumb trackThumb)
+    {
+        var value = GetValueByPointOnTrack(pointerCoord);
+
+        switch (trackThumb)
+        {
+            case TrackThumb.Upper:
+            case TrackThumb.InnerUpper:
+            case TrackThumb.OuterUpper:
+                UpperSelectedValue = SnapToTick(value);
+                break;
+            case TrackThumb.Lower:
+            case TrackThumb.InnerLower:
+            case TrackThumb.OuterLower:
+                LowerSelectedValue = SnapToTick(value);
+                break;
+            case TrackThumb.Both:
+                var delta = value - _previousValue;
+                
+                if ((Math.Abs(LowerSelectedValue - Minimum) <= Tolerance && delta <= 0d)
+                    || (Math.Abs(UpperSelectedValue - Maximum) <= Tolerance && delta >= 0d))
+                    return;
+
+                if (!IsSnapToTickEnabled)
+                {
+                    _previousValue = value;
+                    LowerSelectedValue += delta;
+                    UpperSelectedValue += delta;
+                }
+                else
+                {
+                    var closestTick = SnapToTick(Math.Abs(delta) / 2d);
+                    if (closestTick > 0d)
+                    {
+                        _previousValue = value;
+                        LowerSelectedValue += closestTick * Math.Sign(delta);
+                        UpperSelectedValue += closestTick * Math.Sign(delta);
+                    }
+                }
+                break;
+        }
+    }
+
+    private double GetValueByPointOnTrack(Point pointerCoord)
+    {
+        var orient = Orientation == Orientation.Horizontal;
+        var trackLength = orient ? _track.Bounds.Width : _track.Bounds.Height;
+        var pointNum = orient ? pointerCoord.X : pointerCoord.Y;
+        var thumbLength = orient ? _track.LowerThumb.Width : _track.LowerThumb.Height;
+
+        // Just add epsilon to avoid NaN in case 0/0
+        trackLength += double.Epsilon;
+
+        if (IsThumbOverlap)
+            thumbLength /= 2.0;
+
+        if (pointNum <= thumbLength)
+            return orient ? Minimum : Maximum;
+        if (pointNum > trackLength - thumbLength)
+            return orient ? Maximum : Minimum;
+
+        trackLength -= 2.0 * thumbLength;
+        pointNum -= thumbLength;
+
+        var logicalPos = MathUtilities.Clamp(pointNum / trackLength, 0.0d, 1.0d);
+        var invert = orient
+            ? IsDirectionReversed ? 1 : 0
+            : IsDirectionReversed ? 0 : 1;
+        var calcVal = Math.Abs(invert - logicalPos);
+        var range = Maximum - Minimum;
+        var finalValue = calcVal * range + Minimum;
+
+        return finalValue;
+    }
+
+    private bool IsPressedOnTrackBetweenThumbs()
+    {
+        return _currentTrackThumb == TrackThumb.InnerLower || _currentTrackThumb == TrackThumb.InnerUpper;
+    }
+
+    private void SelectThumbBasedOnPointerDirection(Point pointerCoord)
+    {
+        var value = GetValueByPointOnTrack(pointerCoord);
+        var delta = _previousValue - value;
+
+        if (delta >= 0d && delta < Tolerance)
+            return;
+
+        if (delta > 0d)
+            _currentTrackThumb = TrackThumb.Lower;
+        else
+            _currentTrackThumb = TrackThumb.Upper;
+    }
+
+    private TrackThumb GetNearestTrackThumb(Point pointerCoord)
+    {
+        var orient = Orientation == Orientation.Horizontal;
+
+        var lowerThumbPos = orient ? _track.LowerThumb.Bounds.Position.X : _track.LowerThumb.Bounds.Position.Y;
+        var upperThumbPos = orient ? _track.UpperThumb.Bounds.Position.X : _track.UpperThumb.Bounds.Position.Y;
+        var thumbWidth = orient ? _track.LowerThumb.Bounds.Width : _track.LowerThumb.Bounds.Height;
+        var thumbHalfWidth = thumbWidth / 2d;
+
+        var pointerPos = orient ? pointerCoord.X : pointerCoord.Y;
+
+        if (IsThumbOverlap)
+        {
+            var isThumbsOverlapped = Math.Abs(lowerThumbPos - upperThumbPos) < Tolerance;
+
+            if (isThumbsOverlapped)
+                return TrackThumb.Overlapped;
+        }
+
+        if (Math.Abs(lowerThumbPos + thumbHalfWidth - pointerPos) <= thumbHalfWidth)
+            return TrackThumb.Lower;
+        else if (Math.Abs(upperThumbPos + thumbHalfWidth - pointerPos) <= thumbHalfWidth)
+            return TrackThumb.Upper;
+
+        if (Math.Abs(lowerThumbPos - pointerPos) < Math.Abs(upperThumbPos - pointerPos))
+        {
+            if (pointerPos < lowerThumbPos)
+                return orient ? TrackThumb.OuterLower : TrackThumb.InnerLower;
+            else
+                return orient ? TrackThumb.InnerLower : TrackThumb.OuterLower;
+        }
+        else
+        {
+            if (pointerPos < upperThumbPos)
+                return orient ? TrackThumb.InnerUpper : TrackThumb.OuterUpper;
+            else
+                return orient ? TrackThumb.OuterUpper : TrackThumb.InnerUpper;
+        }
+    }
+
+    protected override void UpdateDataValidation(AvaloniaProperty property, BindingValueType state, Exception? error)
+    {
+        if (property == LowerSelectedValueProperty || property == UpperSelectedValueProperty)
+        {
+            DataValidationErrors.SetError(this, error);
+        }
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == RangeStartProperty)
-        {
-            _minSet = true;
+        var e = change as AvaloniaPropertyChangedEventArgs<Orientation>;
 
-            if (!_valuesAssigned)
-                return;
-
-            var newV = change.GetNewValue<double>();
-            RangeMinToStepFrequency();
-
-            if (_valuesAssigned)
-            {
-                if (newV < Minimum)
-                    RangeStart = Minimum;
-                else if (newV > Maximum)
-                    RangeStart = Maximum;
-
-                SyncActiveRectangle();
-
-                if (newV > RangeEnd)
-                    RangeEnd = newV;
-            }
-
-            SyncThumbs();
-
-            if (!_isDraggingEnd && !_isDraggingStart)
-            {
-                OnValueChanged(new RangeChangedEventArgs(change.GetOldValue<double>(), newV,
-                    RangeSelectorProperty.RangeStartValue));
-            }
-        }
-        else if (change.Property == RangeEndProperty)
-        {
-            _maxSet = true;
-
-            if (!_valuesAssigned)
-                return;
-
-            var newV = change.GetNewValue<double>();
-            RangeMaxToStepFrequency();
-
-            if (_valuesAssigned)
-            {
-                if (newV < Minimum)
-                    RangeEnd = Minimum;
-                else if (newV > Maximum)
-                    RangeEnd = Maximum;
-
-                SyncActiveRectangle();
-
-                if (newV < RangeStart)
-                    RangeStart = newV;
-            }
-
-            SyncThumbs();
-
-            if (!_isDraggingEnd && !_isDraggingStart)
-            {
-                OnValueChanged(new RangeChangedEventArgs(change.GetOldValue<double>(), newV,
-                    RangeSelectorProperty.RangeEndValue));
-            }
-        }
-        else if (change.Property == MinimumProperty)
-        {
-            if (!_valuesAssigned)
-                return;
-
-            var (oldV, newV) = change.GetOldAndNewValue<double>();
-
-            if (Maximum < newV)
-                Maximum = newV + Epsilon;
-
-            if (RangeStart < newV)
-                RangeStart = newV;
-
-            if (RangeEnd < newV)
-                RangeEnd = newV;
-
-            if (newV != oldV)
-                SyncThumbs();
-        }
-        else if (change.Property == MaximumProperty)
-        {
-            if (!_valuesAssigned)
-                return;
-
-            var (oldV, newV) = change.GetOldAndNewValue<double>();
-
-            if (Minimum > newV)
-                Maximum = newV + Epsilon;
-
-            if (RangeEnd > newV)
-                RangeEnd = newV;
-
-            if (RangeStart > newV)
-                RangeStart = newV;
-
-            if (newV != oldV)
-                SyncThumbs();
-        }
-        else if (change.Property == OrientationProperty)
-        {
-            SyncThumbs();
-        }
-    }
-
-    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
-    {
-        if (_minThumb != null)
-        {
-            _minThumb.DragCompleted -= HandleThumbDragCompleted;
-            _minThumb.DragDelta -= MinThumbDragDelta;
-            _minThumb.DragStarted -= MinThumbDragStarted;
-            _minThumb.KeyDown -= MinThumbKeyDown;
-            _minThumb.KeyUp -= ThumbKeyUp;
-
-            _maxThumb.DragCompleted -= HandleThumbDragCompleted;
-            _maxThumb.DragDelta -= MaxThumbDragDelta;
-            _maxThumb.DragStarted -= MaxThumbDragStarted;
-            _maxThumb.KeyDown -= MaxThumbKeyDown;
-            _maxThumb.KeyUp -= ThumbKeyUp;
-
-            _containerCanvas.SizeChanged -= ContainerCanvasSizeChanged;
-            _containerCanvas.PointerPressed -= ContainerCanvasPointerPressed;
-            _containerCanvas.PointerMoved -= ContainerCanvasPointerMoved;
-            _containerCanvas.PointerReleased -= ContainerCanvasPointerReleased;
-            _containerCanvas.PointerExited -= ContainerCanvasPointerExited;
-        }
-
-        base.OnApplyTemplate(e);
-
-        VerifyValues();
-        _valuesAssigned = true;
-
-        _activeRectangle = e.NameScope.Get<Rectangle>(s_tpActiveRectangle);
-        _minThumb = e.NameScope.Get<Thumb>(s_tpMinThumb);
-        _maxThumb = e.NameScope.Get<Thumb>(s_tpMaxThumb);
-        _containerCanvas = e.NameScope.Get<Canvas>(s_tpContainerCanvas);
-        _toolTip = e.NameScope.Find<Avalonia.Controls.Control>("ToolTip");
-        _toolTipText = e.NameScope.Find<TextBlock>(s_tpToolTipText);
-
-        if (_toolTip != null)
-        {
-            if (_toolTip.Parent is Panel p)
-                p.Children.Remove(_toolTip);
-        }
-
-        _minThumb.DragCompleted += HandleThumbDragCompleted;
-        _minThumb.DragDelta += MinThumbDragDelta;
-        _minThumb.DragStarted += MinThumbDragStarted;
-        _minThumb.KeyDown += MinThumbKeyDown;
-        _minThumb.KeyUp += ThumbKeyUp;
-
-        _maxThumb.DragCompleted += HandleThumbDragCompleted;
-        _maxThumb.DragDelta += MaxThumbDragDelta;
-        _maxThumb.DragStarted += MaxThumbDragStarted;
-        _maxThumb.KeyDown += MaxThumbKeyDown;
-        _maxThumb.KeyUp += ThumbKeyUp;
-
-        _containerCanvas.SizeChanged += ContainerCanvasSizeChanged;
-        _containerCanvas.PointerPressed += ContainerCanvasPointerPressed;
-        _containerCanvas.PointerMoved += ContainerCanvasPointerMoved;
-        _containerCanvas.PointerReleased += ContainerCanvasPointerReleased;
-        _containerCanvas.PointerExited += ContainerCanvasPointerExited;
-    }
-
-    private void MinThumbDragDelta(object sender, VectorEventArgs e)
-    {
-        if (Orientation == Orientation.Horizontal)
-        {
-            _absolutePosition += e.Vector.X;
-            var oldStart = RangeStart;
-            var newStart = DragThumb(_minThumb, 0, DragWidth, _absolutePosition);
-
-            var limit = RangeEnd - MinimumRange;
-            if (newStart > limit)
-            {
-                RangeEnd += newStart - oldStart;
-                newStart -= newStart - limit;
-                RangeStart = newStart;
-            }
-            else
-            {
-                RangeStart = newStart;
-            }
-        }
-        else
-        {
-            _absolutePosition += e.Vector.Y;
-            var oldStart = RangeStart;
-            var newStart = DragThumb(_minThumb, 0, DragHeight, _absolutePosition, true);
-
-            var limit = RangeEnd - MinimumRange;
-            if (newStart > limit)
-            {
-                RangeEnd += newStart - oldStart;
-                newStart -= newStart - limit;
-                RangeStart = newStart;
-            }
-            else
-            {
-                RangeStart = newStart;
-            }
-        }
-
-        if (_toolTipText != null)
-        {
-            UpdateToolTipText(RangeStart);
-        }
-    }
-
-    private void MaxThumbDragDelta(object sender, VectorEventArgs e)
-    {
-        if (Orientation == Orientation.Horizontal)
-        {
-            _absolutePosition += e.Vector.X;
-            var oldEnd = RangeEnd;
-            var newEnd = DragThumb(_maxThumb, 0, DragWidth, _absolutePosition);
-
-            var limit = RangeStart + MinimumRange;
-            if (newEnd < limit)
-            {
-                RangeStart -= oldEnd - newEnd;
-                newEnd -= newEnd - limit;
-                RangeEnd = newEnd;
-            }
-            else
-            {
-                RangeEnd = newEnd;
-            }
-        }
-        else
-        {
-            _absolutePosition += e.Vector.Y;
-            var oldEnd = RangeEnd;
-            var newEnd = DragThumb(_maxThumb, 0, DragHeight, _absolutePosition, true);
-
-            var limit = RangeStart + MinimumRange;
-            if (newEnd < limit)
-            {
-                RangeStart -= oldEnd - newEnd;
-                newEnd -= newEnd - limit;
-                RangeEnd = newEnd;
-            }
-            else
-            {
-                RangeEnd = newEnd;
-            }
-        }
-
-        if (_toolTipText != null)
-        {
-            UpdateToolTipText(RangeEnd);
-        }
-    }
-
-    private double DragThumb(Thumb thumb, double min, double max, double nextPos, bool isVertical = false)
-    {
-        nextPos = Math.Max(min, nextPos);
-        nextPos = Math.Min(max, nextPos);
-
-        if (isVertical)
-        {
-            Canvas.SetTop(thumb, max - nextPos); // Инвертируем для вертикального движения
-        }
-        else
-        {
-            Canvas.SetLeft(thumb, nextPos);
-        }
-
-        return Minimum + ((nextPos / (isVertical ? DragHeight : DragWidth)) * (Maximum - Minimum));
-    }
-    
-    private void SyncActiveRectangle()
-    {
-        if (_containerCanvas == null || _minThumb == null || _maxThumb == null)
+        if (e is null)
             return;
 
-        if (Orientation == Orientation.Horizontal)
+        var value = e.NewValue.GetValueOrDefault();
+
+        if (change.Property == OrientationProperty)
         {
-            var relativeLeft = Canvas.GetLeft(_minThumb);
-            Canvas.SetLeft(_activeRectangle, relativeLeft);
-            Canvas.SetTop(_activeRectangle, (_containerCanvas.Bounds.Height - _activeRectangle.Bounds.Height) / 2);
-            _activeRectangle.Width = Math.Max(0, Canvas.GetLeft(_maxThumb) - Canvas.GetLeft(_minThumb));
-            _activeRectangle.Height = 2;
-        }
-        else
-        {
-            var relativeTop = Canvas.GetTop(_maxThumb);
-            Canvas.SetTop(_activeRectangle, relativeTop);
-            Canvas.SetLeft(_activeRectangle, (_containerCanvas.Bounds.Width - _activeRectangle.Bounds.Width) / 2);
-            _activeRectangle.Height = Math.Max(0, Canvas.GetTop(_minThumb) - Canvas.GetTop(_maxThumb));
-            _activeRectangle.Width = 2;
+            UpdatePseudoClasses(value);
         }
     }
 
-    // Остальные методы остаются без изменений, кроме тех, что работают с координатами
-    // (ContainerCanvasPointerPressed, ContainerCanvasPointerMoved и т.д.)
-    // Их нужно аналогично модифицировать для поддержки вертикальной ориентации
-    private double _dragWidth;
-    private double _dragHeight;
-
-    private double DragWidth
+    /// <summary>
+    /// Snap the input 'value' to the closest tick.
+    /// </summary>
+    /// <param name="value">Value that want to snap to closest Tick.</param>
+    private double SnapToTick(double value)
     {
-        get => _dragWidth;
-        set => _dragWidth = value;
-    }
-
-    private double DragHeight
-    {
-        get => _dragHeight;
-        set => _dragHeight = value;
-    }
-
-    private void SyncThumbs(bool fromMinKeyDown = false, bool fromMaxKeyDown = false)
-    {
-        if (_containerCanvas == null)
-            return;
-
-        // Обновляем размеры области перетаскивания
-        DragWidth = _containerCanvas.Bounds.Width;
-        DragHeight = _containerCanvas.Bounds.Height;
-
-        double relativeMin = ((RangeStart - Minimum) / (Maximum - Minimum)) *
-                             (Orientation == Orientation.Horizontal ? DragWidth : DragHeight);
-        double relativeMax = ((RangeEnd - Minimum) / (Maximum - Minimum)) *
-                             (Orientation == Orientation.Horizontal ? DragWidth : DragHeight);
-
-        if (Orientation == Orientation.Horizontal)
+        if (IsSnapToTickEnabled)
         {
-            Canvas.SetLeft(_minThumb, relativeMin);
-            Canvas.SetLeft(_maxThumb, relativeMax);
+            var previous = Minimum;
+            var next = Maximum;
 
-            var y = _containerCanvas.Bounds.Height / 2 - _minThumb.Bounds.Height / 2;
-            Canvas.SetTop(_minThumb, y);
-            Canvas.SetTop(_maxThumb, y);
-        }
-        else
-        {
-            // Для вертикального режима инвертируем координаты (0 внизу)
-            Canvas.SetTop(_minThumb, DragHeight - relativeMax);
-            Canvas.SetTop(_maxThumb, DragHeight - relativeMin);
+            // This property is rarely set so let's try to avoid the GetValue
+            var ticks = Ticks;
 
-            var x = _containerCanvas.Bounds.Width / 2 - _minThumb.Bounds.Width / 2;
-            Canvas.SetLeft(_minThumb, x);
-            Canvas.SetLeft(_maxThumb, x);
-        }
-
-        // Обновляем абсолютную позицию для текущего перетаскивания
-        if (_isDraggingStart)
-        {
-            _absolutePosition = Orientation == Orientation.Horizontal ? relativeMin : relativeMax;
-        }
-        else if (_isDraggingEnd)
-        {
-            _absolutePosition = Orientation == Orientation.Horizontal ? relativeMax : relativeMin;
-        }
-
-        if (fromMinKeyDown || fromMaxKeyDown)
-        {
-            var thumb = fromMinKeyDown ? _minThumb : _maxThumb;
-            var pos = fromMinKeyDown ? relativeMin : relativeMax;
-
-            if (Orientation == Orientation.Horizontal)
+            // If ticks collection is available, use it.
+            // Note that ticks may be unsorted.
+            if (ticks != null && ticks.Count > 0)
             {
-                Canvas.SetLeft(thumb, pos);
-            }
-            else
-            {
-                Canvas.SetTop(thumb, DragHeight - pos);
-            }
-
-            if (_toolTipText != null)
-            {
-                UpdateToolTipText(fromMinKeyDown ? RangeStart : RangeEnd);
-            }
-        }
-
-        SyncActiveRectangle();
-    }
-
-    private void ContainerCanvasPointerPressed(object sender, PointerPressedEventArgs e)
-    {
-        var point = e.GetCurrentPoint(_containerCanvas);
-        var position = Orientation == Orientation.Horizontal ? point.Position.X : point.Position.Y;
-        var size = Orientation == Orientation.Horizontal ? DragWidth : DragHeight;
-
-        var mods = TopLevel.GetTopLevel(this).PlatformSettings.HotkeyConfiguration.CommandModifiers;
-        if (mods == KeyModifiers.None)
-            mods = KeyModifiers.Control;
-
-        if ((e.KeyModifiers & mods) == mods)
-        {
-            _pointerManipulatingBoth = true;
-            _absolutePosition = position;
-            return;
-        }
-
-        var normalizedPosition = (position / size) * (Maximum - Minimum) + Minimum;
-        double upperValueDiff = Math.Abs(RangeEnd - normalizedPosition);
-        double lowerValueDiff = Math.Abs(RangeStart - normalizedPosition);
-
-        if (upperValueDiff < lowerValueDiff)
-        {
-            RangeEnd = normalizedPosition;
-            _pointerManipulatingMax = true;
-            HandleThumbDragStarted(_maxThumb);
-        }
-        else
-        {
-            RangeStart = normalizedPosition;
-            _pointerManipulatingMin = true;
-            HandleThumbDragStarted(_minThumb);
-        }
-
-        SyncThumbs();
-    }
-
-    private void ContainerCanvasPointerMoved(object sender, PointerEventArgs e)
-    {
-        var point = e.GetCurrentPoint(_containerCanvas);
-        var position = Orientation == Orientation.Horizontal ? point.Position.X : point.Position.Y;
-        var size = Orientation == Orientation.Horizontal ? DragWidth : DragHeight;
-
-        if (_pointerManipulatingBoth)
-        {
-            var max = Maximum;
-            var min = Minimum;
-            var dragDelta = position - _absolutePosition;
-            var delta = ((dragDelta / size) * (max - min));
-
-            if (Math.Abs(delta) < StepFrequency)
-                return;
-
-            var rs = RangeStart;
-            var re = RangeEnd;
-
-            if (delta > 0)
-            {
-                if (MathUtilities.AreClose(re, max))
-                    return;
-
-                if (re + delta > max)
-                    delta = max - re;
-            }
-            else if (delta < 0)
-            {
-                if (MathUtilities.AreClose(rs, min))
-                    return;
-
-                if (rs + delta < min)
-                    delta = min - rs;
-            }
-
-            RangeStart += delta;
-            RangeEnd += delta;
-            _absolutePosition = position;
-            return;
-        }
-
-        var normalizedPosition = (position / size) * (Maximum - Minimum) + Minimum;
-
-        if (_pointerManipulatingMin && normalizedPosition < RangeEnd)
-        {
-            var maxPos = Orientation == Orientation.Horizontal
-                ? Canvas.GetLeft(_maxThumb)
-                : DragHeight - Canvas.GetTop(_maxThumb);
-            RangeStart = DragThumb(_minThumb, 0, maxPos, position, Orientation == Orientation.Vertical);
-            UpdateToolTipText(RangeStart);
-        }
-        else if (_pointerManipulatingMax && normalizedPosition > RangeStart)
-        {
-            var minPos = Orientation == Orientation.Horizontal
-                ? Canvas.GetLeft(_minThumb)
-                : DragHeight - Canvas.GetTop(_minThumb);
-            RangeEnd = DragThumb(_maxThumb, minPos, size, position, Orientation == Orientation.Vertical);
-            UpdateToolTipText(RangeEnd);
-        }
-    }
-    
-    // Остальные поля и константы остаются без изменений
-    private Rectangle _activeRectangle;
-    private Thumb _minThumb;
-    private Thumb _maxThumb;
-    private Canvas _containerCanvas;
-    private double _oldValue;
-    private bool _valuesAssigned;
-    private bool _minSet;
-    private bool _maxSet;
-    private bool _pointerManipulatingMin;
-    private bool _pointerManipulatingMax;
-    private bool _pointerManipulatingBoth;
-    private double _absolutePosition;
-    private Avalonia.Controls.Control _toolTip;
-    private TextBlock _toolTipText;
-    private const double Epsilon = 0.01;
-    private bool _isDraggingStart;
-    private bool _isDraggingEnd;
-    private readonly DispatcherTimer _keyTimer = new DispatcherTimer();
-
-    // private const string s_tpActiveRectangle = "ActiveRectangle";
-    // private const string s_tpMinThumb = "MinThumb";
-    // private const string s_tpMaxThumb = "MaxThumb";
-    // private const string s_tpContainerCanvas = "ContainerCanvas";
-    // private const string s_tpToolTipText = "ToolTipText";
-
-    protected virtual void OnThumbDragStarted(VectorEventArgs e)
-    {
-        ThumbDragStarted?.Invoke(this, e);
-    }
-
-    protected virtual void OnThumbDragCompleted(VectorEventArgs e)
-    {
-        ThumbDragCompleted?.Invoke(this, e);
-    }
-
-    protected virtual void OnValueChanged(RangeChangedEventArgs e)
-    {
-        ValueChanged?.Invoke(this, e);
-    }
-
-    private void MinThumbDragStarted(object sender, VectorEventArgs e)
-    {
-        _isDraggingStart = true;
-        OnThumbDragStarted(e);
-        HandleThumbDragStarted(_minThumb);
-    }
-
-    private void MaxThumbDragStarted(object sender, VectorEventArgs e)
-    {
-        _isDraggingEnd = true;
-        OnThumbDragStarted(e);
-        HandleThumbDragStarted(_maxThumb);
-    }
-
-    private void HandleThumbDragCompleted(object sender, VectorEventArgs e)
-    {
-        _isDraggingStart = _isDraggingEnd = false;
-        OnThumbDragCompleted(e);
-        OnValueChanged(sender.Equals(_minThumb)
-            ? new RangeChangedEventArgs(_oldValue, RangeStart, RangeSelectorProperty.RangeStartValue)
-            : new RangeChangedEventArgs(_oldValue, RangeEnd, RangeSelectorProperty.RangeEndValue));
-        SyncThumbs();
-
-        if (_toolTip != null)
-        {
-            SetToolTipAt(sender as Thumb, false);
-        }
-    }
-
-    private double DragThumb(Thumb thumb, double min, double max, double nextPos)
-    {
-        nextPos = Math.Max(min, nextPos);
-        nextPos = Math.Min(max, nextPos);
-
-        Canvas.SetLeft(thumb, nextPos);
-
-        return Minimum + ((nextPos / DragWidth) * (Maximum - Minimum));
-    }
-
-    private void HandleThumbDragStarted(Thumb thumb)
-    {
-        var useMin = thumb == _minThumb;
-        var otherThumb = useMin ? _maxThumb : _minThumb;
-
-        _absolutePosition = Canvas.GetLeft(thumb);
-        thumb.ZIndex = 10;
-        otherThumb.ZIndex = 0;
-        _oldValue = RangeStart;
-
-        if (_toolTipText != null && _toolTip != null)
-        {
-            SetToolTipAt(thumb, true);
-
-            UpdateToolTipText(useMin ? RangeStart : RangeEnd);
-        }
-    }
-
-    private void MinThumbKeyDown(object sender, KeyEventArgs e)
-    {
-        switch (e.Key)
-        {
-            case Key.Left:
-                RangeStart -= StepFrequency;
-                SyncThumbs(fromMinKeyDown: true);
-
-                SetToolTipAt(_minThumb, true);
-
-                e.Handled = true;
-                break;
-
-            case Key.Right:
-                RangeStart += StepFrequency;
-                SyncThumbs(fromMinKeyDown: true);
-
-                SetToolTipAt(_minThumb, true);
-
-                e.Handled = true;
-                break;
-        }
-    }
-
-    private void MaxThumbKeyDown(object sender, KeyEventArgs e)
-    {
-        switch (e.Key)
-        {
-            case Key.Left:
-                RangeEnd -= StepFrequency;
-                SyncThumbs(fromMaxKeyDown: true);
-
-                if (!ToolTip.GetIsOpen(_maxThumb))
+                foreach (var tick in ticks)
                 {
-                    UnParentToolTip(_toolTip);
-                    ToolTip.SetTip(_maxThumb, _toolTip);
-                    ToolTip.SetIsOpen(_maxThumb, true);
-                    ToolTip.SetPlacement(_maxThumb, PlacementMode.Top);
-                    ToolTip.SetVerticalOffset(_maxThumb, -_containerCanvas.Bounds.Height);
-                }
-
-                e.Handled = true;
-                break;
-            case Key.Right:
-                RangeEnd += StepFrequency;
-                SyncThumbs(fromMaxKeyDown: true);
-
-                if (!ToolTip.GetIsOpen(_maxThumb))
-                {
-                    UnParentToolTip(_toolTip);
-                    ToolTip.SetTip(_maxThumb, _toolTip);
-                    ToolTip.SetIsOpen(_maxThumb, true);
-                    ToolTip.SetPlacement(_maxThumb, PlacementMode.Top);
-                    ToolTip.SetVerticalOffset(_maxThumb, -_containerCanvas.Bounds.Height);
-                }
-
-                e.Handled = true;
-                break;
-        }
-    }
-
-    private void ThumbKeyUp(object sender, KeyEventArgs e)
-    {
-        switch (e.Key)
-        {
-            case Key.Left:
-            case Key.Right:
-                if (_toolTip != null)
-                {
-                    _keyTimer.Debounce(() =>
+                    if (MathUtilities.AreClose(tick, value))
                     {
-                        SetToolTipAt(_minThumb, false);
-                        SetToolTipAt(_maxThumb, false);
-                    }, TimeSpan.FromSeconds(1));
+                        return value;
+                    }
+
+                    if (MathUtilities.LessThan(tick, value) && MathUtilities.GreaterThan(tick, previous))
+                    {
+                        previous = tick;
+                    }
+                    else if (MathUtilities.GreaterThan(tick, value) && MathUtilities.LessThan(tick, next))
+                    {
+                        next = tick;
+                    }
                 }
+            }
+            else if (MathUtilities.GreaterThan(TickFrequency, 0.0))
+            {
+                previous = Minimum + Math.Round((value - Minimum) / TickFrequency) * TickFrequency;
+                next = Math.Min(Maximum, previous + TickFrequency);
+            }
 
-                e.Handled = true;
-                break;
+            // Choose the closest value between previous and next. If tie, snap to 'next'.
+            value = MathUtilities.GreaterThanOrClose(value, (previous + next) * 0.5) ? next : previous;
         }
+
+        return value;
     }
 
-    private void ContainerCanvasPointerExited(object sender, PointerEventArgs e)
+    private void ApplyThumbFlyoutPlacement(ThumbFlyoutPlacement placement)
     {
-        var position = e.GetCurrentPoint(_containerCanvas).Position.X;
-        var normalizedPosition = ((position / DragWidth) * (Maximum - Minimum)) + Minimum;
-
-        if (_pointerManipulatingMin)
-        {
-            _pointerManipulatingMin = false;
-            _containerCanvas.IsHitTestVisible = true;
-            OnValueChanged(new RangeChangedEventArgs(RangeStart, normalizedPosition,
-                RangeSelectorProperty.RangeStartValue));
-        }
-        else if (_pointerManipulatingMax)
-        {
-            _pointerManipulatingMax = false;
-            _containerCanvas.IsHitTestVisible = true;
-            OnValueChanged(new RangeChangedEventArgs(RangeEnd, normalizedPosition,
-                RangeSelectorProperty.RangeEndValue));
-        }
-    }
-
-    private void ContainerCanvasPointerReleased(object sender, PointerReleasedEventArgs e)
-    {
-        _pointerManipulatingBoth = false;
-        var position = e.GetCurrentPoint(_containerCanvas).Position.X;
-        var normalizedPosition = ((position / DragWidth) * (Maximum - Minimum)) + Minimum;
-
-        if (_toolTip != null)
-        {
-            var thumb = _pointerManipulatingMax ? _maxThumb : _pointerManipulatingMin ? _minThumb : null;
-            if (thumb == null)
-                return; // Should never happen, but just in case
-
-            ToolTip.SetIsOpen(thumb, false);
-            UnParentToolTip(_toolTip);
-            ToolTip.SetTip(thumb, null);
-        }
-
-        if (_pointerManipulatingMin)
-        {
-            _pointerManipulatingMin = false;
-            _containerCanvas.IsHitTestVisible = true;
-            OnValueChanged(new RangeChangedEventArgs(RangeStart, normalizedPosition,
-                RangeSelectorProperty.RangeStartValue));
-        }
-        else if (_pointerManipulatingMax)
-        {
-            _pointerManipulatingMax = false;
-            _containerCanvas.IsHitTestVisible = true;
-            OnValueChanged(new RangeChangedEventArgs(RangeEnd, normalizedPosition,
-                RangeSelectorProperty.RangeEndValue));
-        }
-
-        SyncThumbs();
-    }
-    
-    private void UpdateToolTipText(double newValue)
-    {
-        if (_toolTipText != null)
-        {
-            var format = ToolTipStringFormat ?? "0.##";
-            _toolTipText.Text = newValue.ToString(format);
-        }
-    }
-
-    private void VerifyValues()
-    {
-        if (Minimum > Maximum)
-        {
-            Minimum = Maximum;
-            Maximum = Maximum;
-        }
-
-        if (Minimum == Maximum)
-        {
-            Maximum += Epsilon;
-        }
-
-        if (!_maxSet)
-        {
-            RangeEnd = Maximum;
-        }
-
-        if (!_minSet)
-        {
-            RangeStart = Minimum;
-        }
-
-        if (RangeStart < Minimum)
-        {
-            RangeStart = Minimum;
-        }
-
-        if (RangeEnd < Minimum)
-        {
-            RangeEnd = Minimum;
-        }
-
-        if (RangeStart > Maximum)
-        {
-            RangeStart = Maximum;
-        }
-
-        if (RangeEnd > Maximum)
-        {
-            RangeEnd = Maximum;
-        }
-
-        if (RangeEnd < RangeStart)
-        {
-            RangeStart = RangeEnd;
-        }
-    }
-
-    private void RangeMinToStepFrequency()
-    {
-        RangeStart = MoveToStepFrequency(RangeStart);
-    }
-
-    private void RangeMaxToStepFrequency()
-    {
-        RangeEnd = MoveToStepFrequency(RangeEnd);
-    }
-
-    private double MoveToStepFrequency(double rangeValue)
-    {
-        double newValue = Minimum + (((int)Math.Round((rangeValue - Minimum) / StepFrequency)) * StepFrequency);
-
-        if (newValue < Minimum)
-        {
-            return Minimum;
-        }
-        else if (newValue > Maximum || Maximum - newValue < StepFrequency)
-        {
-            return Maximum;
-        }
-        else
-        {
-            return newValue;
-        }
-    }
-
-    private void ContainerCanvasSizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        SyncThumbs();
-    }
-
-    private void SetToolTipAt(Thumb thumb, bool open)
-    {
-        if (!ShowValueToolTip)
+        if (placement == ThumbFlyoutPlacement.None)
             return;
 
-        if (open && !ToolTip.GetIsOpen(thumb))
+        var placementMode = Orientation switch
         {
-            UnParentToolTip(_toolTip);
-            ToolTip.SetTip(thumb, _toolTip);
-            ToolTip.SetIsOpen(thumb, true);
-            ToolTip.SetPlacement(thumb, PlacementMode.Top);
-            ToolTip.SetVerticalOffset(thumb, -_containerCanvas.Bounds.Height);
-        }
-        else if (!open)
-        {
-            ToolTip.SetIsOpen(thumb, false);
-            UnParentToolTip(_toolTip);
-            ToolTip.SetTip(thumb, null);
-        }
-    }
-
-    private static void UnParentToolTip(Avalonia.Controls.Control c)
-    {
-        if (c.Parent is Panel p)
-        {
-            p.Children.Remove(c);
-        }
-        else if (c.Parent is ContentControl cc)
-        {
-            cc.Content = null;
-        }
-        else if (c.Parent is Decorator d)
-        {
-            d.Child = null;
-        }
-    }
-}
-
-internal static class DispatcherTimerExtensions
-{
-    public static void Debounce(this DispatcherTimer timer, Action action, TimeSpan interval, bool immediate = false)
-    {
-        // Check and stop any existing timer
-        var timeout = timer.IsEnabled;
-        if (timeout)
-        {
-            timer.Stop();
-        }
-
-        // Reset timer parameters
-        timer.Tick -= TimerTick;
-        timer.Interval = interval;
-
-        if (immediate)
-        {
-            // If we're in immediate mode then we only execute if the timer wasn't running beforehand
-            if (!timeout)
+            Orientation.Horizontal => placement switch
             {
-                action.Invoke();
-            }
-        }
-        else
-        {
-            // If we're not in immediate mode, then we'll execute when the current timer expires.
-            timer.Tick += TimerTick;
-
-            // Store/Update function
-            _debounceInstances.AddOrUpdate(timer, action, (k, v) => action);
-        }
-
-        // Start the timer to keep track of the last call here.
-        timer.Start();
-    }
-
-    private static void TimerTick(object sender, object e)
-    {
-        // This event is only registered/run if we weren't in immediate mode above
-        if (sender is DispatcherTimer timer)
-        {
-            timer.Tick -= TimerTick;
-            timer.Stop();
-
-            if (_debounceInstances.TryRemove(timer, out Action action))
+                ThumbFlyoutPlacement.TopLeft => PlacementMode.Top,
+                ThumbFlyoutPlacement.BottomRight => PlacementMode.Bottom,
+                _ => throw new ArgumentOutOfRangeException(nameof(placement), "Unexpected argument value")
+            },
+            Orientation.Vertical => placement switch
             {
-                action?.Invoke();
-            }
+                ThumbFlyoutPlacement.TopLeft => PlacementMode.Left,
+                ThumbFlyoutPlacement.BottomRight => PlacementMode.Right,
+                _ => throw new ArgumentOutOfRangeException(nameof(placement), "Unexpected argument value")
+            },
+            _ => throw new NotImplementedException("Unknown value")
+        };
+
+        var lowerFlyout = FlyoutBase.GetAttachedFlyout(_lowerThumb) as PopupFlyoutBase;
+        if (lowerFlyout is not null)
+            lowerFlyout.Placement = placementMode;
+
+        var upperFlyout = FlyoutBase.GetAttachedFlyout(_upperThumb) as PopupFlyoutBase;
+        if (upperFlyout is not null)
+            upperFlyout.Placement = placementMode;
+    }
+
+    private void ThumbFlyoutPlacementChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        if (_lowerThumb == null || _upperThumb == null)
+            return;
+
+        if (e.NewValue is ThumbFlyoutPlacement placement)
+        {
+            ApplyThumbFlyoutPlacement(placement);
         }
     }
 
-    private static ConcurrentDictionary<DispatcherTimer, Action> _debounceInstances =
-        new ConcurrentDictionary<DispatcherTimer, Action>();
+    private void UpdatePseudoClasses(Orientation o)
+    {
+        PseudoClasses.Set(":vertical", o == Orientation.Vertical);
+        PseudoClasses.Set(":horizontal", o == Orientation.Horizontal);
+    }
 }

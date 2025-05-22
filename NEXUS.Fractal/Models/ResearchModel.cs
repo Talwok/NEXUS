@@ -3,7 +3,4 @@
 namespace NEXUS.Fractal.Models;
 
 [MessagePackObject]
-public class ResearchModel
-{
-    
-}
+public class ResearchModel { }

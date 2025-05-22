@@ -4,6 +4,7 @@ using NEXUS.Fractal.ViewModels;
 using ReactiveUI;
 using System;
 using Avalonia.Input;
+using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Models;
 
 namespace NEXUS.Fractal.Views;
@@ -24,15 +25,19 @@ public partial class FrameView : UserControl
 
         if (DataContext is FrameViewModel frameViewModel)
         {
+            ActualThemeVariantChanged += (_, _) => ReinsertOpenGlControl();
+            
             frameViewModel.WhenAnyValue(
                     vm => vm.HeightMap,
                     vm => vm.ColorTable)
-                .Subscribe(_ =>
-                {
-                    ViewPanel.Children.Remove(SurfaceOpenGl);
-                    ViewPanel.Children.Add(SurfaceOpenGl);
-                });    
+                .Subscribe(_ => ReinsertOpenGlControl());    
         }
+    }
+
+    private void ReinsertOpenGlControl()
+    {
+        ViewPanel.Children.Remove(SurfaceOpenGl);
+        ViewPanel.Children.Add(SurfaceOpenGl);
     }
     
     private void OnViewCubeViewSelected(AxisViewType type) 

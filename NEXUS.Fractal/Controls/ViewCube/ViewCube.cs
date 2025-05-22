@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Models;
 
 namespace NEXUS.Fractal.Controls.ViewCube

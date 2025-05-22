@@ -1,19 +1,16 @@
-﻿using Avalonia;
+﻿using System.Globalization;
+using Avalonia;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 using NEXUS.Parsers.MDT.Models.Pallete;
 
 namespace NEXUS.Converters;
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using Avalonia.Data.Converters;
-using Avalonia.Media;
-
-public class ColorsToGradientConverter : IValueConverter
+public class VerticalColorsToGradientConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is List<PaletteColor> colors && colors.Count > 0)
+        if (value is List<PaletteColor> { Count: > 0 } colors)
         {
             var gradientStops = new GradientStops();
             
@@ -29,8 +26,8 @@ public class ColorsToGradientConverter : IValueConverter
             
             return new LinearGradientBrush
             {
-                StartPoint = new RelativePoint(0, 0.5, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(1, 0.5, RelativeUnit.Relative),
+                StartPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
                 GradientStops = gradientStops
             };
         }
@@ -43,5 +40,5 @@ public class ColorsToGradientConverter : IValueConverter
         throw new NotImplementedException();
     }
 
-    public static ColorsToGradientConverter Instance = new();
+    public static VerticalColorsToGradientConverter Instance = new();
 }

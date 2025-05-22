@@ -12,6 +12,8 @@ using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using NEXUS.Fractal.Enums;
+using NEXUS.Fractal.Helpers;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.ViewModels;
 using NEXUS.Parsers.MDT.Models.Pallete;
@@ -276,7 +278,29 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             UpdateRender();
         }
     }
-    
+
+    private float _colorTableUpperSelection;
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> ColorTableUpperSelectionProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(ColorTableUpperSelection), o => o.ColorTableUpperSelection, (o, v) => o.ColorTableUpperSelection = v);
+
+    public float ColorTableUpperSelection
+    {
+        get => _colorTableUpperSelection;
+        set => SetAndRaise(ColorTableUpperSelectionProperty, ref _colorTableUpperSelection, value);
+    }
+
+    private float _colorTableLowerSelection;
+
+    public static readonly DirectProperty<SurfaceOpenGlControl, float> ColorTableLowerSelectionProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
+        nameof(ColorTableLowerSelection), o => o.ColorTableLowerSelection, (o, v) => o.ColorTableLowerSelection = v);
+
+    public float ColorTableLowerSelection
+    {
+        get => _colorTableLowerSelection;
+        set => SetAndRaise(ColorTableLowerSelectionProperty, ref _colorTableLowerSelection, value);
+    }
+
     public Bitmap Image { get; set; }
     
     /// <summary>
@@ -345,8 +369,30 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
                 float posZ = (z * stepZ) - sizeZ / 2;
                 float posY = normH;
 
-                int colorIndex = (int)(normH * (_colorTable.Colors.Count - 1));
-                colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
+                int colorIndex;
+
+                if (ColorTableUpperSelection != 0 || ColorTableLowerSelection != 0)
+                {
+                    if (normH > ColorTableUpperSelection)
+                    {
+                        colorIndex = ColorTable.Colors.Count - 1;
+                    }
+                    else if (normH < ColorTableLowerSelection)
+                    {
+                        colorIndex = 0;
+                    }
+                    else
+                    {
+                        normH = FrameHelper.Normalize(normH, ColorTableLowerSelection, ColorTableUpperSelection);
+                        colorIndex = (int)(normH * (_colorTable.Colors.Count - 1));
+                        colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
+                    }   
+                }
+                else
+                {
+                    colorIndex = (int)(normH * (_colorTable.Colors.Count - 1));
+                    colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
+                }
                 var color = _colorTable.Colors[colorIndex];
 
                 var normal = normals[z, x];

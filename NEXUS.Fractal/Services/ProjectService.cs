@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
+using NEXUS.Fractal.Enums;
+using NEXUS.Fractal.Helpers;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.ViewModels;
 using NEXUS.Parsers.BCR;
@@ -96,9 +98,7 @@ public class ProjectService : StatefulServiceBase
     }
 
     [Reactive] public ObservableCollection<RecentProjectModel> RecentProjects { get; set; } = [];
-
     [Reactive, JsonIgnore] public ProjectViewModel? Project { get; private set; }
-
     [Reactive, JsonIgnore] public bool HasProject { get; private set; }
     [Reactive, JsonIgnore] public object SelectedItem { get; set; }
     [Reactive, JsonIgnore] public PaletteColorTable? SelectedColorTable { get; set; }
@@ -270,7 +270,7 @@ public class ProjectService : StatefulServiceBase
             Id = Guid.NewGuid(),
             SourceType = FrameSourceType.Image,
             Name = Path.GetFileNameWithoutExtension(filePath),
-            HeightMap = Normalize(heightMap),
+            HeightMap = heightMap.Normalize(),
             HeightSpacing = 10,
             HeightScaling = 1,
             MetaData = null // TODO: добавить заполнение необходимых для экспорта метаданных
@@ -306,7 +306,7 @@ public class ProjectService : StatefulServiceBase
                     Id = Guid.NewGuid(),
                     SourceType = sourceType,
                     Name = mdaFrame.Title,
-                    HeightMap = Normalize(processor.GetHeightMap()),
+                    HeightMap = processor.GetHeightMap().Normalize(),
                     HeightSpacing = 10,
                     HeightScaling = 1,
                     MetaData = null // TODO: добавить заполнение необходимых для экспорта метаданных
@@ -330,58 +330,12 @@ public class ProjectService : StatefulServiceBase
             Id = Guid.NewGuid(),
             SourceType = FrameSourceType.DigitalSurf,
             Name = Path.GetFileNameWithoutExtension(filePath),
-            HeightMap = Normalize(processor.GetHeightMap()),
+            HeightMap = processor.GetHeightMap().Normalize(),
             HeightSpacing = 10,
             HeightScaling = 1,
             MetaData = bcr.Metadata
         };
         Project.Frames.Add(new FrameViewModel(frameModel));
-    }
-
-    public static float[,] Normalize(float[,] data)
-    {
-        if (data == null || data.Length == 0)
-            return data;
-
-        int rows = data.GetLength(0);
-        int cols = data.GetLength(1);
-    
-        // Find min and max values in the array
-        float min = data[0, 0];
-        float max = data[0, 0];
-    
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                if (data[i, j] < min) min = data[i, j];
-                if (data[i, j] > max) max = data[i, j];
-            }
-        }
-    
-        // Handle case where all values are the same (avoid division by zero)
-        if (min == max)
-        {
-            // You can choose to return all zeros, all 0.5, or the original array
-            // Here we return all 0.5 since it's in the middle of [0,1]
-            float[,] result = new float[rows, cols];
-            for (int i = 0; i < rows; i++)
-            for (int j = 0; j < cols; j++)
-                result[i, j] = 0.5f;
-            return result;
-        }
-    
-        // Normalize the data
-        float[,] normalized = new float[rows, cols];
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                normalized[i, j] = (data[i, j] - min) / (max - min);
-            }
-        }
-    
-        return normalized;
     }
     
     public async Task ExportFromProject()
