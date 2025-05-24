@@ -307,7 +307,7 @@ public static class FractalDimensionHelper
             logEpsilons.Add((float)Math.Log(1.0 / step));
             logAreas.Add((float)Math.Log(totalArea));
         }
-
+        
         float slope = LinearRegressionSlope(logEpsilons, logAreas);
         return new FractalDimensionModel
         {

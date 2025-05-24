@@ -12,6 +12,7 @@ using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Extensions;
+using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.Services;
 using NEXUS.Fractal.Views;
@@ -27,6 +28,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     private readonly GitHubUpdater? _updater;
 
     public MainWindowViewModel(
+        GeometryService geometryService, 
         SettingsScreenViewModel settings,
         IEnumerable<StatefulServiceBase> statefulServices,
         InfoService infoService)
@@ -34,7 +36,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         SettingsMenuItemScreen = settings;
         ProjectService = statefulServices.FirstOrDefault<ProjectService>();
         InfoService = infoService;
-        
+        GeometryService = geometryService;
 #if !DEBUG
         if (Version != null)
         {
@@ -81,7 +83,10 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         SaveAsProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.SaveProjectAs, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
         ExportFromProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.ExportFromProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
         ImportToProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.ImportToProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
+        GeometryUpdateCommand = ReactiveCommand.CreateRunInBackground<GeometryUpdateType>(geometryService.UpdateGeometry, outputScheduler: RxApp.MainThreadScheduler);
     }
+
+    public GeometryService GeometryService { get; set; }
 
     public ProjectService? ProjectService { get; set; }
     
@@ -94,6 +99,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     public ICommand SaveAsProjectCommand { get; set; }
     public ICommand ExportFromProjectCommand { get; set; } 
     public ICommand ImportToProjectCommand { get; set; }
+    public ICommand GeometryUpdateCommand { get; }
     public ICommand UpdateCommand { get; set; }
 
     [Reactive]

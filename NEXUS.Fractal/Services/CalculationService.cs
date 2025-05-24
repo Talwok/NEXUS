@@ -43,7 +43,6 @@ namespace NEXUS.Fractal.Services
                     projectService.Project?.Researches.Add(new FractalDimensionResearchViewModel(researchModel));    
                 }
             }
-            SelectedFrames.Clear();
             
             IsCalculating = false;
         }

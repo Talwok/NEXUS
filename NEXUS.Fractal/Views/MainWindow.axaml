@@ -10,6 +10,7 @@
         xmlns:behaviors="clr-namespace:NEXUS.Behaviors;assembly=NEXUS"
         xmlns:helpers="clr-namespace:NEXUS.Helpers;assembly=NEXUS"
         xmlns:models="clr-namespace:NEXUS.Fractal.Models"
+        xmlns:enums="clr-namespace:NEXUS.Fractal.Enums"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NEXUS.Fractal.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -70,9 +71,26 @@
                 </Button>
                 <Button Grid.Column="1"
                         Theme="{DynamicResource TransparentButton}"
-                        Content="{avalonia:MaterialIconTextExt Kind=Resume, Text=Результаты}">
+                        Content="{avalonia:MaterialIconTextExt Kind=Ruler, Text=Выпрямление}">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Удаление трендов/наклонов 1-го порядка)"
+                                      Command="{Binding GeometryUpdateCommand}"
+                                      CommandParameter="{x:Static enums:GeometryUpdateType.RemoveLinearTrend}"/>
+                            <MenuItem Header="Удаление трендов/наклонов 2-го порядка"
+                                      Command="{Binding GeometryUpdateCommand}"
+                                      CommandParameter="{x:Static enums:GeometryUpdateType.RemoveQuadraticTrend}"/>
+                            <MenuItem Header="Локальное выравнивание"
+                                      Command="{Binding GeometryUpdateCommand}"
+                                      CommandParameter="{x:Static enums:GeometryUpdateType.LocalAlignment}"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
                 </Button>
                 <Button Grid.Column="2"
+                        Theme="{DynamicResource TransparentButton}"
+                        Content="{avalonia:MaterialIconTextExt Kind=Resume, Text=Результаты}">
+                </Button>
+                <Button Grid.Column="3"
                         Theme="{DynamicResource TransparentButton}"
                         Content="{avalonia:MaterialIconTextExt Kind=DockWindow, Text=Панели}">
                     <Button.Flyout>
@@ -86,7 +104,7 @@
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
-                <Button Grid.Column="3"
+                <Button Grid.Column="4"
                         Theme="{DynamicResource TransparentButton}"
                         Content="{avalonia:MaterialIconTextExt Kind=Settings, Text=Настройки}">
                     <Button.Flyout>

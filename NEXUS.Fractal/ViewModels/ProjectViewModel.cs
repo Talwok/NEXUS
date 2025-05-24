@@ -36,7 +36,7 @@ public class ProjectViewModel : ViewModelBase
     {
         return new ProjectModel
         {
-            Frames = Frames.Select(f => f.GetModel()).ToList(),
+            Frames = Frames.FlattenTree().ToList(),
             Researches = Researches.Select(f => f.GetModel()).ToList()
         };
     }

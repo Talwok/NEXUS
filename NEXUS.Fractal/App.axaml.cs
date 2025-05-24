@@ -35,6 +35,8 @@ public partial class App : Application
         
         serviceCollection.AddSingleton<InfoService>();
         serviceCollection.AddSingleton<CalculationService>();
+        serviceCollection.AddSingleton<GeometryService>();
+
         serviceCollection.AddSingleton<StatefulServiceBase, ProjectService>();
         
         serviceCollection.AddSingleton<SettingsScreenViewModel>();

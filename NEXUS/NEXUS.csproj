@@ -16,6 +16,7 @@
       <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
       <PackageReference Include="FluentAvaloniaUI" Version="2.3.0" />
       <PackageReference Include="Material.Icons.Avalonia" Version="2.4.1" />
+      <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
       <PackageReference Include="protobuf-net" Version="3.2.52" />
