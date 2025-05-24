@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using NEXUS.Extensions;
 using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Helpers;
@@ -9,32 +8,28 @@ using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Fractal.Services;
 
-public class GeometryService : ServiceBase
+public class FilterService : ServiceBase
 {
     private readonly ProjectService? _projectService;
 
-    public GeometryService(IEnumerable<StatefulServiceBase> statefulServices, InfoService infoService)
+    public FilterService(IEnumerable<StatefulServiceBase> statefulServices, InfoService infoService)
     {
         _projectService = statefulServices.FirstOrDefault<ProjectService>();
     }
-    
+
     [Reactive] public bool IsCalculating { get; set; }
-    
-    public void UpdateGeometry(GeometryUpdateType updateType)
+
+    public void ApplyFilter(FilterType filterType)
     {
         IsCalculating = true;
 
         if (_projectService?.SelectedItem is FrameViewModel frame)
         {
-            var heightMap = updateType switch
+            var heightMap = filterType switch
             {
-                GeometryUpdateType.RemoveLinearTrend => frame.HeightMap.RemoveLinearTrend(),
-                GeometryUpdateType.RemoveQuadraticTrend => frame.HeightMap.RemoveQuadraticTrend(),
-                GeometryUpdateType.LocalAlignment => frame.HeightMap.LocalAlignment(),
-                
-                GeometryUpdateType.RemoveHorizontalStripes => frame.HeightMap.RemoveHorizontalStripes(),
-                GeometryUpdateType.RemoveVerticalStripes => frame.HeightMap.RemoveVerticalStripes(),
-                
+                FilterType.Gaussian => frame.HeightMap.ApplyGaussianFilter(),
+                FilterType.Bilateral => frame.HeightMap.ApplyBilateralFilter(),
+                FilterType.Median => frame.HeightMap.ApplyMedianFilter(),
                 _ => null
             };
 
@@ -51,9 +46,8 @@ public class GeometryService : ServiceBase
                 frame.Children.Add(frameVm);
                 _projectService.SelectedItem = frameVm;
             }
+
+            IsCalculating = false;
         }
-        
-        IsCalculating = false;
     }
-    
 }

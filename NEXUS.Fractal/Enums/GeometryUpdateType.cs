@@ -4,5 +4,8 @@ public enum GeometryUpdateType
 {
     RemoveLinearTrend,
     RemoveQuadraticTrend,
-    LocalAlignment
+    LocalAlignment,
+    
+    RemoveHorizontalStripes,
+    RemoveVerticalStripes
 }

@@ -1,6 +1,9 @@
 ﻿using System;
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Single;
+using MathNet.Numerics.LinearRegression;
+using MathNet.Numerics.Statistics;
 
 namespace NEXUS.Fractal.Helpers
 {
@@ -73,12 +76,12 @@ namespace NEXUS.Fractal.Helpers
             {
                 for (int x = 0; x < width; x++, i++)
                 {
-                    A[i, 0] = 1;       // Константа
-                    A[i, 1] = x;       // x
-                    A[i, 2] = y;       // y
-                    A[i, 3] = x * x;   // x²
-                    A[i, 4] = y * y;   // y²
-                    A[i, 5] = x * y;    // xy
+                    A[i, 0] = 1; // Константа
+                    A[i, 1] = x; // x
+                    A[i, 2] = y; // y
+                    A[i, 3] = x * x; // x²
+                    A[i, 4] = y * y; // y²
+                    A[i, 5] = x * y; // xy
                 }
             }
 
@@ -91,11 +94,11 @@ namespace NEXUS.Fractal.Helpers
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float trend = coefficients[0] + 
-                                  coefficients[1] * x + 
-                                  coefficients[2] * y + 
-                                  coefficients[3] * x * x + 
-                                  coefficients[4] * y * y + 
+                    float trend = coefficients[0] +
+                                  coefficients[1] * x +
+                                  coefficients[2] * y +
+                                  coefficients[3] * x * x +
+                                  coefficients[4] * y * y +
                                   coefficients[5] * x * y;
                     result[y, x] = inputData[y, x] - trend;
                 }
@@ -195,6 +198,62 @@ namespace NEXUS.Fractal.Helpers
             var AtA = a.TransposeThisAndMultiply(a);
             var Atb = a.TransposeThisAndMultiply(b);
             return AtA.Solve(Atb).Column(0);
+        }
+
+        public static float[,] RemoveHorizontalStripes(this float[,] input)
+        {
+            int w = input.GetLength(0), h = input.GetLength(1);
+            var result = new float[w, h];
+
+            for (int j = 0; j < h; j++)
+            {
+                var A = DenseMatrix.Create(w, 2, 0.0f);
+                var b = DenseVector.Create(w, 0.0f);
+                for (int i = 0; i < w; i++)
+                {
+                    A[i, 0] = i;
+                    A[i, 1] = 1.0f;
+                    b[i] = input[i, j];
+                }
+
+                Vector<float> p = (A.TransposeThisAndMultiply(A)).Cholesky().Solve(A.TransposeThisAndMultiply(b));
+                double a = p[0], c = p[1];
+                for (int i = 0; i < w; i++)
+                {
+                    double trend = a * i + c;
+                    result[i, j] = (float)(input[i, j] - trend);
+                }
+            }
+
+            return result;
+        }
+
+        public static float[,] RemoveVerticalStripes(this float[,] input)
+        {
+            int w = input.GetLength(0), h = input.GetLength(1);
+            var result = new float[w, h];
+
+            for (int i = 0; i < w; i++)
+            {
+                var A = DenseMatrix.Create(h, 2, 0.0f);
+                var b = DenseVector.Create(h, 0.0f);
+                for (int j = 0; j < h; j++)
+                {
+                    A[j, 0] = j;
+                    A[j, 1] = 1.0f;
+                    b[j] = input[i, j];
+                }
+
+                Vector<float> p = (A.TransposeThisAndMultiply(A)).Cholesky().Solve(A.TransposeThisAndMultiply(b));
+                double a = p[0], c = p[1];
+                for (int j = 0; j < h; j++)
+                {
+                    double trend = a * j + c;
+                    result[i, j] = (float)(input[i, j] - trend);
+                }
+            }
+
+            return result;
         }
     }
 }

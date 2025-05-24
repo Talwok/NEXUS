@@ -29,6 +29,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
 
     public MainWindowViewModel(
         GeometryService geometryService, 
+        FilterService filterService,
         SettingsScreenViewModel settings,
         IEnumerable<StatefulServiceBase> statefulServices,
         InfoService infoService)
@@ -84,6 +85,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         ExportFromProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.ExportFromProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
         ImportToProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.ImportToProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
         GeometryUpdateCommand = ReactiveCommand.CreateRunInBackground<GeometryUpdateType>(geometryService.UpdateGeometry, outputScheduler: RxApp.MainThreadScheduler);
+        ApplyFilterCommand = ReactiveCommand.CreateRunInBackground<FilterType>(filterService.ApplyFilter, outputScheduler: RxApp.MainThreadScheduler);
     }
 
     public GeometryService GeometryService { get; set; }
@@ -100,6 +102,8 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     public ICommand ExportFromProjectCommand { get; set; } 
     public ICommand ImportToProjectCommand { get; set; }
     public ICommand GeometryUpdateCommand { get; }
+    public ICommand ApplyFilterCommand { get; }
+
     public ICommand UpdateCommand { get; set; }
 
     [Reactive]
