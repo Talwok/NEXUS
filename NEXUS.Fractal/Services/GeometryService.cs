@@ -24,7 +24,7 @@ public class GeometryService : ServiceBase
     {
         IsCalculating = true;
 
-        if (_projectService?.SelectedItem is FrameViewModel frame)
+        if (_projectService?.SelectedFrame is FrameViewModel frame)
         {
             var heightMap = updateType switch
             {
@@ -49,7 +49,7 @@ public class GeometryService : ServiceBase
                     HeightMap = heightMap
                 };
                 frame.Children.Add(frameVm);
-                _projectService.SelectedItem = frameVm;
+                _projectService.SelectedFrame = frameVm;
             }
         }
         

@@ -23,7 +23,7 @@ public class FilterService : ServiceBase
     {
         IsCalculating = true;
 
-        if (_projectService?.SelectedItem is FrameViewModel frame)
+        if (_projectService?.SelectedFrame is FrameViewModel frame)
         {
             var heightMap = filterType switch
             {
@@ -44,7 +44,7 @@ public class FilterService : ServiceBase
                     HeightMap = heightMap
                 };
                 frame.Children.Add(frameVm);
-                _projectService.SelectedItem = frameVm;
+                _projectService.SelectedFrame = frameVm;
             }
 
             IsCalculating = false;

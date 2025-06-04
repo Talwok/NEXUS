@@ -1,0 +1,128 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             xmlns:models="clr-namespace:NEXUS.Fractal.Models"
+             xmlns:views="clr-namespace:NEXUS.Fractal.Views"
+             xmlns:enums="clr-namespace:NEXUS.Fractal.Enums"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="50"
+             x:Class="NEXUS.Fractal.Views.MenuSection"
+             Background="Transparent"
+             x:DataType="viewModels:MainWindowViewModel">
+    <UserControl.Styles>
+        <Style Selector="MenuItem">
+            <Setter Property="Margin" Value=" 0"/>
+            <Setter Property="Padding" Value="6 0"/>
+        </Style>
+    </UserControl.Styles>
+    <Menu Height="30" Margin="8 0 0 0">
+        <MenuItem Header="Файл">
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=Add}"
+                      Header="Создать проект"
+                      HotKey="Ctrl + Shift + N"
+                      InputGesture="Ctrl + Shift + N"
+                      Command="{Binding CreateProjectCommand}" />
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=File}"
+                      Header="Открыть проект"
+                      HotKey="Ctrl + O"
+                      InputGesture="Ctrl + O"
+                      Command="{Binding OpenProjectCommand}" />
+            <MenuItem Classes="SubItems" Icon="{avalonia:MaterialIconExt Kind=Recent}"
+                      IsEnabled="{Binding ProjectService.RecentProjects.Count}"
+                      Header="Недавние проекты" ItemsSource="{Binding ProjectService.RecentProjects}">
+                <MenuItem.Styles>
+                    <Style Selector="MenuItem.SubItems MenuItem" x:DataType="models:RecentProjectModel">
+                        <Setter Property="Icon">
+                            <Setter.Value>
+                                <Template>
+                                    <avalonia:MaterialIcon Kind="PackageVariant" />
+                                </Template>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Header" Value="{Binding Name}" />
+                        <Setter Property="ToolTip.Tip" Value="{Binding Directory}" />
+                        <Setter Property="Command"
+                                Value="{ReflectionBinding $parent[views:MainWindow].DataContext.OpenRecentProjectCommand}" />
+                        <Setter Property="CommandParameter" Value="{Binding FullPath}" />
+                    </Style>
+                </MenuItem.Styles>
+            </MenuItem>
+            <MenuItem Header="-" />
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=ContentSave}"
+                      Header="Сохранить"
+                      HotKey="Ctrl + S"
+                      InputGesture="Ctrl + S"
+                      Command="{Binding SaveProjectCommand}" />
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=ContentSaveAdd}"
+                      Header="Сохранить как"
+                      HotKey="Ctrl + Shift + S"
+                      InputGesture="Ctrl + Shift + S"
+                      Command="{Binding SaveAsProjectCommand}" />
+            <MenuItem Header="-" />
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=Import}"
+                      Header="Импорт данных"
+                      HotKey="Ctrl + I"
+                      InputGesture="Ctrl + I"
+                      Command="{Binding ImportToProjectCommand}" />
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=Export}"
+                      HotKey="Ctrl + E"
+                      InputGesture="Ctrl + E"
+                      Header="Экспорт данных"
+                      Command="{Binding ExportFromProjectCommand}" />
+        </MenuItem>
+        <MenuItem Header="Редактировать">
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=Ruler}" Header="Выпрямление">
+                <MenuItem Header="Удаление трендов/наклонов 1-го порядка)"
+                          Command="{Binding GeometryUpdateCommand}"
+                          CommandParameter="{x:Static enums:GeometryUpdateType.RemoveLinearTrend}" />
+                <MenuItem Header="Удаление трендов/наклонов 2-го порядка"
+                          Command="{Binding GeometryUpdateCommand}"
+                          CommandParameter="{x:Static enums:GeometryUpdateType.RemoveQuadraticTrend}" />
+                <MenuItem Header="Локальное выравнивание"
+                          Command="{Binding GeometryUpdateCommand}"
+                          CommandParameter="{x:Static enums:GeometryUpdateType.LocalAlignment}" />
+                <MenuItem Header="Устранение горизонтальных полос"
+                          Command="{Binding GeometryUpdateCommand}"
+                          CommandParameter="{x:Static enums:GeometryUpdateType.RemoveHorizontalStripes}" />
+                <MenuItem Header="Устранение вертикальных полос"
+                          Command="{Binding GeometryUpdateCommand}"
+                          CommandParameter="{x:Static enums:GeometryUpdateType.RemoveVerticalStripes}" />
+            </MenuItem>
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=ImageFilter}" Header="Фильтрация">
+                <MenuItem Header="Гауссов фильтр"
+                          Command="{Binding ApplyFilterCommand}"
+                          CommandParameter="{x:Static enums:FilterType.Gaussian}" />
+                <MenuItem Header="Билатеральный фильтр"
+                          Command="{Binding ApplyFilterCommand}"
+                          CommandParameter="{x:Static enums:FilterType.Bilateral}" />
+                <MenuItem Header="Медианный фильтр"
+                          Command="{Binding ApplyFilterCommand}"
+                          CommandParameter="{x:Static enums:FilterType.Median}" />
+            </MenuItem>
+        </MenuItem>
+        <MenuItem Header="Исследование">
+            <MenuItem Icon="{avalonia:MaterialIconExt Kind=FractionOneHalf}" Header="Фрактальная размерность">
+                <MenuItem Header="Метод подсчёта кубов" Command="{Binding CalculateFractalDimensionCommand}" CommandParameter="{x:Static enums:FractalDimensionType.BoxCountingFractalDimension}"/>
+                <MenuItem Header="Метод дисперсий (размаха)" Command="{Binding CalculateFractalDimensionCommand}" CommandParameter="{x:Static enums:FractalDimensionType.VarianceFractalDimension}"/>
+                <MenuItem Header="Метод триангуляции" Command="{Binding CalculateFractalDimensionCommand}" CommandParameter="{x:Static enums:FractalDimensionType.TriangulationFractalDimension}"/>
+            </MenuItem>
+        </MenuItem>
+
+        <MenuItem Header="Панели">
+            <MenuItem ToggleType="CheckBox" Icon="{avalonia:MaterialIconExt Kind=DockLeft}"
+                      Header="Левая панель"
+                      IsChecked="{Binding SettingsMenuItemScreen.Settings.LeftPaneOpened, Mode=TwoWay}" />
+            <MenuItem ToggleType="CheckBox" Icon="{avalonia:MaterialIconExt Kind=DockRight}"
+                      Header="Правая панель"
+                      IsChecked="{Binding SettingsMenuItemScreen.Settings.RightPaneOpened, Mode=TwoWay}" />
+        </MenuItem>
+        <MenuItem Header="Настройки">
+            <MenuItem ToggleType="CheckBox" Icon="{avalonia:MaterialIconExt Kind=MoonAndStars}"
+                      Header="Тёмная тема"
+                      IsChecked="{Binding SettingsMenuItemScreen.CommonSettings.IsDarkThemeToggled, Mode=TwoWay}" />
+        </MenuItem>
+
+    </Menu>
+</UserControl>

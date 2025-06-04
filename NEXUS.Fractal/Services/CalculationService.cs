@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using NEXUS.Extensions;
 using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Helpers;
 using NEXUS.Fractal.Models;
@@ -7,27 +9,27 @@ using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Fractal.Services
 {
-    public class CalculationService(
-        ProjectService projectService,
-        InfoService infoService)
-        : ServiceBase
+    public class CalculationService : ServiceBase
     {
-        [Reactive] public ObservableCollection<FrameViewModel> SelectedFrames { get; set; } = [];
+        private readonly ProjectService? _projectService;
+
+        public CalculationService(IEnumerable<StatefulServiceBase> statefulServices, InfoService infoService)
+        {
+            _projectService = statefulServices.FirstOrDefault<ProjectService>();
+        }
+
         [Reactive] public bool IsCalculating { get; set; }
 
         public void CalculateDimension(FractalDimensionType fractalDimensionType)
         {
             IsCalculating = true;
-            
-            foreach (var frame in SelectedFrames)
+
+            if (_projectService?.SelectedFrame is FrameViewModel frame)
             {
-                FractalDimensionModel? model = fractalDimensionType switch
+                var model = fractalDimensionType switch
                 {
                     FractalDimensionType.BoxCountingFractalDimension => frame.HeightMap.CalculateBoxCountingDimension(),
                     FractalDimensionType.VarianceFractalDimension => frame.HeightMap.CalculateVarianceDimension(),
-                    FractalDimensionType.MassScaleFractalDimension => frame.HeightMap.CalculateMassScaleDimension(),
-                    FractalDimensionType.HiguchiFractalDimension => frame.HeightMap.CalculateHiguchiDimension(),
-                    FractalDimensionType.StructureFunctionFractalDimension => frame.HeightMap.CalculateStructureFunctionDimension(),
                     FractalDimensionType.TriangulationFractalDimension => frame.HeightMap.CalculateTriangulationDimension(),
                     _ => null
                 };
@@ -36,14 +38,16 @@ namespace NEXUS.Fractal.Services
                 {
                     FractalDimensionResearchModel researchModel = new()
                     {
+                        ParentId = frame.Id,
+                        Name = FractalDimensionHelper.GetDimensionName(model.Type),
+                        DimensionType = model.Type,
                         X = model.X,
-                        Y = model.Y,
-                        Dimension = model.Dimension
+                        Y = model.Y
                     };
-                    projectService.Project?.Researches.Add(new FractalDimensionResearchViewModel(researchModel));    
-                }
+                    _projectService?.Project?.Researches.Add(new FractalDimensionResearchViewModel(researchModel));
+                }   
             }
-            
+
             IsCalculating = false;
         }
     }

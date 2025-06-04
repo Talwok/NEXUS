@@ -4,8 +4,5 @@ public enum FractalDimensionType
 {
     BoxCountingFractalDimension,
     VarianceFractalDimension,
-    MassScaleFractalDimension,
-    HiguchiFractalDimension,
-    StructureFunctionFractalDimension,
     TriangulationFractalDimension,
 }

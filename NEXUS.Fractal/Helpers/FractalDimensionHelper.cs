@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Models;
@@ -13,311 +14,174 @@ public static class FractalDimensionHelper
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    public static FractalDimensionModel? CalculateBoxCountingDimension(this float[,] data)
+    public static FractalDimensionModel? CalculateBoxCountingDimension(this float[,] heightMap)
     {
-        int sizeX = data.GetLength(0);
-        int sizeY = data.GetLength(1);
-        int minSize = Math.Min(sizeX, sizeY);
-        List<float> logEpsilons = new();
-        List<float> logCounts = new();
+        int width = heightMap.GetLength(1);
+        int height = heightMap.GetLength(0);
+        int minBoxSize = 2;
+        int maxBoxSize = Math.Min(width, height) / 2;
+        List<float> logEps = new();
+        List<float> logN = new();
 
-        for (int boxSize = 1; boxSize <= minSize / 2; boxSize *= 2)
+        for (int boxSize = minBoxSize; boxSize <= maxBoxSize; boxSize *= 2)
         {
-            int count = 0;
+            float ε = (float)boxSize / Math.Max(width, height);
+            int boxesX = (int)Math.Ceiling((float)width / boxSize);
+            int boxesY = (int)Math.Ceiling((float)height / boxSize);
+            int boxesZ = (int)Math.Ceiling(1.0 / ε);
 
-            for (int i = 0; i < sizeX; i += boxSize)
+            HashSet<(int, int, int)> occupied = new();
+
+            for (int by = 0; by < boxesY; by++)
             {
-                for (int j = 0; j < sizeY; j += boxSize)
+                for (int bx = 0; bx < boxesX; bx++)
                 {
-                    float min = float.MaxValue;
-                    float max = float.MinValue;
-
-                    for (int x = i; x < Math.Min(i + boxSize, sizeX); x++)
+                    for (int y = by * boxSize; y < Math.Min((by + 1) * boxSize, height); y++)
                     {
-                        for (int y = j; y < Math.Min(j + boxSize, sizeY); y++)
+                        for (int x = bx * boxSize; x < Math.Min((bx + 1) * boxSize, width); x++)
                         {
-                            float val = data[x, y];
-                            min = Math.Min(min, val);
-                            max = Math.Max(max, val);
+                            int bz = (int)(heightMap[y, x] / ε);
+                            occupied.Add((bx, by, bz));
                         }
                     }
-
-                    if (max > min)
-                        count++;
                 }
             }
 
-            if (count > 0)
-            {
-                logEpsilons.Add((float)Math.Log(1.0 / boxSize));
-                logCounts.Add((float)Math.Log(count));
-            }
+            logEps.Add((float)Math.Log(1.0 / ε));
+            logN.Add((float)Math.Log(occupied.Count));
         }
 
         return new FractalDimensionModel
         {
             Type = FractalDimensionType.BoxCountingFractalDimension,
-            X = logEpsilons,
-            Y = logCounts,
-            Dimension = LinearRegressionSlope(logEpsilons, logCounts)
+            X = logEps,
+            Y = logN,
         };
-        ;
     }
-
+    
     /// <summary>
     /// Метод дисперсий (размаха)
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    public static FractalDimensionModel? CalculateVarianceDimension(this float[,] data)
+    public static FractalDimensionModel? CalculateVarianceDimension(this float[,] heightMap)
     {
-        int sizeX = data.GetLength(0);
-        int sizeY = data.GetLength(1);
-        int minSize = Math.Min(sizeX, sizeY);
-        List<float> logScales = new();
-        List<float> logVariances = new();
+        int width = heightMap.GetLength(1);
+        int height = heightMap.GetLength(0);
+        int maxWindowSize = Math.Min(width, height) / 2;
 
-        for (int scale = 2; scale <= minSize / 2; scale *= 2)
+        List<float> logEps = new();
+        List<float> logRms = new();
+
+        for (int window = 2; window <= maxWindowSize; window *= 2)
         {
-            List<float> variances = new();
-
-            for (int i = 0; i <= sizeX - scale; i += scale)
+            List<float> localVars = new();
+            for (int y = 0; y <= height - window; y += window)
             {
-                for (int j = 0; j <= sizeY - scale; j += scale)
+                for (int x = 0; x <= width - window; x += window)
                 {
-                    float sum = 0;
-                    float sumSq = 0;
-                    int count = 0;
-
-                    for (int x = i; x < i + scale; x++)
+                    float sum = 0, sumSq = 0;
+                    for (int dy = 0; dy < window; dy++)
+                    for (int dx = 0; dx < window; dx++)
                     {
-                        for (int y = j; y < j + scale; y++)
-                        {
-                            float val = data[x, y];
-                            sum += val;
-                            sumSq += val * val;
-                            count++;
-                        }
+                        float val = heightMap[y + dy, x + dx];
+                        sum += val;
+                        sumSq += val * val;
                     }
 
-                    float mean = sum / count;
-                    float variance = (sumSq / count) - (mean * mean);
-                    variances.Add(variance);
+                    float n = window * window;
+                    float mean = sum / n;
+                    float var = sumSq / n - mean * mean;
+                    localVars.Add(var);
                 }
             }
 
-            float avgVariance = 0;
-            foreach (var v in variances)
-                avgVariance += v;
-            avgVariance /= variances.Count;
+            float rms = (float)Math.Sqrt(localVars.Average());
+            float ε = (float)window / Math.Max(width, height);
 
-            logScales.Add((float)Math.Log(1.0 / scale));
-            logVariances.Add((float)Math.Log(avgVariance));
+            logEps.Add((float)Math.Log(1.0 / ε));
+            logRms.Add((float)Math.Log(rms));
         }
-
-        float slope = LinearRegressionSlope(logScales, logVariances);
 
         return new FractalDimensionModel
         {
             Type = FractalDimensionType.VarianceFractalDimension,
-            X = logScales,
-            Y = logVariances,
-            Dimension = (float)(2 - slope / 2.0)
+            X = logEps,
+            Y = logRms,
         };
     }
-
-    /// <summary>
-    /// Метод Масса-Масштаб
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    public static FractalDimensionModel? CalculateMassScaleDimension(this float[,] data)
-    {
-        int sizeX = data.GetLength(0);
-        int sizeY = data.GetLength(1);
-        int minSize = Math.Min(sizeX, sizeY);
-
-        List<float> logEpsilons = new();
-        List<float> logMasses = new();
-
-        for (int scale = 1; scale <= minSize / 2; scale *= 2)
-        {
-            float totalMass = 0;
-
-            for (int i = 0; i < sizeX; i += scale)
-            {
-                for (int j = 0; j < sizeY; j += scale)
-                {
-                    float sum = 0;
-
-                    for (int x = i; x < Math.Min(i + scale, sizeX); x++)
-                    {
-                        for (int y = j; y < Math.Min(j + scale, sizeY); y++)
-                        {
-                            sum += data[x, y];
-                        }
-                    }
-
-                    if (sum > 0)
-                        totalMass += sum;
-                }
-            }
-
-            logEpsilons.Add((float)Math.Log(1.0 / scale));
-            logMasses.Add((float)Math.Log(totalMass));
-        }
-
-        return new FractalDimensionModel
-        {
-            Type = FractalDimensionType.MassScaleFractalDimension,
-            X = logEpsilons,
-            Y = logMasses,
-            Dimension = LinearRegressionSlope(logEpsilons, logMasses)
-        };
-    }
-
-    /// <summary>
-    /// Метод Хигучи (адаптирован под двумерные данные как линейное приближение)
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    public static FractalDimensionModel? CalculateHiguchiDimension(this float[,] data)
-    {
-        List<float> logL = new();
-        List<float> logK = new();
-        int N = data.GetLength(0) * data.GetLength(1);
-        List<float> flat = new(data.Length);
-        foreach (float f in data) flat.Add(f);
-
-        for (int k = 1; k <= N / 4; k *= 2)
-        {
-            float Lk = 0;
-            for (int m = 0; m < k; m++)
-            {
-                float length = 0;
-                int n = 0;
-
-                for (int i = m + k; i < flat.Count; i += k)
-                {
-                    length += Math.Abs(flat[i] - flat[i - k]);
-                    n++;
-                }
-
-                if (n > 0)
-                    Lk += (length * (flat.Count - 1)) / (n * k);
-            }
-
-            Lk /= k;
-            logK.Add((float)Math.Log(1.0 / k));
-            logL.Add((float)Math.Log(Lk));
-        }
-
-        return new FractalDimensionModel
-        {
-            Type = FractalDimensionType.HiguchiFractalDimension,
-            X = logK,
-            Y = logL,
-            Dimension = LinearRegressionSlope(logK, logL)
-        };
-    }
-
-    /// <summary>
-    /// Метод Перма (структурная функция второго порядка)
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    public static FractalDimensionModel? CalculateStructureFunctionDimension(this float[,] data)
-    {
-        int sizeX = data.GetLength(0);
-        int sizeY = data.GetLength(1);
-        int maxLag = Math.Min(sizeX, sizeY) / 4;
-
-        List<float> logLags = new();
-        List<float> logStructFunc = new();
-
-        for (int lag = 1; lag < maxLag; lag *= 2)
-        {
-            float sum = 0;
-            int count = 0;
-
-            for (int i = 0; i < sizeX - lag; i++)
-            {
-                for (int j = 0; j < sizeY - lag; j++)
-                {
-                    float d = data[i, j] - data[i + lag, j + lag];
-                    sum += d * d;
-                    count++;
-                }
-            }
-
-            if (count > 0)
-            {
-                float sf = sum / count;
-                logLags.Add((float)Math.Log(lag));
-                logStructFunc.Add((float)Math.Log(sf));
-            }
-        }
-
-        float slope = LinearRegressionSlope(logLags, logStructFunc);
-        return new FractalDimensionModel
-        {
-            Type = FractalDimensionType.StructureFunctionFractalDimension,
-            X = logLags,
-            Y = logStructFunc,
-            Dimension = (float)(2 - slope / 2.0)
-        };
-    }
-
+    
     /// <summary>
     /// Метод триангуляции
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    public static FractalDimensionModel? CalculateTriangulationDimension(this float[,] data)
+    public static FractalDimensionModel? CalculateTriangulationDimension(this float[,] heightMap)
     {
-        int sizeX = data.GetLength(0);
-        int sizeY = data.GetLength(1);
-        int minSize = Math.Min(sizeX, sizeY);
+        int width = heightMap.GetLength(1);
+        int height = heightMap.GetLength(0);
 
-        List<float> logEpsilons = new();
-        List<float> logAreas = new();
+        List<float> logEps = new();
+        List<float> logArea = new();
 
-        for (int step = 1; step <= minSize / 2; step *= 2)
+        int maxStep = Math.Min(width, height) / 2;
+
+        for (int step = 2; step <= maxStep; step *= 2)
         {
             float totalArea = 0;
-
-            for (int i = 0; i < sizeX - step; i += step)
+            for (int y = 0; y < height - step; y += step)
             {
-                for (int j = 0; j < sizeY - step; j += step)
+                for (int x = 0; x < width - step; x += step)
                 {
-                    // Четыре угла ячейки
-                    var p00 = new Vector3(i, j, data[i, j]);
-                    var p10 = new Vector3(i + step, j, data[i + step, j]);
-                    var p01 = new Vector3(i, j + step, data[i, j + step]);
-                    var p11 = new Vector3(i + step, j + step, data[i + step, j + step]);
+                    // 4 вершины ячейки
+                    Vector3 p1 = new(x, y, heightMap[y, x]);
+                    Vector3 p2 = new(x + step, y, heightMap[y, x + step]);
+                    Vector3 p3 = new(x, y + step, heightMap[y + step, x]);
+                    Vector3 p4 = new(x + step, y + step, heightMap[y + step, x + step]);
 
-                    // Два треугольника: (p00, p10, p11) и (p00, p11, p01)
-                    float area1 = TriangleArea(p00, p10, p11);
-                    float area2 = TriangleArea(p00, p11, p01);
-
-                    totalArea += area1 + area2;
+                    // Два треугольника
+                    totalArea += TriangleArea(p1, p2, p3);
+                    totalArea += TriangleArea(p2, p4, p3);
                 }
             }
 
-            logEpsilons.Add((float)Math.Log(1.0 / step));
-            logAreas.Add((float)Math.Log(totalArea));
+            float ε = (float)step / Math.Max(width, height);
+            logEps.Add((float)Math.Log(1.0 / ε));
+            logArea.Add((float)Math.Log(totalArea));
         }
-        
-        float slope = LinearRegressionSlope(logEpsilons, logAreas);
+
         return new FractalDimensionModel
         {
             Type = FractalDimensionType.TriangulationFractalDimension,
-            X = logEpsilons,
-            Y = logAreas,
-            Dimension = 2 - slope
+            X = logEps,
+            Y = logArea,
+            // EstimatedDimension = 2 + LinearRegressionSlope(logEps, logArea)
         };
     }
 
+
+    public static float? CalculateDimension(List<float> x, List<float> y, FractalDimensionType type)
+    {
+        return type switch
+        {
+            FractalDimensionType.BoxCountingFractalDimension => LinearRegressionSlope(x, y),
+            FractalDimensionType.VarianceFractalDimension => 2 - LinearRegressionSlope(x, y),
+            FractalDimensionType.TriangulationFractalDimension => 2 + LinearRegressionSlope(x, y),
+            _ => null
+        };
+    }
+
+    public static string? GetDimensionName(FractalDimensionType type)
+    {
+        return type switch
+        {
+            FractalDimensionType.BoxCountingFractalDimension => "Метод подсчёта кубов",
+            FractalDimensionType.VarianceFractalDimension => "Метод дисперсий",
+            FractalDimensionType.TriangulationFractalDimension => "Метод триангуляции",
+            _ => null
+        };
+    }
+    
     /// <summary>
     /// Вычисление площади треугольника по трём 3D-точкам
     /// </summary>

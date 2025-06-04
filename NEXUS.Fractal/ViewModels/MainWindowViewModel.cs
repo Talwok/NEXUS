@@ -29,6 +29,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
 
     public MainWindowViewModel(
         GeometryService geometryService, 
+        CalculationService calculationService,
         FilterService filterService,
         SettingsScreenViewModel settings,
         IEnumerable<StatefulServiceBase> statefulServices,
@@ -38,6 +39,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         ProjectService = statefulServices.FirstOrDefault<ProjectService>();
         InfoService = infoService;
         GeometryService = geometryService;
+        CalculationService = calculationService;
 #if !DEBUG
         if (Version != null)
         {
@@ -86,7 +88,12 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         ImportToProjectCommand = ReactiveCommand.CreateFromTask(ProjectService.ImportToProject, ProjectService.WhenAnyValue(svc => svc.HasProject), outputScheduler: RxApp.MainThreadScheduler);
         GeometryUpdateCommand = ReactiveCommand.CreateRunInBackground<GeometryUpdateType>(geometryService.UpdateGeometry, outputScheduler: RxApp.MainThreadScheduler);
         ApplyFilterCommand = ReactiveCommand.CreateRunInBackground<FilterType>(filterService.ApplyFilter, outputScheduler: RxApp.MainThreadScheduler);
+        RemoveFrameCommand = ReactiveCommand.CreateRunInBackground(ProjectService.RemoveCurrentFrame, outputScheduler: RxApp.MainThreadScheduler);
+
+        CalculateFractalDimensionCommand = ReactiveCommand.CreateRunInBackground<FractalDimensionType>(CalculationService.CalculateDimension, outputScheduler: RxApp.MainThreadScheduler);
     }
+
+    public CalculationService CalculationService { get; set; }
 
     public GeometryService GeometryService { get; set; }
 
@@ -103,7 +110,9 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     public ICommand ImportToProjectCommand { get; set; }
     public ICommand GeometryUpdateCommand { get; }
     public ICommand ApplyFilterCommand { get; }
+    public ICommand RemoveFrameCommand { get; set; }
 
+    public ICommand CalculateFractalDimensionCommand { get; }
     public ICommand UpdateCommand { get; set; }
 
     [Reactive]

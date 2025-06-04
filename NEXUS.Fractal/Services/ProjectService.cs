@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,9 @@ namespace NEXUS.Fractal.Services;
 
 public class ProjectService : StatefulServiceBase
 {
+    public static readonly int FramesTab = 0;
+    public static readonly int ResearchesTab = 1;
+    
     private static readonly string ProjectExtension = ".nfproj";
     private static readonly string FileName = "ProjectsConfig.json";
 
@@ -100,7 +104,9 @@ public class ProjectService : StatefulServiceBase
     [Reactive] public ObservableCollection<RecentProjectModel> RecentProjects { get; set; } = [];
     [Reactive, JsonIgnore] public ProjectViewModel? Project { get; private set; }
     [Reactive, JsonIgnore] public bool HasProject { get; private set; }
-    [Reactive, JsonIgnore] public object SelectedItem { get; set; }
+    [Reactive, JsonIgnore] public int SelectedTab { get; set; }
+    [Reactive, JsonIgnore] public FrameViewModel SelectedFrame { get; set; }
+    [Reactive, JsonIgnore] public ResearchViewModel SelectedResearch { get; set; }
     [Reactive, JsonIgnore] public PaletteColorTable? SelectedColorTable { get; set; }
     [JsonIgnore] public ObservableCollection<PaletteColorTable> ColorTables { get; } = [];
 
@@ -141,6 +147,8 @@ public class ProjectService : StatefulServiceBase
 
         Project = new ProjectViewModel(_projectInitialPath, model);
 
+        fileStream.Close();
+        
         UpdateRecentProjects(_projectInitialPath);
     }
 
@@ -175,6 +183,8 @@ public class ProjectService : StatefulServiceBase
 
         var model = await MessagePackSerializer.DeserializeAsync<ProjectModel>(fileStream);
 
+        fileStream.Close();
+        
         Project = new ProjectViewModel(_projectInitialPath, model);
 
         UpdateRecentProjects(_projectInitialPath);
@@ -190,6 +200,8 @@ public class ProjectService : StatefulServiceBase
 
             await MessagePackSerializer.SerializeAsync(fileStream, model);
 
+            fileStream.Close();
+            
             UpdateRecentProjects(_projectInitialPath);
         }
     }
@@ -211,6 +223,8 @@ public class ProjectService : StatefulServiceBase
 
             await MessagePackSerializer.SerializeAsync(fileStream, model);
 
+            fileStream.Close();
+            
             UpdateRecentProjects(projectPath);
         }
     }
@@ -346,5 +360,36 @@ public class ProjectService : StatefulServiceBase
             return;
 
         var projectPath = file.Path.LocalPath;
+    }
+    
+    public void RemoveCurrentFrame()
+    {
+        if (SelectedFrame is FrameViewModel frame)
+        {
+            if (frame.ParentId != null && GetFrame(Project?.Frames, frame.ParentId.Value) is { } parentFrame)
+            {
+                parentFrame.Children.Remove(frame);
+            }
+            else
+            {
+                Project?.Frames.Remove(frame);
+            }
+        }
+    }
+
+    private FrameViewModel? GetFrame(IEnumerable<FrameViewModel>? frames, Guid id)
+    {
+        if (frames == null) 
+            return null;
+        
+        foreach (var frame in frames)
+        {
+            if (frame.Id == id)
+                return frame;
+
+            return GetFrame(frame.Children, id);
+        }
+
+        return null;
     }
 }
