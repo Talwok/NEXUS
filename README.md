@@ -4,9 +4,10 @@
 <p>Scientific software for working with MDT, BCR and image files of SEM (AFM and STM) microscope data.</p>
 
 # Future plans
-- [x] #739
-- [ ] https://github.com/octo-org/octo-repo/issues/740
-- [ ] Add delight to the experience when all tasks are complete :tada:
+- [x] Add parsing of MDT and BCR files :tada:
+- [x] Add visualization of 3d surface using OpenGL :tada:
+- [ ] #7
+- [ ] #8
 
 # Showcase
 <img src="assets/img.png" alt="img.png">
