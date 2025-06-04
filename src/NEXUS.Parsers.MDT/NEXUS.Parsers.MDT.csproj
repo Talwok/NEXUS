@@ -30,4 +30,27 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="..\..\data\Palletes\Default.pal">
+        <Link>Palletes\Default.pal</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\Palette.pal">
+        <Link>Palletes\Palette.pal</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\Rainbows.pal">
+        <Link>Palletes\Rainbows.pal</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\Stylish.pal">
+        <Link>Palletes\Stylish.pal</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\TrueCol.pal">
+        <Link>Palletes\TrueCol.pal</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

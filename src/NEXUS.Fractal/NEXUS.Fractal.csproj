@@ -58,24 +58,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Assets\Palletes\Default.pal">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Assets\Palletes\Palette.pal">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Assets\Palletes\Rainbows.pal">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Assets\Palletes\Stylish.pal">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Assets\Palletes\TrueCol.pal">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
       <UpToDateCheckInput Remove="Controls\AxisMiniature\AxisMiniature.axaml" />
     </ItemGroup>
 
@@ -87,9 +69,5 @@
       <Reference Include="Avalonia.Svg.Skia">
         <HintPath>..\..\..\Users\VitalyAnofriev\.nuget\packages\avalonia.svg.skia\11.2.7.1\lib\net9.0\Avalonia.Svg.Skia.dll</HintPath>
       </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Converters\" />
     </ItemGroup>
 </Project>

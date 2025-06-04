@@ -7,7 +7,7 @@ namespace NEXUS.Parsers.MDT;
 
 public static class PaletteParser
 {
-    private const string StandardPalettesDirectory = @"Assets\Palletes";
+    private const string StandardPalettesDirectory = "Palletes";
     private const string PalletesSearchPattern = "*.pal";
 
     public static PalleteFile Parse(string filePath)

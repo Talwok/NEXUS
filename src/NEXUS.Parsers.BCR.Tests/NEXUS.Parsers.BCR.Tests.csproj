@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Bcr\" />
+      <Folder Include="..\..\data\Bcr\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -423,6 +423,57 @@
       <None Update="Bcr\Mo80 12 10 24 (35,5).bcr">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+ 
+    <ItemGroup>
+      <Content Include="..\..\data\Bcr\Fe65 22 02 2024 (128).bcr">
+        <Link>Bcr\Fe65 22 02 2024 (128).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Fe65 22 02 2024 (184).bcr">
+        <Link>Bcr\Fe65 22 02 2024 (184).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Fe65 22 02 2024 (94.1).bcr">
+        <Link>Bcr\Fe65 22 02 2024 (94.1).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 11 10 24 (20,2).bcr">
+        <Link>Bcr\Mo80 11 10 24 (20,2).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 11 10 24 (21,7).bcr">
+        <Link>Bcr\Mo80 11 10 24 (21,7).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 11 10 24 (22).bcr">
+        <Link>Bcr\Mo80 11 10 24 (22).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 11 10 24 (28,4).bcr">
+        <Link>Bcr\Mo80 11 10 24 (28,4).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 12 10 24 (17,5.bcr">
+        <Link>Bcr\Mo80 12 10 24 (17,5.bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 12 10 24 (26,2).bcr">
+        <Link>Bcr\Mo80 12 10 24 (26,2).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 12 10 24 (27,7).bcr">
+        <Link>Bcr\Mo80 12 10 24 (27,7).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 12 10 24 (28,41).bcr">
+        <Link>Bcr\Mo80 12 10 24 (28,41).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Bcr\Mo80 12 10 24 (32).bcr">
+        <Link>Bcr\Mo80 12 10 24 (32).bcr</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
