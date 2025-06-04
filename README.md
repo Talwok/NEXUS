@@ -6,9 +6,9 @@
 # Future plans
 - [x] Add parsing of MDT and BCR files :tada:
 - [x] Add visualization of 3d surface using OpenGL :tada:
-- [ ] Add scale-axis to 3d surface view https://github.com/Talwok/NEXUS/issues/7
-- [ ] Add scale-axis to 2d surface view https://github.com/Talwok/NEXUS/issues/8
-- [ ] Add new math functions to surface transformation and analysis https://github.com/Talwok/NEXUS/issues/9
+- [ ] [Add scale-axis to 3d surface view](https://github.com/Talwok/NEXUS/issues/7)
+- [ ] [Add scale-axis to 2d surface view](https://github.com/Talwok/NEXUS/issues/8)
+- [ ] [Add new math functions to surface transformation and analysis](https://github.com/Talwok/NEXUS/issues/9)
 
 
 # Showcase
