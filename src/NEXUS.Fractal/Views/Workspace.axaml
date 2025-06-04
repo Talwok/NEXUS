@@ -1,0 +1,40 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             xmlns:behaviors="clr-namespace:NEXUS.Behaviors;assembly=NEXUS"
+             xmlns:helpers="clr-namespace:NEXUS.Helpers;assembly=NEXUS"
+             xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
+             xmlns:views="clr-namespace:NEXUS.Fractal.Views"
+             xmlns:services="clr-namespace:NEXUS.Fractal.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Views.Workspace"
+             x:DataType="viewModels:MainWindowViewModel">
+    <Grid Name="RootGrid"
+              IsVisible="{Binding ProjectService.HasProject}"
+              helpers:GridHelpers.PixelColumnWidths="{Binding  SettingsMenuItemScreen.Settings.ColumnWidths, Mode=TwoWay}">
+            <Interaction.Behaviors>
+                <behaviors:HideGridColumnBehavior ColumnIndex="0"
+                                                  IsVisible="{Binding SettingsMenuItemScreen.Settings.LeftPaneOpened}" />
+                <behaviors:HideGridColumnBehavior ColumnIndex="1"
+                                                  IsVisible="{Binding SettingsMenuItemScreen.Settings.LeftPaneOpened}" />
+                <behaviors:HideGridColumnBehavior ColumnIndex="3"
+                                                  IsVisible="{Binding SettingsMenuItemScreen.Settings.RightPaneOpened}" />
+                <behaviors:HideGridColumnBehavior ColumnIndex="4"
+                                                  IsVisible="{Binding SettingsMenuItemScreen.Settings.RightPaneOpened}" />
+            </Interaction.Behaviors>
+            <views:Inspector Grid.Column="0"/>
+
+            <GridSplitter IsVisible="{Binding SettingsMenuItemScreen.Settings.LeftPaneOpened}" Grid.Column="1"
+                          Background="Transparent" />
+            <ContentControl IsVisible="{Binding ProjectService.SelectedTab, Converter={x:Static converters:ValueEqualityConverter.Instance}, ConverterParameter={x:Static services:ProjectService.FramesTab}}" Grid.Column="2" Content="{Binding ProjectService.SelectedFrame}" />
+            <ContentControl IsVisible="{Binding ProjectService.SelectedTab, Converter={x:Static converters:ValueEqualityConverter.Instance}, ConverterParameter={x:Static services:ProjectService.ResearchesTab}}" Grid.Column="2" Content="{Binding ProjectService.SelectedResearch}" />
+
+            <GridSplitter IsVisible="{Binding SettingsMenuItemScreen.Settings.RightPaneOpened}" Grid.Column="3"
+                          Background="Transparent" />
+            <views:Properties Grid.Column="4"/>
+        </Grid>
+</UserControl>
