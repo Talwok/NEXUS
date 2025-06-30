@@ -3,20 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
-using Avalonia.Platform;
 using Avalonia.Threading;
 using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Helpers;
-using NEXUS.Fractal.Models;
-using NEXUS.Fractal.ViewModels;
-using NEXUS.Parsers.MDT.Models.Pallete;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -28,628 +21,187 @@ namespace NEXUS.Fractal.Controls.Surface;
 /// <summary>
 /// Custom OpenGL control for 3D surface rendering using Silk.NET
 /// </summary>
-internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
+internal partial class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 {
-    private GL _gl;
-
-    /// <summary>
-    /// Vertex data structure (position + color + normal)
-    /// </summary>
-    private struct OpenGlPoint
-    {
-        public float X, Y, Z;
-        public float R, G, B;
-        public float Nx, Ny, Nz;
-        public float IsBasement;
-
-        public OpenGlPoint(float x, float y, float z, float r, float g, float b, float nx, float ny, float nz,
-            bool isBasement)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-            R = r;
-            G = g;
-            B = b;
-            Nx = nx;
-            Ny = ny;
-            Nz = nz;
-            IsBasement = isBasement ? 1 : 0;
-        }
-    }
-
-    // OpenGL objects
-    private uint _vbo;
-    private uint _ebo;
-    private uint _shaderProgram;
-    private uint _vertexShader;
-    private uint _fragmentShader;
-    private uint _vao;
-
-    // Shader uniforms
-    private int _modelLocation;
-    private int _viewLocation;
-    private int _projectionLocation;
-    private int _heightMultiplierLocation;
-    private int _showFoundationLocation;
-    private int _lightPositionLocation;
-    private int _cameraPositionLocation;
-    private int _ambientStrengthLocation;
-    private int _specularStrengthLocation;
-
-    private string _glShaderVersion = "#version 300 es";
-    // Camera parameters
-    private static readonly Vector3 CameraStartPosition = new(0, 0, 75);
-    private Vector3 _cameraPosition = CameraStartPosition;
-    private Vector3 _cameraTarget = Vector3.Zero;
-
-    private Matrix4x4 _modelMatrix = Matrix4x4.Identity;
-    private float _modelYaw;
-    private float _modelPitch = 1.5f;
-    private float _heightMultiplier = 1f;
-    private bool _showFoundation = true;
-    private Color _foundationColor = Colors.LightGray;
-    private int _indicesCount;
-    private float _minZoom = 1;
-    private float _maxZoom = 300;
-    private Color _backgroundColor;
-    private float _ambientStrength = 0.3f;
-    private float _specularStrength = 0.4f;
-    
-    // ColorTable
-    public static readonly DirectProperty<SurfaceOpenGlControl, PaletteColorTable> ColorTableProperty =
-        AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, PaletteColorTable>(
-            nameof(ColorTable),
-            o => o.ColorTable,
-            (o, v) => o.ColorTable = v,
-            enableDataValidation: false);
-
-    private PaletteColorTable _colorTable;
-    public PaletteColorTable ColorTable
-    {
-        get => _colorTable;
-        set
-        {
-            SetAndRaise(ColorTableProperty, ref _colorTable, value);
-            RecreateBuffersFromHeightMap();
-            UpdateRender();
-        }
-    }
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float[,]> HeightMapProperty =
-        AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float[,]>(
-            nameof(HeightMap),
-            o => o.HeightMap,
-            (o, v) => o.HeightMap = v);
-
-    private float[,] _heightMap;
-    public float[,] HeightMap
-    {
-        get => _heightMap;
-        set
-        {
-            SetAndRaise(HeightMapProperty, ref _heightMap, value);
-            RecreateBuffersFromHeightMap();
-            UpdateRender();
-        }
-    }
-
-    
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> HeightMultiplierProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(HeightMultiplier), o => o.HeightMultiplier, (o, v) => o.HeightMultiplier = v);
-
-    public float HeightMultiplier
-    {
-        get => _heightMultiplier;
-        set
-        {
-            SetAndRaise(HeightMultiplierProperty, ref _heightMultiplier, value);
-            UpdateRender();
-        }
-    }
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, bool> ShowFoundationProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, bool>(
-        nameof(ShowFoundation), o => o.ShowFoundation, (o, v) => o.ShowFoundation = v);
-
-    public bool ShowFoundation
-    {
-        get => _showFoundation;
-        set
-        {
-            SetAndRaise(ShowFoundationProperty, ref _showFoundation, value);
-            UpdateRender();
-        }
-    }
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> ModelPitchProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(ModelPitch), o => o.ModelPitch, (o, v) => o.ModelPitch = v);
-
-    public float ModelPitch
-    {
-        get => _modelPitch;
-        set
-        {
-            SetAndRaise(ModelPitchProperty, ref _modelPitch, value);
-            UpdateRender();
-        }
-    }
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> ModelYawProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(ModelYaw), o => o.ModelYaw, (o, v) => o.ModelYaw = v);
-
-    public float ModelYaw
-    {
-        get => _modelYaw;
-        set
-        {
-            SetAndRaise(ModelYawProperty, ref _modelYaw, value);
-            UpdateRender();
-        }
-    }
-
-    private float _lightPositionX;
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> LightPositionXProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(LightPositionX), o => o.LightPositionX, (o, v) => o.LightPositionX = v);
-
-    public float LightPositionX
-    {
-        get => _lightPositionX;
-        set
-        {
-            SetAndRaise(LightPositionXProperty, ref _lightPositionX, value);
-            UpdateRender();
-        }
-    }
-
-    private float _lightPositionY;
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> LightPositionYProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(LightPositionY), o => o.LightPositionY, (o, v) => o.LightPositionY = v);
-
-    public float LightPositionY
-    {
-        get => _lightPositionY;
-        set
-        {
-            SetAndRaise(LightPositionYProperty, ref _lightPositionY, value);
-            UpdateRender();
-        }
-    }
-
-    private float _lightPositionZ;
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> LightPositionZProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(LightPositionZ), o => o.LightPositionZ, (o, v) => o.LightPositionZ = v);
-
-    public float LightPositionZ
-    {
-        get => _lightPositionZ;
-        set
-        {
-            SetAndRaise(LightPositionZProperty, ref _lightPositionZ, value);
-            UpdateRender();
-        }
-    }
-
-    private float _zoom;
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> ZoomProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(Zoom), o => o.Zoom, (o, v) => o.Zoom = v);
-
-    public float Zoom
-    {
-        get => _zoom;
-        set
-        {
-            if(value < 1)
-                return;
-            
-            SetAndRaise(ZoomProperty, ref _zoom, value);
-            var direction = Vector3.Normalize(_cameraTarget - _cameraPosition);
-            var newDistance = Math.Clamp(value, _minZoom, _maxZoom);
-            _cameraPosition = _cameraTarget - direction * newDistance;
-            UpdateRender();
-        }
-    }
-    
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> AmbientStrengthProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(AmbientStrength), o => o.AmbientStrength, (o, v) => o.AmbientStrength = v);
-
-    public float AmbientStrength
-    {
-        get => _ambientStrength;
-        set
-        {
-            SetAndRaise(AmbientStrengthProperty, ref _ambientStrength, value);
-            UpdateRender();
-        }
-    }
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> SpecularStrengthProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(SpecularStrength), o => o.SpecularStrength, (o, v) => o.SpecularStrength = v);
-
-    public float SpecularStrength
-    {
-        get => _specularStrength;
-        set
-        {
-            SetAndRaise(SpecularStrengthProperty, ref _specularStrength, value);
-            UpdateRender();
-        }
-    }
-
-    private float _colorTableUpperSelection;
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> ColorTableUpperSelectionProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(ColorTableUpperSelection), o => o.ColorTableUpperSelection, (o, v) => o.ColorTableUpperSelection = v);
-
-    public float ColorTableUpperSelection
-    {
-        get => _colorTableUpperSelection;
-        set => SetAndRaise(ColorTableUpperSelectionProperty, ref _colorTableUpperSelection, value);
-    }
-
-    private float _colorTableLowerSelection;
-
-    public static readonly DirectProperty<SurfaceOpenGlControl, float> ColorTableLowerSelectionProperty = AvaloniaProperty.RegisterDirect<SurfaceOpenGlControl, float>(
-        nameof(ColorTableLowerSelection), o => o.ColorTableLowerSelection, (o, v) => o.ColorTableLowerSelection = v);
-
-    public float ColorTableLowerSelection
-    {
-        get => _colorTableLowerSelection;
-        set => SetAndRaise(ColorTableLowerSelectionProperty, ref _colorTableLowerSelection, value);
-    }
-
-    public Bitmap Image { get; set; }
-    
-    /// <summary>
-    /// Creates vertex and index buffers from height map
-    /// </summary>
     private void RecreateBuffersFromHeightMap()
     {
         if (_heightMap == null || _gl == null || _colorTable == null) return;
-        
-        int rows = _heightMap.GetLength(0);
-        int cols = _heightMap.GetLength(1);
 
-        var ratioX = cols / (float)rows;
-        var ratioY = rows / (float)cols;
+        int rows = _heightMap.GetLength(0), cols = _heightMap.GetLength(1);
+        float sizeX = 10f * Math.Min(1f, cols / (float)rows);
+        float sizeZ = 10f * Math.Min(1f, rows / (float)cols);
+        float stepX = sizeX / (cols - 1), stepZ = sizeZ / (rows - 1);
 
-        float sizeX = 10f * (ratioX >= 1f ? 1f : ratioX);
-        float sizeZ = 10f * (ratioY >= 1f ? 1f : ratioY);
+        GetMinMaxHeight(_heightMap, out float minH, out float maxH);
+        float rangeH = Math.Max(maxH - minH, 0.001f);
+        var normals = ComputeNormals(rows, cols, stepX, stepZ, _heightMap);
 
-        float stepX = sizeX / (cols - 1);
-        float stepZ = sizeZ / (rows - 1);
+        var vertices = GenerateSurfaceVertices(rows, cols, stepX, stepZ, sizeX, sizeZ, minH, rangeH, normals);
+        int foundationStart = vertices.Count;
+        AddFoundationVertices(vertices, rows, cols, stepX, stepZ, sizeX, sizeZ);
 
-        float minH = float.MaxValue;
-        float maxH = float.MinValue;
-        foreach (float h in _heightMap)
+        var indices = new List<uint>();
+        AddGridIndices(indices, rows, cols);
+        AddGridIndices(indices, rows, cols, (uint)foundationStart);
+
+        AddWalls(vertices, indices, cols, rows, foundationStart);
+
+        UploadBuffers(vertices.ToArray(), indices.ToArray());
+    }
+
+    private static void GetMinMaxHeight(float[,] map, out float minH, out float maxH)
+    {
+        minH = float.MaxValue;
+        maxH = float.MinValue;
+        foreach (float h in map)
         {
             if (h < minH) minH = h;
             if (h > maxH) maxH = h;
         }
+    }
 
-        float rangeH = Math.Max(maxH - minH, 0.001f);
-
-        var normals = new Vector3[rows, cols];
-
+    private Vector3[,] ComputeNormals(int rows, int cols, float stepX, float stepZ, float[,] heightMap)
+    {
+        var n = new Vector3[rows, cols];
         for (int z = 1; z < rows - 1; z++)
+        for (int x = 1; x < cols - 1; x++)
         {
-            for (int x = 1; x < cols - 1; x++)
-            {
-                Vector3 dx = new Vector3(2 * stepX, (float)(_heightMap[z, x + 1] - _heightMap[z, x - 1]), 0);
-                Vector3 dz = new Vector3(0, (float)(_heightMap[z + 1, x] - _heightMap[z - 1, x]), 2 * stepZ);
-                var normal = Vector3.Normalize(Vector3.Cross(dz, dx));
-                normals[z, x] = normal;
-            }
+            var dx = new Vector3(2 * stepX, heightMap[z, x + 1] - heightMap[z, x - 1], 0);
+            var dz = new Vector3(0, heightMap[z + 1, x] - heightMap[z - 1, x], 2 * stepZ);
+            n[z, x] = Vector3.Normalize(Vector3.Cross(dz, dx));
         }
 
-        // Handle borders
+        for (int i = 0; i < rows; i++)
+        {
+            n[i, 0] = n[i, 1];
+            n[i, cols - 1] = n[i, cols - 2];
+        }
+
+        for (int i = 0; i < cols; i++)
+        {
+            n[0, i] = n[1, i];
+            n[rows - 1, i] = n[rows - 2, i];
+        }
+
+        return n;
+    }
+
+    private List<OpenGlPoint> GenerateSurfaceVertices(int rows, int cols, float stepX, float stepZ, float sizeX,
+        float sizeZ, float minH, float rangeH, Vector3[,] normals)
+    {
+        var verts = new List<OpenGlPoint>();
+
         for (int z = 0; z < rows; z++)
-        {
-            normals[z, 0] = normals[z, 1];
-            normals[z, cols - 1] = normals[z, cols - 2];
-        }
-
         for (int x = 0; x < cols; x++)
         {
-            normals[0, x] = normals[1, x];
-            normals[rows - 1, x] = normals[rows - 2, x];
+            float normH = (_heightMap[z, x] - minH) / rangeH;
+            float posX = x * stepX - sizeX / 2;
+            float posZ = z * stepZ - sizeZ / 2;
+            float posY = normH;
+
+            int colorIndex = GetColorIndex(normH);
+            var c = _colorTable.Colors[colorIndex];
+            var n = normals[z, x];
+
+            verts.Add(new OpenGlPoint(posX, posY, posZ, c.Red / 255f, c.Green / 255f, c.Blue / 255f, n.X, n.Y, n.Z,
+                false));
         }
 
-        // Create vertices
-        List<OpenGlPoint> vertices = new();
+        return verts;
+    }
+
+    private int GetColorIndex(float normH)
+    {
+        if (ColorTableUpperSelection != 0 || ColorTableLowerSelection != 0)
+        {
+            if (normH > ColorTableUpperSelection) return _colorTable.Colors.Count - 1;
+            if (normH < ColorTableLowerSelection) return 0;
+            normH = FrameHelper.Normalize(normH, ColorTableLowerSelection, ColorTableUpperSelection);
+        }
+
+        return Math.Clamp((int)(normH * (_colorTable.Colors.Count - 1)), 0, _colorTable.Colors.Count - 1);
+    }
+
+    private void AddFoundationVertices(List<OpenGlPoint> vertices, int rows, int cols, float stepX, float stepZ,
+        float sizeX, float sizeZ)
+    {
         for (int z = 0; z < rows; z++)
-        {
-            for (int x = 0; x < cols; x++)
-            {
-                float normH = (float)((_heightMap[z, x] - minH) / rangeH);
-                float posX = (x * stepX) - sizeX / 2;
-                float posZ = (z * stepZ) - sizeZ / 2;
-                float posY = normH;
-
-                int colorIndex;
-
-                if (ColorTableUpperSelection != 0 || ColorTableLowerSelection != 0)
-                {
-                    if (normH > ColorTableUpperSelection)
-                    {
-                        colorIndex = ColorTable.Colors.Count - 1;
-                    }
-                    else if (normH < ColorTableLowerSelection)
-                    {
-                        colorIndex = 0;
-                    }
-                    else
-                    {
-                        normH = FrameHelper.Normalize(normH, ColorTableLowerSelection, ColorTableUpperSelection);
-                        colorIndex = (int)(normH * (_colorTable.Colors.Count - 1));
-                        colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
-                    }   
-                }
-                else
-                {
-                    colorIndex = (int)(normH * (_colorTable.Colors.Count - 1));
-                    colorIndex = Math.Clamp(colorIndex, 0, _colorTable.Colors.Count - 1);
-                }
-                var color = _colorTable.Colors[colorIndex];
-
-                var normal = normals[z, x];
-                vertices.Add(new OpenGlPoint(
-                    posX, posY, posZ,
-                    color.Red / 255f, color.Green / 255f, color.Blue / 255f,
-                    normal.X, normal.Y, normal.Z, false));
-            }
-        }
-
-        // Add foundation vertices
-        int foundationStartIndex = vertices.Count;
-        for (int z = 0; z < rows; z++)
-        {
-            for (int x = 0; x < cols; x++)
-            {
-                float posX = (x * stepX) - sizeX / 2;
-                float posZ = (z * stepZ) - sizeZ / 2;
-
-                vertices.Add(new OpenGlPoint(
-                    posX, 0, posZ,
-                    _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                    0, 1, 0, true));
-            }
-        }
-
-        // Create indices
-        List<uint> indices = new();
-
-        // Surface indices
-        for (int z = 0; z < rows - 1; z++)
-        {
-            for (int x = 0; x < cols - 1; x++)
-            {
-                uint i0 = (uint)(z * cols + x);
-                uint i1 = (uint)(z * cols + x + 1);
-                uint i2 = (uint)((z + 1) * cols + x);
-                uint i3 = (uint)((z + 1) * cols + x + 1);
-
-                indices.Add(i0);
-                indices.Add(i2);
-                indices.Add(i1);
-                indices.Add(i1);
-                indices.Add(i2);
-                indices.Add(i3);
-            }
-        }
-
-        // Foundation indices
-        for (int z = 0; z < rows - 1; z++)
-        {
-            for (int x = 0; x < cols - 1; x++)
-            {
-                uint i0 = (uint)(foundationStartIndex + z * cols + x);
-                uint i1 = (uint)(foundationStartIndex + z * cols + x + 1);
-                uint i2 = (uint)(foundationStartIndex + (z + 1) * cols + x);
-                uint i3 = (uint)(foundationStartIndex + (z + 1) * cols + x + 1);
-
-                indices.Add(i0);
-                indices.Add(i2);
-                indices.Add(i1);
-                indices.Add(i1);
-                indices.Add(i2);
-                indices.Add(i3);
-            }
-        }
-
-        // Добавляем вершины и индексы для боковых стенок
-        int wallStartIndex = vertices.Count;
-
-        // Создаем стенки по периметру
-        // 1. Нижняя граница (z = 0)
         for (int x = 0; x < cols; x++)
         {
-            // Вершина поверхности
-            var surfaceVert = vertices[x];
-            // Вершина фундамента
-            var foundationVert = vertices[foundationStartIndex + x];
-
-            // Добавляем обе вершины (дублируем для нормалей)
-            vertices.Add(new OpenGlPoint(
-                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f,
-                _foundationColor.B / 255f, // Темно-серый цвет для стенок
-                0, 0, -1, true)); // Нормаль наружу
-
-            vertices.Add(new OpenGlPoint(
-                foundationVert.X, foundationVert.Y, foundationVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                0, 0, -1, true));
+            float posX = x * stepX - sizeX / 2;
+            float posZ = z * stepZ - sizeZ / 2;
+            vertices.Add(new OpenGlPoint(posX, 0, posZ, _foundationColor.R / 255f, _foundationColor.G / 255f,
+                _foundationColor.B / 255f, 0, 1, 0, true));
         }
+    }
 
-        // Индексы для нижней стенки
+    private void AddGridIndices(List<uint> indices, int rows, int cols, uint offset = 0)
+    {
+        for (int z = 0; z < rows - 1; z++)
         for (int x = 0; x < cols - 1; x++)
         {
-            uint i0 = (uint)(wallStartIndex + x * 2);
-            uint i1 = (uint)(wallStartIndex + x * 2 + 1);
-            uint i2 = (uint)(wallStartIndex + (x + 1) * 2);
-            uint i3 = (uint)(wallStartIndex + (x + 1) * 2 + 1);
+            uint i0 = offset + (uint)(z * cols + x);
+            uint i1 = i0 + 1;
+            uint i2 = offset + (uint)((z + 1) * cols + x);
+            uint i3 = i2 + 1;
 
-            indices.Add(i0);
-            indices.Add(i2);
-            indices.Add(i1);
-            indices.Add(i1);
-            indices.Add(i2);
-            indices.Add(i3);
+            indices.AddRange(new[] { i0, i2, i1, i1, i2, i3 });
         }
+    }
 
-        // 2. Верхняя граница (z = rows-1)
-        wallStartIndex = vertices.Count;
-        int topRowStart = (rows - 1) * cols;
-        for (int x = 0; x < cols; x++)
+    private void AddWalls(List<OpenGlPoint> vertices, List<uint> indices, int cols, int rows, int foundationStart)
+    {
+        void AddWall(Func<int, (OpenGlPoint top, OpenGlPoint basePoint)> selector, Vector3 normal)
         {
-            var surfaceVert = vertices[topRowStart + x];
-            var foundationVert = vertices[foundationStartIndex + topRowStart + x];
+            int startIdx = vertices.Count;
+            for (int i = 0; i < (normal.X != 0 ? rows : cols); i++)
+            {
+                var (top, basePoint) = selector(i);
+                vertices.Add(new OpenGlPoint(top.X, top.Y, top.Z, _foundationColor.R / 255f, _foundationColor.G / 255f,
+                    _foundationColor.B / 255f, normal.X, normal.Y, normal.Z, true));
+                vertices.Add(new OpenGlPoint(basePoint.X, basePoint.Y, basePoint.Z, _foundationColor.R / 255f,
+                    _foundationColor.G / 255f, _foundationColor.B / 255f, normal.X, normal.Y, normal.Z, true));
+            }
 
-            vertices.Add(new OpenGlPoint(
-                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                0, 0, 1, true));
-
-            vertices.Add(new OpenGlPoint(
-                foundationVert.X, foundationVert.Y, foundationVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                0, 0, 1, true));
+            for (int i = 0; i < (normal.X != 0 ? rows : cols) - 1; i++)
+            {
+                uint i0 = (uint)(startIdx + i * 2);
+                uint i1 = i0 + 1;
+                uint i2 = i0 + 2;
+                uint i3 = i2 + 1;
+                indices.AddRange(new[] { i0, i2, i1, i1, i2, i3 });
+            }
         }
 
-        // Индексы для верхней стенки
-        for (int x = 0; x < cols - 1; x++)
-        {
-            uint i0 = (uint)(wallStartIndex + x * 2);
-            uint i1 = (uint)(wallStartIndex + x * 2 + 1);
-            uint i2 = (uint)(wallStartIndex + (x + 1) * 2);
-            uint i3 = (uint)(wallStartIndex + (x + 1) * 2 + 1);
-
-            indices.Add(i0);
-            indices.Add(i1);
-            indices.Add(i2);
-            indices.Add(i1);
-            indices.Add(i3);
-            indices.Add(i2);
-        }
-
-        // 3. Левая граница (x = 0)
-        wallStartIndex = vertices.Count;
-        for (int z = 0; z < rows; z++)
-        {
-            var surfaceVert = vertices[z * cols];
-            var foundationVert = vertices[foundationStartIndex + z * cols];
-
-            vertices.Add(new OpenGlPoint(
-                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                -1, 0, 0, true));
-
-            vertices.Add(new OpenGlPoint(
-                foundationVert.X, foundationVert.Y, foundationVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                -1, 0, 0, true));
-        }
-
-        // Индексы для левой стенки
-        for (int z = 0; z < rows - 1; z++)
-        {
-            uint i0 = (uint)(wallStartIndex + z * 2);
-            uint i1 = (uint)(wallStartIndex + z * 2 + 1);
-            uint i2 = (uint)(wallStartIndex + (z + 1) * 2);
-            uint i3 = (uint)(wallStartIndex + (z + 1) * 2 + 1);
-
-            indices.Add(i0);
-            indices.Add(i2);
-            indices.Add(i1);
-            indices.Add(i1);
-            indices.Add(i2);
-            indices.Add(i3);
-        }
-
-        // 4. Правая граница (x = cols-1)
-        wallStartIndex = vertices.Count;
-        for (int z = 0; z < rows; z++)
-        {
-            var surfaceVert = vertices[z * cols + cols - 1];
-            var foundationVert = vertices[foundationStartIndex + z * cols + cols - 1];
-
-            vertices.Add(new OpenGlPoint(
-                surfaceVert.X, surfaceVert.Y, surfaceVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                1, 0, 0, true));
-
-            vertices.Add(new OpenGlPoint(
-                foundationVert.X, foundationVert.Y, foundationVert.Z,
-                _foundationColor.R / 255f, _foundationColor.G / 255f, _foundationColor.B / 255f,
-                1, 0, 0, true));
-        }
-
-        // Индексы для правой стенки
-        for (int z = 0; z < rows - 1; z++)
-        {
-            uint i0 = (uint)(wallStartIndex + z * 2);
-            uint i1 = (uint)(wallStartIndex + z * 2 + 1);
-            uint i2 = (uint)(wallStartIndex + (z + 1) * 2);
-            uint i3 = (uint)(wallStartIndex + (z + 1) * 2 + 1);
-
-            indices.Add(i0);
-            indices.Add(i1);
-            indices.Add(i2);
-            indices.Add(i1);
-            indices.Add(i3);
-            indices.Add(i2);
-        }
-
-        UploadBuffers(vertices.ToArray(), indices.ToArray());
+        AddWall(i => (vertices[i], vertices[foundationStart + i]), new Vector3(0, 0, -1)); // Bottom
+        AddWall(i => (vertices[(rows - 1) * cols + i], vertices[foundationStart + (rows - 1) * cols + i]),
+            new Vector3(0, 0, 1)); // Top
+        AddWall(i => (vertices[i * cols], vertices[foundationStart + i * cols]), new Vector3(-1, 0, 0)); // Left
+        AddWall(i => (vertices[i * cols + cols - 1], vertices[foundationStart + i * cols + cols - 1]),
+            new Vector3(1, 0, 0)); // Right
     }
 
     private void UploadBuffers(OpenGlPoint[] vertices, uint[] indices)
     {
         _indicesCount = indices.Length;
 
-        // Index Buffer
-        _ebo = _gl.GenBuffer();
-        _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
-        _gl.BufferData<uint>(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * Marshal.SizeOf<uint>()),
-            indices, BufferUsageARB.StreamDraw);
-        
-        // Vertex Buffer
-        _vbo = _gl.GenBuffer();
-        _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
-        _gl.BufferData<OpenGlPoint>(BufferTargetARB.ArrayBuffer,
-            (nuint)(vertices.Length * Marshal.SizeOf<OpenGlPoint>()),
-            vertices, BufferUsageARB.StreamDraw);
+        EBO = new BufferObject<uint>(_gl, indices, BufferTargetARB.ElementArrayBuffer);
+        VBO = new BufferObject<OpenGlPoint>(_gl, vertices, BufferTargetARB.ArrayBuffer);
+        VAO = new VertexArrayObject<OpenGlPoint, uint>(_gl, VBO, EBO);
 
-        _gl.GenVertexArrays(1, out _vao);
-        _gl.BindVertexArray(_vao);
-
-        var pointSize = Marshal.SizeOf<OpenGlPoint>();
-        var floatSize = Marshal.SizeOf<float>();
-
-        // Vertex Attributes
-        _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint)pointSize, 0);
-        _gl.EnableVertexAttribArray(0);
-        
-        _gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (uint)pointSize, 3 * floatSize);
-        _gl.EnableVertexAttribArray(1);
-
-        _gl.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, (uint)pointSize, 6 * floatSize);
-        _gl.EnableVertexAttribArray(2);
-
-        _gl.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, (uint)pointSize, 9 * floatSize);
-        _gl.EnableVertexAttribArray(3);
+        VAO.VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 0);
+        VAO.VertexAttributePointer(1, 3, VertexAttribPointerType.Float, 3);
+        VAO.VertexAttributePointer(2, 3, VertexAttribPointerType.Float, 6);
+        VAO.VertexAttributePointer(3, 1, VertexAttribPointerType.Float, 9);
     }
     
     protected override void OnOpenGlInit(GlInterface gl)
     {
         base.OnOpenGlInit(gl);
         _gl = GL.GetApi(gl.GetProcAddress);
-        
-        ConfigureShaders();
+
+        Shader = new Shader(_gl);
+
         RecreateBuffersFromHeightMap();
 
         _gl.Enable(EnableCap.DepthTest);
@@ -665,7 +217,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         _gl.ClearColor(_backgroundColor.R / 255f, _backgroundColor.G / 255f, _backgroundColor.B / 255f, 1);
     }
-
+    
     protected override void OnOpenGlDeinit(GlInterface gl)
     {
         base.OnOpenGlDeinit(gl);
@@ -675,12 +227,11 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         _gl.BindVertexArray(0);
         _gl.UseProgram(0);
 
-        _gl.DeleteVertexArray(_vao);
-        _gl.DeleteBuffer(_vbo);
-        _gl.DeleteBuffer(_ebo);
-        _gl.DeleteProgram(_shaderProgram);
-        _gl.DeleteShader(_vertexShader);
-        _gl.DeleteShader(_fragmentShader);
+        VAO.Dispose();
+        VBO.Dispose();
+        EBO.Dispose();
+
+        Shader.Dispose();
     }
 
     protected override void OnOpenGlRender(GlInterface gl, int fb)
@@ -696,11 +247,11 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
 
         _gl.Viewport(0, 0, (uint)width, (uint)height);
 
-        _gl.BindVertexArray(_vao);
-        _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
-        _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
+        VAO.Bind();
+        VBO.Bind();
+        EBO.Bind();
 
-        _gl.UseProgram(_shaderProgram);
+        Shader.Use();
 
         // Model matrix
         _modelMatrix = Matrix4x4.CreateRotationY(ModelYaw) *
@@ -716,18 +267,15 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             _cameraTarget,
             Vector3.UnitY);
 
-        _gl.UniformMatrix4(_modelLocation, 1, false, MemoryMarshal.CreateReadOnlySpan(ref _modelMatrix.M11, 16));
-        _gl.UniformMatrix4(_viewLocation, 1, false, MemoryMarshal.CreateReadOnlySpan(ref view.M11, 16));
-        _gl.UniformMatrix4(_projectionLocation, 1, false, MemoryMarshal.CreateReadOnlySpan(ref projection.M11, 16));
-
-        _gl.Uniform1(_heightMultiplierLocation, _heightMultiplier);
-        _gl.Uniform1(_showFoundationLocation, _showFoundation ? 1f : 0f);
-
-        _gl.Uniform3(_lightPositionLocation, new Vector3(LightPositionX, LightPositionY, LightPositionZ));;
-        _gl.Uniform3(_cameraPositionLocation, _cameraPosition);
-
-        _gl.Uniform1(_ambientStrengthLocation, _ambientStrength);
-        _gl.Uniform1(_specularStrengthLocation, _specularStrength);
+        Shader.UniformMatrix4("model", _modelMatrix);
+        Shader.UniformMatrix4("view", view);
+        Shader.UniformMatrix4("projection", projection);
+        Shader.Uniform1("heightMultiplier", _heightMultiplier);
+        Shader.Uniform1("showFoundation", _showFoundation ? 1f : 0f);
+        Shader.Uniform3("lightPosition", new Vector3(LightPositionX, LightPositionY, LightPositionZ));
+        Shader.Uniform3("cameraPosition", _cameraPosition);
+        Shader.Uniform1("ambientStrength", _ambientStrength);
+        Shader.Uniform1("specularStrength", _specularStrength);
 
         if (_heightMap != null)
         {
@@ -751,7 +299,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
             }
 
             Rgba32[] pixelsRgba32 = new Rgba32[pixels.Length / 4];
-            
+
             for (int i = 0; i < pixels.Length; i += 4)
             {
                 pixelsRgba32[i / 4] = new Rgba32(
@@ -785,57 +333,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
         return bitmap;
     }
 
-    private void ConfigureShaders()
-    {
-        _vertexShader = _gl.CreateShader(ShaderType.VertexShader);
-        _gl.ShaderSource(_vertexShader, VertexShaderSource);
-        _gl.CompileShader(_vertexShader);
-        CheckShaderCompileError(_vertexShader);
-
-        _fragmentShader = _gl.CreateShader(ShaderType.FragmentShader);
-        _gl.ShaderSource(_fragmentShader, FragmentShaderSource);
-        _gl.CompileShader(_fragmentShader);
-        CheckShaderCompileError(_fragmentShader);
-
-        _shaderProgram = _gl.CreateProgram();
-        _gl.AttachShader(_shaderProgram, _vertexShader);
-        _gl.AttachShader(_shaderProgram, _fragmentShader);
-        _gl.LinkProgram(_shaderProgram);
-        CheckProgramLinkError(_shaderProgram);
-
-        // Get uniform locations
-        _modelLocation = _gl.GetUniformLocation(_shaderProgram, "model");
-        _viewLocation = _gl.GetUniformLocation(_shaderProgram, "view");
-        _projectionLocation = _gl.GetUniformLocation(_shaderProgram, "projection");
-        _heightMultiplierLocation = _gl.GetUniformLocation(_shaderProgram, "heightMultiplier");
-        _showFoundationLocation = _gl.GetUniformLocation(_shaderProgram, "showFoundation");
-        _lightPositionLocation = _gl.GetUniformLocation(_shaderProgram, "lightPosition");
-        _cameraPositionLocation = _gl.GetUniformLocation(_shaderProgram, "cameraPosition");
-        _ambientStrengthLocation = _gl.GetUniformLocation(_shaderProgram, "ambientStrength");
-        _specularStrengthLocation = _gl.GetUniformLocation(_shaderProgram, "specularStrength");
-        
-    }
-
-    private void CheckShaderCompileError(uint shader)
-    {
-        _gl.GetShader(shader, ShaderParameterName.CompileStatus, out int success);
-        if (success == 0)
-        {
-            string infoLog = _gl.GetShaderInfoLog(shader);
-            throw new Exception($"Shader compilation error: {infoLog}");
-        }
-    }
-
-    private void CheckProgramLinkError(uint program)
-    {
-        _gl.GetProgram(program, ProgramPropertyARB.LinkStatus, out int success);
-        if (success == 0)
-        {
-            string infoLog = _gl.GetProgramInfoLog(program);
-            throw new Exception($"Program linking error: {infoLog}");
-        }
-    }
-
     public void RotateModel(float deltaYaw, float deltaPitch)
     {
         ModelYaw += deltaYaw;
@@ -846,7 +343,7 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     {
         Zoom *= 1 - delta * 0.1f;
     }
-    
+
     public void SetCameraPreset(AxisViewType view)
     {
         switch (view)
@@ -877,65 +374,6 @@ internal class SurfaceOpenGlControl : OpenGlControlBase, INotifyPropertyChanged
     {
         Dispatcher.UIThread.Post(RequestNextFrameRendering, DispatcherPriority.Background);
     }
-
-    // Shader sources remain the same as in original
-    private string VertexShaderSource => _glShaderVersion + @"
-    precision mediump float;
-    layout(location = 0) in vec3 aPos;
-    layout(location = 1) in vec3 aColor;
-    layout(location = 2) in vec3 aNormal;
-    layout(location = 3) in float aIsBasement;
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
-    uniform float heightMultiplier;
-    out vec3 FragPos;
-    out vec3 Normal;
-    out vec3 VertexColor;
-    out float IsBasement;
-    void main()
-    {
-        FragPos = vec3(model * vec4(aPos.x, aPos.y * heightMultiplier, aPos.z, 1.0));
-        Normal = mat3(transpose(inverse(model))) * aNormal;
-        VertexColor = aColor;
-        gl_Position = projection * view * vec4(FragPos, 1.0);
-        IsBasement = aIsBasement;
-    }";
-
-    private string FragmentShaderSource => _glShaderVersion + @"
-    precision mediump float; 
-    in vec3 FragPos;
-    in vec3 Normal;
-    in vec3 VertexColor;
-    in float IsBasement;
-    uniform vec3 lightPosition;
-    uniform vec3 cameraPosition;    
-    uniform float showFoundation;
-    uniform float ambientStrength;
-    uniform float specularStrength;
-    out vec4 FragColor;
-    void main()
-    {
-        if (showFoundation < 0.5 && IsBasement > 0.5) 
-        {
-            discard;
-        }
-        // Ambient
-        vec3 ambient = ambientStrength * VertexColor;
-        // Diffuse
-        vec3 norm = normalize(Normal);
-        vec3 lightDir = normalize(lightPosition - FragPos);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 diffuse = diff * VertexColor;
-        // Specular
-        vec3 viewDir = normalize(cameraPosition - FragPos);
-        vec3 reflectDir = reflect(-lightDir, norm);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-        vec3 specular = specularStrength * spec * vec3(1.0);
-        vec3 result = IsBasement > 0.5 ? VertexColor : ambient + diffuse + specular;
-        FragColor = vec4(result, 1.0);  
-    }";
-
 
     public new event PropertyChangedEventHandler? PropertyChanged;
 
