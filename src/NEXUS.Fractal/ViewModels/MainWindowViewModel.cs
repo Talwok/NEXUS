@@ -89,7 +89,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         GeometryUpdateCommand = ReactiveCommand.CreateRunInBackground<GeometryUpdateType>(geometryService.UpdateGeometry, outputScheduler: RxApp.MainThreadScheduler);
         ApplyFilterCommand = ReactiveCommand.CreateRunInBackground<FilterType>(filterService.ApplyFilter, outputScheduler: RxApp.MainThreadScheduler);
         RemoveFrameCommand = ReactiveCommand.CreateRunInBackground(ProjectService.RemoveCurrentFrame, outputScheduler: RxApp.MainThreadScheduler);
-
+        CloneFrameCommand = ReactiveCommand.CreateRunInBackground(ProjectService.CloneCurrentFrame, outputScheduler: RxApp.MainThreadScheduler);
         CalculateFractalDimensionCommand = ReactiveCommand.CreateRunInBackground<FractalDimensionType>(CalculationService.CalculateDimension, outputScheduler: RxApp.MainThreadScheduler);
     }
 
@@ -110,6 +110,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     public ICommand ImportToProjectCommand { get; set; }
     public ICommand GeometryUpdateCommand { get; }
     public ICommand ApplyFilterCommand { get; }
+    public ICommand CloneFrameCommand { get; }
     public ICommand RemoveFrameCommand { get; set; }
 
     public ICommand CalculateFractalDimensionCommand { get; }

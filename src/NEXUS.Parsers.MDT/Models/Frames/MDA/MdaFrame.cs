@@ -3,12 +3,8 @@ using ReactiveUI.Fody.Helpers;
 
 namespace NEXUS.Parsers.MDT.Models.Frames.MDA;
 
-public class MdaFrame : MdtFrame
+public class MdaFrame(MdtFrame frame) : MdtFrame(frame)
 {
-    public MdaFrame(MdtFrame frame) : base(frame)
-    {
-    }
-    
     [Reactive]
     public int DimensionsCount { get; set; }
     [Reactive]

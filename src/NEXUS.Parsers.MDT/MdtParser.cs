@@ -120,14 +120,195 @@ public static class MdtParser
 
     private static MdtFrame ParseSpectroscopyFrame(MdtFrame frame)
     {
-        var spectroscopyFrame = new SpectroscopyFrame(frame);
-        return spectroscopyFrame;
+        var specFrame = new SpectroscopyFrame(frame);
+        using var ms = new MemoryStream(frame.Buffer);
+        using var reader = new BinaryReader(ms);
+
+        // Чтение осей X, Y, Z
+        specFrame.XScale = ReadAxisScale(reader);
+        specFrame.YScale = ReadAxisScale(reader);
+        specFrame.ZScale = ReadAxisScale(reader);
+
+        // Чтение параметров спектроскопии
+        specFrame.SpMode = reader.ReadUInt16();
+        specFrame.SpFilter = reader.ReadUInt16();
+        specFrame.UBegin = reader.ReadSingle();
+        specFrame.UEnd = reader.ReadSingle();
+        specFrame.ZUp = reader.ReadInt16();
+        specFrame.ZDown = reader.ReadInt16();
+        specFrame.SpAveraging = reader.ReadUInt16();
+        specFrame.SpRepeat = reader.ReadByte() != 0;
+        specFrame.SpBack = reader.ReadByte() != 0;
+        specFrame.Sp4Nx = reader.ReadInt16();
+        specFrame.SpOsc = reader.ReadByte() != 0;
+        specFrame.SpN4 = reader.ReadByte();
+        specFrame.Sp4X0 = reader.ReadSingle();
+        specFrame.Sp4Xr = reader.ReadSingle();
+        specFrame.Sp4U = reader.ReadInt16();
+        specFrame.Sp4I = reader.ReadInt16();
+        specFrame.SpNx = reader.ReadInt16();
+        specFrame.SpReserved = reader.ReadBytes(95);
+        specFrame.SpVer = reader.ReadByte();
+        specFrame.ScnGuid = reader.ReadUInt32();
+
+        // Пропуск оставшихся байтов переменной части
+        int bytesRead = 30 + 142; // Оси (30) + остальные поля (142)
+        if (frame.VarSize > bytesRead)
+        {
+            reader.ReadBytes((int)(frame.VarSize - bytesRead));
+        }
+
+        // Чтение Frame Mode
+        specFrame.FrameMode = reader.ReadUInt16();
+        specFrame.FrameXRes = reader.ReadUInt16();
+        specFrame.FrameYRes = reader.ReadUInt16();
+        specFrame.FrameNDots = reader.ReadUInt16();
+
+        // Чтение точек (Dots)
+        if (specFrame.FrameNDots > 0)
+        {
+            if (frame.Type == FrameType.Spectroscopy)
+            {
+                specFrame.Dots = reader.ReadBytes(specFrame.FrameNDots * 4);
+            }
+            else if (frame.Type == FrameType.Curves)
+            {
+                reader.ReadBytes(14); // Пропуск заголовка точек
+                specFrame.Dots = reader.ReadBytes(specFrame.FrameNDots * 16);
+            }
+        }
+
+        // Чтение данных спектроскопии
+        if (specFrame.FrameXRes > 0 && specFrame.FrameYRes > 0)
+        {
+            int dataSize = specFrame.FrameXRes * specFrame.FrameYRes;
+            specFrame.Data = new short[dataSize];
+            for (int i = 0; i < dataSize; i++)
+            {
+                specFrame.Data[i] = reader.ReadInt16();
+            }
+        }
+
+        // Чтение заголовка
+        if (ms.Position < ms.Length - 4)
+        {
+            specFrame.TitleLength = reader.ReadUInt32();
+            if (specFrame.TitleLength > 0 && ms.Position + specFrame.TitleLength <= ms.Length)
+            {
+                specFrame.Title = Encoding.GetEncoding(1251).GetString(reader.ReadBytes((int)specFrame.TitleLength));
+            }
+        }
+
+        // Чтение XML-данных
+        if (ms.Position < ms.Length - 4)
+        {
+            uint xmlLength = reader.ReadUInt32();
+            if (xmlLength > 0 && ms.Position + xmlLength <= ms.Length)
+            {
+                specFrame.XmlStuff = Encoding.Unicode.GetString(reader.ReadBytes((int)xmlLength));
+            }
+        }
+
+        return specFrame;
     }
 
     private static MdtFrame ParseScannedFrame(MdtFrame frame)
     {
         var scannedFrame = new ScannedFrame(frame);
+        using var ms = new MemoryStream(frame.Buffer);
+        using var reader = new BinaryReader(ms);
+
+        // Чтение осей X, Y, Z
+        scannedFrame.XScale = ReadAxisScale(reader);
+        scannedFrame.YScale = ReadAxisScale(reader);
+        scannedFrame.ZScale = ReadAxisScale(reader);
+
+        // Чтение остальных полей переменной части
+        scannedFrame.ChannelIndex = reader.ReadByte();
+        scannedFrame.Mode = reader.ReadByte();
+        scannedFrame.XResolution = reader.ReadUInt16();
+        scannedFrame.YResolution = reader.ReadUInt16();
+        scannedFrame.Ndacq = reader.ReadUInt16();
+        scannedFrame.StepLength = reader.ReadSingle();
+        scannedFrame.Adt = reader.ReadUInt16();
+        scannedFrame.AdcGainAmpLog10 = reader.ReadByte();
+        scannedFrame.AdcIndex = reader.ReadByte();
+        scannedFrame.S16Version = reader.ReadByte();
+        scannedFrame.S17PassNum = reader.ReadByte();
+        scannedFrame.ScanDir = reader.ReadByte();
+        scannedFrame.PowerOf2 = reader.ReadByte() != 0;
+        scannedFrame.Velocity = reader.ReadSingle();
+        scannedFrame.Setpoint = reader.ReadSingle();
+        scannedFrame.BiasVoltage = reader.ReadSingle();
+        scannedFrame.Draw = reader.ReadByte() != 0;
+        reader.ReadByte(); // Пропуск резервного байта
+        scannedFrame.XOffset = reader.ReadInt32();
+        scannedFrame.YOffset = reader.ReadInt32();
+        scannedFrame.NlCorr = reader.ReadByte() != 0;
+
+        // Пропуск оставшихся байтов переменной части
+        int bytesRead = 30 + 41; // Оси (30) + остальные поля (41)
+        if (frame.VarSize > bytesRead)
+        {
+            reader.ReadBytes(frame.VarSize - bytesRead);
+        }
+
+        // Чтение Frame Mode
+        //scannedFrame.FrameMode = reader.ReadUInt16();
+        scannedFrame.FrameXRes = reader.ReadUInt16();
+        scannedFrame.FrameYRes = reader.ReadUInt16();
+        scannedFrame.FrameNDots = reader.ReadUInt16();
+
+        // Чтение точек (Dots)
+        if (scannedFrame.FrameNDots > 0)
+        {
+            reader.ReadBytes(14); // Пропуск заголовка точек
+            scannedFrame.Dots = reader.ReadBytes(scannedFrame.FrameNDots * 16);
+        }
+
+        // Чтение изображения
+        if (scannedFrame.FrameXRes > 0 && scannedFrame.FrameYRes > 0)
+        {
+            int imageSize = scannedFrame.FrameXRes * scannedFrame.FrameYRes;
+            scannedFrame.ImageBuffer = new short[imageSize];
+            for (int i = 0; i < imageSize; i++)
+            {
+                scannedFrame.ImageBuffer[i] = reader.ReadInt16();
+            }
+        }
+
+        // Чтение заголовка
+        if (ms.Position < ms.Length - 4)
+        {
+            scannedFrame.TitleLength = reader.ReadUInt32();
+            if (scannedFrame.TitleLength > 0 && ms.Position + scannedFrame.TitleLength <= ms.Length)
+            {
+                scannedFrame.Title = Encoding.UTF8.GetString(reader.ReadBytes((int)scannedFrame.TitleLength));
+            }
+        }
+
+        // Чтение XML-данных
+        if (ms.Position < ms.Length - 4)
+        {
+            uint xmlLength = reader.ReadUInt32();
+            if (xmlLength > 0 && ms.Position + xmlLength <= ms.Length)
+            {
+                scannedFrame.XmlStuff = Encoding.Unicode.GetString(reader.ReadBytes((int)xmlLength));
+            }
+        }
+
         return scannedFrame;
+    }
+
+    // Вспомогательный метод для чтения структуры MDTAxisScale
+    private static MdtAxisScale ReadAxisScale(BinaryReader reader)
+    {
+        return new MdtAxisScale
+        {
+            Offset = reader.ReadSingle(),
+            Step = reader.ReadSingle(),
+            Unit = reader.ReadInt16()
+        };
     }
 
     private static MdaFrame ParseMdaFrame(MdtFrame frame)

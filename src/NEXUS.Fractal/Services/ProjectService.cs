@@ -47,6 +47,7 @@ public class ProjectService : StatefulServiceBase
         AllowMultiple = true,
         FileTypeFilter =
         [
+            new FilePickerFileType("Все типы") {Patterns = ["*.mdt", "*.bcr", "*.jpeg", "*.jpg", "*.png", "*.bmp"]},
             new FilePickerFileType("NT-MDT") { Patterns = ["*.mdt"] },
             new FilePickerFileType("DigitalSurf") { Patterns = ["*.bcr"] },
             new FilePickerFileType("Изображения") { Patterns = ["*.jpeg", "*.jpg", "*.png", "*.bmp"] }
@@ -109,7 +110,7 @@ public class ProjectService : StatefulServiceBase
     [Reactive, JsonIgnore] public ResearchViewModel SelectedResearch { get; set; }
     [Reactive, JsonIgnore] public PaletteColorTable? SelectedColorTable { get; set; }
     [JsonIgnore] public ObservableCollection<PaletteColorTable> ColorTables { get; } = [];
-
+    
     private void UpdateRecentProjects(string projectPath)
     {
         if (string.IsNullOrEmpty(projectPath))
@@ -140,7 +141,7 @@ public class ProjectService : StatefulServiceBase
     public async Task OpenRecentProject(string recentPath)
     {
         _projectInitialPath = recentPath;
-
+        
         var fileStream = File.Open(_projectInitialPath, FileMode.OpenOrCreate);
 
         var model = await MessagePackSerializer.DeserializeAsync<ProjectModel>(fileStream);
@@ -244,7 +245,7 @@ public class ProjectService : StatefulServiceBase
 
             switch (extension)
             {
-                case ".jpg" or ".jpeg" or "png" or "bmp":
+                case ".jpg" or ".jpeg" or ".png" or ".bmp":
                     ProcessImageFile(filePath);
                     break;
                 case ".mdt":
@@ -312,22 +313,30 @@ public class ProjectService : StatefulServiceBase
 
             FrameModel frameModel;
             
-            if (frame is MdaFrame mdaFrame)
+            if (frame is MdaFrame mdaFrame && mdaFrame.CreateFromMdaFrame() is {} mdaProcessor)
             {
-                var processor = mdaFrame.CreateFromMdaFrame();
                 frameModel = new FrameModel
                 {
                     Id = Guid.NewGuid(),
                     SourceType = sourceType,
                     Name = mdaFrame.Title,
-                    HeightMap = processor.GetHeightMap().Normalize(),
-                    HeightSpacing = 10,
-                    HeightScaling = 1,
+                    HeightMap = mdaProcessor.GetHeightMap().Normalize(),
                     MetaData = null // TODO: добавить заполнение необходимых для экспорта метаданных
                 };    
                 Project.Frames.Add(new FrameViewModel(frameModel));
             }
-            else if (frame is ScannedFrame scannedFrame) { }
+            else if (frame is ScannedFrame scannedFrame && scannedFrame.CreateFromScannedFrame() is {} scannedProcessor)
+            {
+                frameModel = new FrameModel
+                {
+                    Id = Guid.NewGuid(),
+                    SourceType = sourceType,
+                    Name = scannedFrame.Title,
+                    HeightMap = scannedProcessor.GetHeightMap().Normalize(),
+                    MetaData = null // TODO: добавить заполнение необходимых для экспорта метаданных
+                };    
+                Project.Frames.Add(new FrameViewModel(frameModel));
+            }
             else if (frame is SpectroscopyFrame spectroscopyFrame) { }
         }
     }
@@ -364,9 +373,9 @@ public class ProjectService : StatefulServiceBase
     
     public void RemoveCurrentFrame()
     {
-        if (SelectedFrame is FrameViewModel frame)
+        if (SelectedFrame is { } frame)
         {
-            if (frame.ParentId != null && GetFrame(Project?.Frames, frame.ParentId.Value) is { } parentFrame)
+            if (frame.ParentId is { } parentId && GetFrame(Project?.Frames, parentId) is { } parentFrame)
             {
                 parentFrame.Children.Remove(frame);
             }
@@ -376,7 +385,44 @@ public class ProjectService : StatefulServiceBase
             }
         }
     }
+    
+    public void CloneCurrentFrame()
+    {
+        void AppendFrame(FrameViewModel? frame, FrameViewModel? parentFrame = null)
+        {
+            if(frame == null)
+                return;
+            
+            var frameModel = frame.GetModel();
+            frameModel.Id = Guid.NewGuid();
 
+            var frameViewModel = new FrameViewModel(frameModel);
+
+            if (parentFrame != null)
+            {
+                parentFrame.Children.Add(frameViewModel);
+            }
+            else if (frameModel.ParentId is { } parentId)
+            {
+                parentFrame = GetFrame(Project?.Frames, parentId);
+                parentFrame?.Children.Add(frameViewModel);
+            }
+            else
+            {
+                Project?.Frames.Add(frameViewModel);
+            }
+            
+            var children = frame.Children.ToList();
+            
+            foreach (var child in children)
+            {
+                AppendFrame(child, frameViewModel);
+            }
+        }
+        
+        AppendFrame(SelectedFrame);
+    }
+    
     private FrameViewModel? GetFrame(IEnumerable<FrameViewModel>? frames, Guid id)
     {
         if (frames == null) 
@@ -387,7 +433,8 @@ public class ProjectService : StatefulServiceBase
             if (frame.Id == id)
                 return frame;
 
-            return GetFrame(frame.Children, id);
+            if (GetFrame(frame.Children, id) is { } childFrame)
+                return childFrame;
         }
 
         return null;

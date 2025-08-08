@@ -64,6 +64,54 @@ public static class FrameHelper
     
         return normalized;
     }
+    
+    public static float[,] NormalizeWithOutliers(this float[,] data, float lowerPercentile = 1f, float upperPercentile = 99f)
+    {
+        int rows = data.GetLength(0);
+        int cols = data.GetLength(1);
+        int total = rows * cols;
+    
+        // Собираем все значения в одномерный список
+        List<float> values = new List<float>(total);
+        for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            values.Add(data[i, j]);
+
+        // Вычисляем значения процентилей
+        values.Sort();
+        float minVal = values[(int)(total * lowerPercentile / 100f)];
+        float maxVal = values[(int)(total * upperPercentile / 100f)];
+        float range = maxVal - minVal;
+
+        // Обработка случая с нулевым диапазоном
+        if (Math.Abs(range) < float.Epsilon)
+            return CreateUniformArray(rows, cols, 0.5f); // Все значения одинаковы
+
+        // Создаем новый массив с нормализованными значениями
+        float[,] normalized = new float[rows, cols];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                float value = data[i, j];
+                float normalizedValue = (value - minVal) / range;
+            
+                // Обрезаем значения за пределами [0, 1]
+                normalized[i, j] = Math.Clamp(normalizedValue, minVal, maxVal);
+            }
+        }
+        return normalized;
+    }
+
+    private static float[,] CreateUniformArray(int rows, int cols, float value)
+    {
+        float[,] result = new float[rows, cols];
+        for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            result[i, j] = value;
+        return result;
+    }
+    
     public static float Denormalize(float value, float min, float max) 
         => value * (max - min) + min;
 

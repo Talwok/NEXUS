@@ -37,7 +37,10 @@
                         <Setter Property="Icon">
                             <Setter.Value>
                                 <Template>
-                                    <avalonia:MaterialIcon Kind="PackageVariant" />
+                                    <Panel>
+                                        <avalonia:MaterialIcon Kind="PackageVariant" IsVisible="{Binding Exists}" />
+                                        <avalonia:MaterialIcon Kind="PackageVariant" IsVisible="{Binding !Exists}" Foreground="DarkRed"/>
+                                    </Panel>
                                 </Template>
                             </Setter.Value>
                         </Setter>

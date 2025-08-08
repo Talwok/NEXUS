@@ -112,43 +112,48 @@ namespace NEXUS.Fractal.Helpers
         /// </summary>
         public static float[,] LocalAlignment(this float[,] inputData, int windowSize = 32)
         {
-            var height = inputData.GetLength(0);
-            var width = inputData.GetLength(1);
+            int height = inputData.GetLength(0);
+            int width = inputData.GetLength(1);
 
-            var aligned = new float[height, width];
-            Array.Copy(inputData, aligned, inputData.Length);
+            // Создаем интегральное изображение с дополнительными границами
+            float[,] integral = new float[height + 1, width + 1];
 
-            for (int y = 0; y < height; y += windowSize)
+            // Построение интегрального изображения
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x += windowSize)
+                for (int x = 0; x < width; x++)
                 {
-                    int xEnd = Math.Min(x + windowSize, width);
-                    int yEnd = Math.Min(y + windowSize, height);
+                    integral[y + 1, x + 1] = inputData[y, x]
+                                             + integral[y, x + 1]
+                                             + integral[y + 1, x]
+                                             - integral[y, x];
+                }
+            }
 
-                    // Вычисляем среднее в окне
-                    float mean = 0;
-                    int count = 0;
+            float[,] aligned = new float[height, width];
+            int halfWindow = windowSize / 2;
 
-                    for (int iy = y; iy < yEnd; iy++)
-                    {
-                        for (int ix = x; ix < xEnd; ix++)
-                        {
-                            mean += aligned[iy, ix];
-                            count++;
-                        }
-                    }
+            // Обработка каждого пикселя с локальным окном
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // Определяем границы окна с учетом краев изображения
+                    int x1 = Math.Max(0, x - halfWindow);
+                    int y1 = Math.Max(0, y - halfWindow);
+                    int x2 = Math.Min(width - 1, x + halfWindow);
+                    int y2 = Math.Min(height - 1, y + halfWindow);
 
-                    if (count > 0)
-                        mean /= count;
+                    int pixelCount = (x2 - x1 + 1) * (y2 - y1 + 1);
 
-                    // Вычитаем среднее
-                    for (int iy = y; iy < yEnd; iy++)
-                    {
-                        for (int ix = x; ix < xEnd; ix++)
-                        {
-                            aligned[iy, ix] -= mean;
-                        }
-                    }
+                    // Вычисляем сумму в окне через интегральное изображение
+                    float windowSum = integral[y2 + 1, x2 + 1]
+                                      - integral[y1, x2 + 1]
+                                      - integral[y2 + 1, x1]
+                                      + integral[y1, x1];
+
+                    float localMean = windowSum / pixelCount;
+                    aligned[y, x] = inputData[y, x] - localMean;
                 }
             }
 

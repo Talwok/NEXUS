@@ -13,8 +13,8 @@ public class FrameModel
     [Key(nameof(SourceType))] public FrameSourceType SourceType { get; set; }
     [Key(nameof(Name))] public required string Name { get; set; }
     [Key(nameof(HeightMap))] public required float[,] HeightMap { get; set; }
-    [Key(nameof(HeightSpacing))] public float HeightSpacing { get; set; }
-    [Key(nameof(HeightScaling))] public float HeightScaling { get; set; }
+    [Key(nameof(HeightSpacing))] public float HeightSpacing { get; set; } = 10;
+    [Key(nameof(HeightScaling))] public float HeightScaling { get; set; } = 1;
     [Key(nameof(MetaData))] public required Dictionary<string, string> MetaData { get; set; }
     [Key(nameof(AmbientStrength))] public float AmbientStrength { get; set; } = 0.3f;
     [Key(nameof(SpecularStrength))] public float SpecularStrength { get; set; } = 0.4f;
@@ -30,5 +30,5 @@ public class FrameModel
     [Key(nameof(ColorTableMinimum))] public float ColorTableMinimum { get; set; }
     [Key(nameof(ColorTableUpperSelection))] public float ColorTableUpperSelection { get; set; }
     [Key(nameof(ColorTableLowerSelection))] public float ColorTableLowerSelection { get; set; }
-    
+    [Key(nameof(IsExpanded))] public bool IsExpanded { get; set; }
 }

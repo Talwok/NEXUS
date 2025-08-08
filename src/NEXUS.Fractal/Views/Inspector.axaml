@@ -6,7 +6,8 @@
              xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
              xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
              xmlns:services="clr-namespace:NEXUS.Fractal.Services"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:views="clr-namespace:NEXUS.Fractal.Views"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="350"
              x:Class="NEXUS.Fractal.Views.Inspector"
              x:DataType="viewModels:MainWindowViewModel">
     <Border IsVisible="{Binding SettingsMenuItemScreen.Settings.LeftPaneOpened}" Margin="4 2"
@@ -63,12 +64,71 @@
                         </StackPanel>
                     </TabItem.Header>
                     <DockPanel>
-                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8">
-                            <Button Content="{avalonia:MaterialIconExt Kind=ImageRemove}"
-                                    Command="{Binding RemoveFrameCommand}" />
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8">
+                            <StackPanel.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Width" Value="30"/>
+                                    <Setter Property="Height" Value="30"/>
+                                    <!-- <Setter Property="Theme" Value="{StaticResource TransparentButton}"/> -->
+                                </Style>
+                            </StackPanel.Styles>
+                            <Button Content="{avalonia:MaterialIconExt Kind=FileTree}"
+                                    ToolTip.Tip="Дерево фреймов">
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuItem Icon="{avalonia:MaterialIconExt Kind=ExpandAll}" 
+                                                  Header="Развернуть все"
+                                                  Click="ExpandFrameTree"/>
+                                        <MenuItem Icon="{avalonia:MaterialIconExt Kind=CollapseAll}" 
+                                                  Header="Свернуть все"
+                                                  Click="CollapseFrameTree"/>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                            <Button Content="{avalonia:MaterialIconExt Kind=Image}"
+                                    ToolTip.Tip="Действия над фреймами">
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuItem Icon="{avalonia:MaterialIconExt Kind=ImageAdd}" 
+                                                  Header="Импортировать"
+                                                  Command="{Binding ImportToProjectCommand}"/>
+                                        <MenuItem Icon="{avalonia:MaterialIconExt Kind=ControlPointDuplicate}" 
+                                                  Header="Клонировать"
+                                                  Command="{Binding CloneFrameCommand}"/>
+                                        <MenuItem Icon="{avalonia:MaterialIconExt Kind=ImageRemove}" 
+                                                  Header="Удалить"
+                                                  Command="{Binding RemoveFrameCommand}"/>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
                         </StackPanel>
-                        <TreeView ItemsSource="{Binding  ProjectService.Project.Frames}"
+                        <TreeView Name="FrameTree"
+                                  ItemsSource="{Binding  ProjectService.Project.Frames}"
                                   SelectedItem="{Binding ProjectService.SelectedFrame}">
+                            <TreeView.Styles>
+                                <Style Selector="TreeView#FrameTree > TreeViewItem" x:DataType="viewModels:FrameViewModel">
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
+                                    <Setter Property="ContextFlyout">
+                                        <Setter.Value>
+                                            <MenuFlyout>
+                                                <MenuItem Icon="{avalonia:MaterialIconExt Kind=ControlPointDuplicate}" 
+                                                          Header="Клонировать"
+                                                          Command="{ReflectionBinding $parent[views:MainWindow].DataContext.CloneFrameCommand}"/>
+                                                <MenuItem Icon="{avalonia:MaterialIconExt Kind=ImageRemove}" 
+                                                          Header="Удалить"
+                                                          Command="{ReflectionBinding $parent[views:MainWindow].DataContext.RemoveFrameCommand}"/>
+                                                <Separator/>
+                                                <MenuItem Icon="{avalonia:MaterialIconExt Kind=ExpandVertical}" 
+                                                          Header="Развернуть"
+                                                          Click="ExpandFrame"/>
+                                                <MenuItem Icon="{avalonia:MaterialIconExt Kind=CollapseVertical}" 
+                                                          Header="Свернуть"
+                                                          Click="CollapseFrame"/>
+                                            </MenuFlyout>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TreeView.Styles>
                             <TreeView.DataTemplates>
                                 <TreeDataTemplate DataType="{x:Type viewModels:FrameViewModel}"
                                                   ItemsSource="{Binding Children}">

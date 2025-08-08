@@ -121,10 +121,10 @@ public class FrameViewModel : ViewModelBase
     [Reactive] public float ColorTableUpperSelection { get; set; }
     [Reactive] public float ColorTableLowerSelection { get; set; }
     [Reactive] public ColorTableRange ColorTableRange { get; set; }
-    
+    [Reactive] public bool IsExpanded { get; set; }
     private void UpdateImage()
     {
-        var image = new Image<Rgba32>(HeightMap.GetLength(0), HeightMap.GetLength(1));
+        var image = new Image<Rgba32>(HeightMap.GetLength(1), HeightMap.GetLength(0));
         image.ProcessPixelRows(accessor =>
         {
             for (int y = 0; y < accessor.Height; y++)
@@ -210,7 +210,8 @@ public class FrameViewModel : ViewModelBase
             ColorTableMaximum = ColorTableMaximum,
             ColorTableMinimum = ColorTableMinimum,
             ColorTableUpperSelection = ColorTableUpperSelection,
-            ColorTableLowerSelection = ColorTableLowerSelection
+            ColorTableLowerSelection = ColorTableLowerSelection,
+            IsExpanded = IsExpanded
         };
     }
 }
