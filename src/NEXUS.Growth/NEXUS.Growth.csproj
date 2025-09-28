@@ -45,6 +45,9 @@
         <None Remove="Assets\Fonts\JetBrainsMonoNL-SemiBoldItalic.ttf" />
         <None Remove="Assets\Fonts\JetBrainsMonoNL-Thin.ttf" />
         <None Remove="Assets\Fonts\JetBrainsMonoNL-ThinItalic.ttf" />
+        <None Update="Assets\CSEG\CSEG.exe">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
@@ -105,6 +108,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NEXUS.Parsers.CSEG\NEXUS.Parsers.CSEG.csproj" />
       <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
     

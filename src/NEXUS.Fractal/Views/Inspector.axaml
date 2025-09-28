@@ -103,8 +103,10 @@
                             </Button>
                         </StackPanel>
                         <TreeView Name="FrameTree"
+                                  SelectionMode="Multiple"
                                   ItemsSource="{Binding  ProjectService.Project.Frames}"
-                                  SelectedItem="{Binding ProjectService.SelectedFrame}">
+                                  SelectedItem="{Binding ProjectService.SelectedFrame}"
+                                  SelectedItems="{Binding ProjectService.SelectedFrames}">
                             <TreeView.Styles>
                                 <Style Selector="TreeView#FrameTree > TreeViewItem" x:DataType="viewModels:FrameViewModel">
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>

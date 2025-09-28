@@ -107,10 +107,11 @@ public class ProjectService : StatefulServiceBase
     [Reactive, JsonIgnore] public bool HasProject { get; private set; }
     [Reactive, JsonIgnore] public int SelectedTab { get; set; }
     [Reactive, JsonIgnore] public FrameViewModel SelectedFrame { get; set; }
+    [Reactive, JsonIgnore] public ObservableCollection<FrameViewModel> SelectedFrames { get; set; } = [];
     [Reactive, JsonIgnore] public ResearchViewModel SelectedResearch { get; set; }
     [Reactive, JsonIgnore] public PaletteColorTable? SelectedColorTable { get; set; }
     [JsonIgnore] public ObservableCollection<PaletteColorTable> ColorTables { get; } = [];
-    
+
     private void UpdateRecentProjects(string projectPath)
     {
         if (string.IsNullOrEmpty(projectPath))

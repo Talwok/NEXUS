@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using NEXUS.Extensions;
 using NEXUS.Fractal.Enums;
 using NEXUS.Fractal.Helpers;
@@ -23,9 +24,11 @@ namespace NEXUS.Fractal.Services
         public void CalculateDimension(FractalDimensionType fractalDimensionType)
         {
             IsCalculating = true;
-
-            if (_projectService?.SelectedFrame is FrameViewModel frame)
+                
+            foreach (var frame in _projectService?.SelectedFrames)
             {
+                if (frame == null) continue;
+                
                 var model = fractalDimensionType switch
                 {
                     FractalDimensionType.BoxCountingFractalDimension => frame.HeightMap.CalculateBoxCountingDimension(),

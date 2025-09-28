@@ -23,12 +23,12 @@ public static class FractalDimensionHelper
         List<float> logEps = new();
         List<float> logN = new();
 
-        for (int boxSize = minBoxSize; boxSize <= maxBoxSize; boxSize *= 2)
+        for (int boxSize = minBoxSize; boxSize <= maxBoxSize; boxSize += 2)
         {
-            float ε = (float)boxSize / Math.Max(width, height);
+            float epsilon = (float)boxSize / Math.Max(width, height);
             int boxesX = (int)Math.Ceiling((float)width / boxSize);
             int boxesY = (int)Math.Ceiling((float)height / boxSize);
-            int boxesZ = (int)Math.Ceiling(1.0 / ε);
+            int boxesZ = (int)Math.Ceiling(1.0 / epsilon);
 
             HashSet<(int, int, int)> occupied = new();
 
@@ -40,14 +40,14 @@ public static class FractalDimensionHelper
                     {
                         for (int x = bx * boxSize; x < Math.Min((bx + 1) * boxSize, width); x++)
                         {
-                            int bz = (int)(heightMap[y, x] / ε);
+                            int bz = (int)(heightMap[y, x] / epsilon);
                             occupied.Add((bx, by, bz));
                         }
                     }
                 }
             }
 
-            logEps.Add((float)Math.Log(1.0 / ε));
+            logEps.Add((float)Math.Log(1.0 / epsilon));
             logN.Add((float)Math.Log(occupied.Count));
         }
 

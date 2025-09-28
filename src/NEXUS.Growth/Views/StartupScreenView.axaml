@@ -5,19 +5,13 @@
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:startup="clr-namespace:NEXUS.Growth.ViewModels"
-             xmlns:custom="clr-namespace:NEXUS.Styles.Control.Custom;assembly=NEXUS.Styles"
              xmlns:views="clr-namespace:NEXUS.Growth.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NEXUS.Growth.Views.StartupScreenView"
              x:DataType="startup:StartupScreenViewModel">
 
-    <Design.DataContext>
-        <startup:StartupScreenViewModel />
-    </Design.DataContext>
-
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Bottom"
-                   IsVisible="{Binding !#ContinueTab.IsSelected}"
                    Margin="8 0 8 8">
             <Button DockPanel.Dock="Right" VerticalAlignment="Bottom" Margin="8 0 0 0 "
                     Command="{Binding StartProcessCommand}">
@@ -134,27 +128,7 @@
                 </controls:TabViewItem.Content>
 
             </controls:TabViewItem>
-
-            <controls:TabViewItem Name="ContinueTab">
-
-                <controls:TabViewItem.Header>
-
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-
-                        <avalonia:MaterialIcon Kind="FolderPlayOutline" />
-
-                        <TextBlock Text="Продолжение вычислений" />
-
-                    </StackPanel>
-
-                </controls:TabViewItem.Header>
-
-                <controls:TabViewItem.Content>
-                    <views:StartupScreenContinueView />
-                </controls:TabViewItem.Content>
-
-            </controls:TabViewItem>
-
+            
         </controls:TabView>
 
     </DockPanel>

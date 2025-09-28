@@ -30,36 +30,3 @@ public enum Potential
     TightBinding
 }
 
-public static class PotentialExtensions
-{
-    public static string ToOptionsString(this Potential potential)
-    {
-        switch (potential)
-        {
-            case Potential.LennardJones:
-                return "Lenard-Jones";
-            case Potential.StillingerWeber:
-                return "Stillinger-Weber";
-            case Potential.Tersoff:
-                return "Tersoff";
-            case Potential.Dzhugutov:
-                return "Dzhugutov";
-            case Potential.TightBinding:
-                return "tight-binding";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(potential), potential, null);
-        }
-    }
-    
-    public static Dictionary<Potential, string> GetDictionary()
-    {
-        return new Dictionary<Potential, string>
-        {
-            { Potential.LennardJones, "Леннарда-Джонса (Lennard-Jones)" },
-            { Potential.StillingerWeber, "Стиллинджера-Вебера (Stillinger-Weber)" },
-            { Potential.Tersoff, "Терсоффа (Tersoff)" },
-            { Potential.Dzhugutov, "Джугутова (Dzhugutov)" },
-            { Potential.TightBinding, "Сильной связи (Tight binding)" }
-        };
-    }
-}

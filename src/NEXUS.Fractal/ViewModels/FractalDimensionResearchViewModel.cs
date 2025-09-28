@@ -44,6 +44,9 @@ public class FractalDimensionResearchViewModel : ResearchViewModel
         LowerLimitY = float.IsNaN(model.LowerLimitY) ? MinY : model.LowerLimitY;
         UpperLimitY = float.IsNaN(model.UpperLimitY) ? MaxY : model.UpperLimitY;
         
+        LowerLimitX = 2.5f;
+        UpperLimitX = 3.5f;
+        
         var valueList = new ObservableCollection<Point>();
         
         _series = new LineSeries<Point>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
+using NEXUS.Growth.Helpers;
 using NEXUS.Growth.Models;
 using NEXUS.ViewModels;
 using ReactiveUI.Fody.Helpers;
@@ -18,7 +19,7 @@ public class ViewerScreenViewModel : StatefulViewModelBase
     {
         _configuration = AppConfigurationExtensions.DeserializeDefaultsFromXml() ?? new AppConfiguration();
 
-        Processes = ProcessExtensions.GetDictionary();
+        Processes = ProcessHelper.GetDictionary();
         
         // LastProcesses = new ObservableCollection<ProcessDirectoryViewModel>(_configuration.RecentFolders
         //     .Where(folder => File.Exists($"..\\{folder}\\start.xml"))

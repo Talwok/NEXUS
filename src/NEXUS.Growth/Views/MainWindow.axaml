@@ -28,8 +28,8 @@
                                          IconSource="{Binding Icon, Converter={x:Static converters:MaterialIconKindToPathConverter.Instance}}">
                 <controls:NavigationViewItem.InfoBadge>
                     <controls:InfoBadge DataContext="{Binding Screen}" 
-                                        IsVisible="{Binding SimulationsCount, DataType=vm:SimulationScreenViewModel}"
-                                        Value="{Binding SimulationsCount, DataType=vm:SimulationScreenViewModel}"/>
+                                        IsVisible="{Binding SimulationService.Processes.Count, DataType=vm:SimulationScreenViewModel}"
+                                        Value="{Binding SimulationService.Processes.Count, DataType=vm:SimulationScreenViewModel}"/>
                 </controls:NavigationViewItem.InfoBadge>
             </controls:NavigationViewItem>
             <controls:NavigationViewItem DataContext="{Binding StartupMenuItem}" Content="{Binding Name}" 

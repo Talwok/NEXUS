@@ -175,22 +175,22 @@
                                         </StackPanel.Styles>
                                         <avalonia:MaterialIconText Kind="AlignVerticalDistribute" Text="Ограничения" Classes="Title"
                                                                    Foreground="{DynamicResource SystemAccentColor}" />
-                                        <!--<controls:NumberBox
+                                        <controls:NumberBox
                                             Header="{avalonia:MaterialIconTextExt Kind=FormatVerticalAlignBottom, Text=Нижнее ограничение X}"
-                                            Value="{Binding LowerLimitX, Mode=OneWay}" 
+                                            Value="{Binding LowerLimitX, Mode=TwoWay}" 
                                             Minimum="{Binding MinX}" Maximum="{Binding MaxX}"/>
                                         <controls:NumberBox
                                             Header="{avalonia:MaterialIconTextExt Kind=FormatVerticalAlignTop, Text=Верхнее ограничение X}"
-                                            Value="{Binding UpperLimitX, Mode=OneWay}" 
+                                            Value="{Binding UpperLimitX, Mode=TwoWay}" 
                                             Minimum="{Binding MinX}" Maximum="{Binding MaxX}"/>
                                         <controls:NumberBox
                                             Header="{avalonia:MaterialIconTextExt Kind=FormatVerticalAlignBottom, Text=Нижнее ограничение Y}"
-                                            Value="{Binding LowerLimitY, Mode=OneWay}"
+                                            Value="{Binding LowerLimitY, Mode=TwoWay}"
                                             Minimum="{Binding MinY}" Maximum="{Binding MaxY}" />
                                         <controls:NumberBox
                                             Header="{avalonia:MaterialIconTextExt Kind=FormatVerticalAlignTop, Text=Верхнее ограничение Y}"
-                                            Value="{Binding UpperLimitY, Mode=OneWay}" 
-                                            Minimum="{Binding MinY}" Maximum="{Binding MaxY}" />-->
+                                            Value="{Binding UpperLimitY, Mode=TwoWay}" 
+                                            Minimum="{Binding MinY}" Maximum="{Binding MaxY}" />
                                         <!--<avalonia:MaterialIconText Kind="AxisXArrow" Text="Ось X"/>
                                         <rangeSlider:NexusRangeSlider Orientation="Horizontal" Minimum="{Binding MinX}" Maximum="{Binding MaxX}" LowerSelectedValue="{Binding LowerLimitX}" UpperSelectedValue="{Binding UpperLimitX}"/> 
                                         <avalonia:MaterialIconText Kind="AxisYArrow" Text="Ось Y"/>
