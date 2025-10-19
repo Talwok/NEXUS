@@ -259,41 +259,39 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ env.VERSION }}"
-          
+
           # Формируем список приложений
           $appsList = [System.Collections.ArrayList]@()
           if (Test-Path "./NEXUS.Fractal-$version.zip") { $appsList.Add("- NEXUS.Fractal (Avalonia)") | Out-Null }
           if (Test-Path "./NEXUS.Growth-$version.zip") { $appsList.Add("- NEXUS.Growth (Avalonia)") | Out-Null }
           if (Test-Path "./NEXUS.Simulation-$version.zip") { $appsList.Add("- NEXUS.Growth.Simulation (Console)") | Out-Null }
-          
+
           # Получаем хеши
           $hashesContent = Get-Content ./hashes.md5 -Raw
-          
+
           # Формируем тело релиза
           $bodyLines = @(
             "NEXUS Desktop Applications Release $version",
             "",
             "## Included Applications",
-            $appsList -join "`n",
+            ($appsList -join "`n"),
             "",
             "## MD5 Hashes",
-            "```",
-            $hashesContent,
-            "```",
+            ($hashesContent -replace "`r`n", "`n" -replace "`r", "`n"),
             "",
             "## Notes",
             "- Applications are published as full folders (not single-file)",
             "- Self-contained Windows x64 builds",
             "- Extract ZIP and run the executable"
           )
-          
+
           $body = $bodyLines -join "`n"
-          
+
           # Сохраняем в файл
           $body | Out-File -FilePath "./release_body.md" -Encoding utf8
-          
-          Write-Host "Release body prepared"
 
+          Write-Host "Release body prepared"
+          
       - name: Create GitHub Release
         id: create-release
         uses: softprops/action-gh-release@v1
