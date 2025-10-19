@@ -1,0 +1,47 @@
+#!/bin/sh
+command -v git-lfs >/dev/null 2>&1 || { printf >&2 "\n%s\n\n" "This repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting the 'pre-push' file in the hooks directory (set by 'core.hookspath'; usually '.git/hooks')."; exit 2; }
+git lfs pre-push "$@"
+
+echo "🧪 Running pre-push validation..."
+cd src
+
+# 2. Запуск всех тестов
+echo "🔬 Running tests..."
+if ! dotnet test --verbosity quiet --nologo; then
+    echo "❌ Tests failed! Cannot push."
+    exit 1
+fi
+
+# 3. Проверка уязвимостей в пакетах
+echo "🔒 Checking for vulnerable packages..."
+VULNERABLE_PACKAGES=$(dotnet list package --vulnerable --include-transitive)
+if [[ $VULNERABLE_PACKAGES == *"has the following vulnerable packages"* ]]; then
+    echo "❌ Vulnerable packages detected:"
+    echo "$VULNERABLE_PACKAGES"
+    exit 1
+fi
+
+# 4. Проверка размера сборки (Avalonia специфика)
+echo "📦 Checking build size..."
+dotnet publish -c Release -r win-x64 --self-contained false -o ./temp-publish
+BUILD_SIZE=$(du -sh ./temp-publish | cut -f1)
+rm -rf ./temp-publish
+
+echo "📊 Build size: $BUILD_SIZE"
+
+# 5. Проверка на наличие секретов в коде
+echo "🔑 Checking for secrets..."
+if git diff origin/HEAD..HEAD | grep -i "password\|secret\|key\|token" > /dev/null; then
+    echo "❌ Possible secrets detected in code! Review changes."
+    exit 1
+fi
+
+# 6. Avalonia-specific проверки
+echo "🎨 Running Avalonia-specific checks..."
+# Проверка на использование deprecated контролов
+find . -name "*.cs" -o -name "*.axaml" | xargs grep -l "ApplicationCommands\|InputBindings" > /dev/null
+if [ $? -eq 0 ]; then
+    echo "⚠️  Found deprecated Avalonia features"
+fi
+
+echo "✅ Pre-push validation passed!"
