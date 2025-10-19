@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Extract version from tag
         id: extract-version
@@ -41,42 +43,81 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Set version in projects
+      - name: Find project files
+        id: find-projects
         shell: pwsh
         run: |
-          $version = $env:VERSION
-          $versionProps = @"
-          <Project>
-          <PropertyGroup>
-          <Version>$version</Version>
-          <FileVersion>$version</FileVersion>
-          <AssemblyVersion>$version.0</AssemblyVersion>
-          </PropertyGroup>
-          </Project>
-          "@
-          $versionProps | Out-File -FilePath "Version.props"
+          # Look for project files in expected locations
+          $projects = @{}
+          
+          # Check for Fractal project
+          if (Test-Path "NEXUS.Fractal/NEXUS.Fractal.csproj") {
+              $projects["fractal"] = "NEXUS.Fractal/NEXUS.Fractal.csproj"
+          } elseif (Test-Path "NEXUS.Fractal/NEXUS.Fractal.fsproj") {
+              $projects["fractal"] = "NEXUS.Fractal/NEXUS.Fractal.fsproj"
+          } elseif (Test-Path "NEXUS.Fractal.csproj") {
+              $projects["fractal"] = "NEXUS.Fractal.csproj"
+          }
+          
+          # Check for Growth project  
+          if (Test-Path "NEXUS.Growth/NEXUS.Growth.csproj") {
+              $projects["growth"] = "NEXUS.Growth/NEXUS.Growth.csproj"
+          } elseif (Test-Path "NEXUS.Growth/NEXUS.Growth.fsproj") {
+              $projects["growth"] = "NEXUS.Growth/NEXUS.Growth.fsproj"
+          } elseif (Test-Path "NEXUS.Growth.csproj") {
+              $projects["growth"] = "NEXUS.Growth.csproj"
+          }
+          
+          # Check for Simulation project
+          if (Test-Path "NEXUS.Growth.Simulation/NEXUS.Growth.Simulation.csproj") {
+              $projects["simulation"] = "NEXUS.Growth.Simulation/NEXUS.Growth.Simulation.csproj"
+          } elseif (Test-Path "NEXUS.Growth.Simulation/NEXUS.Growth.Simulation.fsproj") {
+              $projects["simulation"] = "NEXUS.Growth.Simulation/NEXUS.Growth.Simulation.fsproj"
+          } elseif (Test-Path "NEXUS.Growth.Simulation.csproj") {
+              $projects["simulation"] = "NEXUS.Growth.Simulation.csproj"
+          }
+          
+          Write-Host "Found projects:"
+          $projects.GetEnumerator() | ForEach-Object { Write-Host "  $($_.Key): $($_.Value)" }
+          
+          # Convert to JSON for output
+          $projectsJson = $projects | ConvertTo-Json -Compress
+          echo "projects=$projectsJson" >> $env:GITHUB_OUTPUT
 
       - name: Determine apps to build
         id: determine-apps
         shell: pwsh
         run: |
+          $projects = '${{ steps.find-projects.outputs.projects }}' | ConvertFrom-Json -AsHashtable
+          $availableApps = $projects.Keys | ForEach-Object { $_ }
+          
           if ("${{ env.APP }}" -ne "") {
               $app = "${{ env.APP }}".ToLower()
-              if ($app -eq "fractal" -or $app -eq "growth" -or $app -eq "simulation") {
+              if ($availableApps -contains $app) {
                   echo "Building only $app as specified in tag"
                   echo "apps=$app" >> $env:GITHUB_OUTPUT
                   exit 0
+              } else {
+                  Write-Warning "Requested app '$app' not found in available projects: $($availableApps -join ', ')"
               }
           }
           
           $changedFiles = git diff --name-only HEAD^ HEAD
           $apps = @()
           
-          if ($changedFiles -like "*NEXUS.Fractal*") { $apps += "fractal" }
-          if ($changedFiles -like "*NEXUS.Growth*") { $apps += "growth" }
-          if ($changedFiles -like "*NEXUS.Growth.Simulation*") { $apps += "simulation" }
+          if ($changedFiles -like "*NEXUS.Fractal*" -and $availableApps -contains "fractal") { 
+              $apps += "fractal" 
+          }
+          if ($changedFiles -like "*NEXUS.Growth*" -and $availableApps -contains "growth") { 
+              $apps += "growth" 
+          }
+          if ($changedFiles -like "*NEXUS.Growth.Simulation*" -and $availableApps -contains "simulation") { 
+              $apps += "simulation" 
+          }
           
-          if ($apps.Count -eq 0) { $apps = @("fractal", "growth", "simulation") }
+          if ($apps.Count -eq 0) { 
+              $apps = $availableApps 
+          }
           
           echo "apps=$($apps -join ',')" >> $env:GITHUB_OUTPUT
           Write-Host "Apps to build: $($apps -join ', ')"
@@ -85,36 +126,48 @@ jobs:
         if: contains(steps.determine-apps.outputs.apps, 'fractal')
         shell: pwsh
         run: |
-          dotnet publish NEXUS.Fractal -c Release -r win-x64 --self-contained true `
+          $projects = '${{ steps.find-projects.outputs.projects }}' | ConvertFrom-Json -AsHashtable
+          $projectPath = $projects["fractal"]
+          Write-Host "Building Fractal from: $projectPath"
+          
+          dotnet publish "$projectPath" -c Release -r win-x64 --self-contained true `
             -p:PublishSingleFile=false `
             -p:IncludeAllContentForSelfExtract=false `
             -p:Version=$env:VERSION `
             -p:FileVersion=$env:VERSION `
-            -p:AssemblyVersion=$env:VERSION.0 `
+            -p:AssemblyVersion="$env:VERSION.0" `
             -o ./artifacts/Fractal
 
       - name: Build NEXUS.Growth
         if: contains(steps.determine-apps.outputs.apps, 'growth')
         shell: pwsh
         run: |
-          dotnet publish NEXUS.Growth -c Release -r win-x64 --self-contained true `
+          $projects = '${{ steps.find-projects.outputs.projects }}' | ConvertFrom-Json -AsHashtable
+          $projectPath = $projects["growth"]
+          Write-Host "Building Growth from: $projectPath"
+          
+          dotnet publish "$projectPath" -c Release -r win-x64 --self-contained true `
             -p:PublishSingleFile=false `
             -p:IncludeAllContentForSelfExtract=false `
             -p:Version=$env:VERSION `
             -p:FileVersion=$env:VERSION `
-            -p:AssemblyVersion=$env:VERSION.0 `
+            -p:AssemblyVersion="$env:VERSION.0" `
             -o ./artifacts/Growth
 
       - name: Build NEXUS.Growth.Simulation
         if: contains(steps.determine-apps.outputs.apps, 'simulation')
         shell: pwsh
         run: |
-          dotnet publish NEXUS.Growth.Simulation -c Release -r win-x64 --self-contained true `
+          $projects = '${{ steps.find-projects.outputs.projects }}' | ConvertFrom-Json -AsHashtable
+          $projectPath = $projects["simulation"]
+          Write-Host "Building Simulation from: $projectPath"
+          
+          dotnet publish "$projectPath" -c Release -r win-x64 --self-contained true `
             -p:PublishSingleFile=false `
             -p:IncludeAllContentForSelfExtract=false `
             -p:Version=$env:VERSION `
             -p:FileVersion=$env:VERSION `
-            -p:AssemblyVersion=$env:VERSION.0 `
+            -p:AssemblyVersion="$env:VERSION.0" `
             -o ./artifacts/Simulation
 
       - name: Create ZIP archives
@@ -125,18 +178,30 @@ jobs:
           $files = @()
           
           if (Test-Path "./artifacts/Fractal") {
-              Compress-Archive -Path ./artifacts/Fractal/* -DestinationPath "./NEXUS.Fractal-$version.zip"
-              $files += "NEXUS.Fractal-$version.zip"
+              $fractalFiles = Get-ChildItem "./artifacts/Fractal" -File
+              if ($fractalFiles.Count -gt 0) {
+                  Compress-Archive -Path "./artifacts/Fractal/*" -DestinationPath "./NEXUS.Fractal-$version.zip"
+                  $files += "NEXUS.Fractal-$version.zip"
+                  Write-Host "Created NEXUS.Fractal-$version.zip with $($fractalFiles.Count) files"
+              }
           }
           
           if (Test-Path "./artifacts/Growth") {
-              Compress-Archive -Path ./artifacts/Growth/* -DestinationPath "./NEXUS.Growth-$version.zip"
-              $files += "NEXUS.Growth-$version.zip"
+              $growthFiles = Get-ChildItem "./artifacts/Growth" -File
+              if ($growthFiles.Count -gt 0) {
+                  Compress-Archive -Path "./artifacts/Growth/*" -DestinationPath "./NEXUS.Growth-$version.zip"
+                  $files += "NEXUS.Growth-$version.zip"
+                  Write-Host "Created NEXUS.Growth-$version.zip with $($growthFiles.Count) files"
+              }
           }
           
           if (Test-Path "./artifacts/Simulation") {
-              Compress-Archive -Path ./artifacts/Simulation/* -DestinationPath "./NEXUS.Simulation-$version.zip"
-              $files += "NEXUS.Simulation-$version.zip"
+              $simulationFiles = Get-ChildItem "./artifacts/Simulation" -File
+              if ($simulationFiles.Count -gt 0) {
+                  Compress-Archive -Path "./artifacts/Simulation/*" -DestinationPath "./NEXUS.Simulation-$version.zip"
+                  $files += "NEXUS.Simulation-$version.zip"
+                  Write-Host "Created NEXUS.Simulation-$version.zip with $($simulationFiles.Count) files"
+              }
           }
           
           echo "files=$($files -join ',')" >> $env:GITHUB_OUTPUT
@@ -165,22 +230,19 @@ jobs:
           
           $hashes | Out-File -FilePath "./hashes.md5"
           echo "hashes=$($hashes -join '|')" >> $env:GITHUB_OUTPUT
-          echo "Hashes calculated and saved to hashes.md5"
+          Write-Host "Hashes calculated and saved to hashes.md5"
 
       - name: Prepare release body
         id: prepare-release-body
         shell: pwsh
         run: |
-          # Формируем список приложений
           $appsList = [System.Collections.ArrayList]@()
           if (Test-Path "./NEXUS.Fractal-$env:VERSION.zip") { $appsList.Add("- NEXUS.Fractal (Avalonia)") | Out-Null }
           if (Test-Path "./NEXUS.Growth-$env:VERSION.zip") { $appsList.Add("- NEXUS.Growth (Avalonia)") | Out-Null }
           if (Test-Path "./NEXUS.Simulation-$env:VERSION.zip") { $appsList.Add("- NEXUS.Growth.Simulation (Console)") | Out-Null }
           
-          # Получаем хеши
           $hashesContent = Get-Content ./hashes.md5 -Raw
           
-          # Формируем тело релиза
           $bodyLines = @(
             "NEXUS Desktop Applications Release $env:VERSION",
             "",
@@ -193,13 +255,9 @@ jobs:
           )
           
           $body = $bodyLines -join "`n"
+          $body | Out-File -FilePath "./release_body.md" -Encoding utf8
           
-          # Сохраняем в файл
-          $body | Out-File -FilePath "./release_body.md" -Encoding utf8 -NoNewline
-          
-          # Для вывода в GITHUB_OUTPUT заменяем переносы строк и экранируем кавычки
-          $outputBody = $body -replace "`n", "%0A" -replace "`r", "%0D" -replace '"', '\"'
-          echo "body=$outputBody" >> $env:GITHUB_OUTPUT
+          Write-Host "Release body prepared"
 
       - name: Create GitHub Release
         id: create-release
@@ -208,8 +266,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          name: NEXUS ${{ env.VERSION }}${{ env.APP && format('-{0}', env.APP) || '' }}
-          body_file: release_body.md
+          release_name: NEXUS ${{ env.VERSION }}${{ env.APP && format('-{0}', env.APP) || '' }}
+          body_path: release_body.md
           files: |
             ${{ steps.create-archives.outputs.files }}
             hashes.md5
