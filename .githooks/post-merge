@@ -1,12 +1,21 @@
 #!/bin/bash
-echo "🔄 Выполнение пост-мердж задач..."
+echo "🔄 Running post-merge tasks..."
 
-# Восстановление пакетов
-echo "📦 Восстановление пакетов NuGet..."
+# 1. Восстановление пакетов
+echo "📦 Restoring packages..."
 dotnet restore
 
-# Очистка старых сборок
-echo "🧹 Очистка старых сборок..."
-dotnet clean
+# 2. Обновление инструментов Avalonia
+echo "🛠 Updating Avalonia tools..."
+dotnet tool update -g Avalonia.Tools || dotnet tool install -g Avalonia.Tools
 
-echo "✅ Пост-мердж задачи завершены"
+# 3. Генерация сборки для дизайнера
+echo "🎨 Generating design-time build..."
+dotnet build -t:BuildDesignTime
+
+# 4. Очистка старых сборок
+echo "🧹 Cleaning old builds..."
+find . -name "bin" -type d -exec rm -rf {} + 2>/dev/null || true
+find . -name "obj" -type d -exec rm -rf {} + 2>/dev/null || true
+
+echo "✅ Post-merge tasks completed!"

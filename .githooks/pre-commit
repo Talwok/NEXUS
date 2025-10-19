@@ -1,10 +1,41 @@
 #!/bin/bash
-echo "🔧 Запуск автоформатирования C# кода..."
+echo "🚀 Running pre-commit checks..."
 
-# Форматирование всего решения
-dotnet format --verbosity diagnostic
+# 1. Проверка форматирования кода
+echo "📝 Checking code formatting..."
+dotnet format --verify-no-changes --verbosity diagnostic
+if [ $? -ne 0 ]; then
+    echo "❌ Code formatting issues found. Run 'dotnet format' to fix."
+    exit 1
+fi
 
-# Добавляем отформатированные файлы обратно в коммит
-git add .
+# 2. Проверка синтаксиса C#
+echo "🔍 Building project..."
+if ! dotnet build --nologo --verbosity quiet; then
+    echo "❌ Build failed!"
+    exit 1
+fi
 
-echo "✅ Форматирование завершено"
+# 3. Проверка XAML файлов Avalonia
+echo "📱 Validating Avalonia XAML files..."
+find . -name "*.axaml" | while read xaml_file; do
+    echo "  Checking $xaml_file"
+    # Простая проверка на валидность XML
+    if ! xmllint --noout "$xaml_file" 2>/dev/null; then
+        echo "❌ Invalid XAML: $xaml_file"
+        exit 1
+    fi
+done
+
+# 4. Проверка на наличие отладочного кода
+echo "🐛 Checking for debug code..."
+if git diff --cached --name-only | xargs grep -l "TODO\|FIXME\|DEBUG" 2>/dev/null; then
+    echo "⚠️  Found TODO/FIXME in committed files. Continue? [y/N]"
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+echo "✅ Pre-commit checks passed!"
+exit 0

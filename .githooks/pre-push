@@ -1,13 +1,43 @@
 #!/bin/bash
-echo "🧪 Запуск тестовой базы..."
+echo "🧪 Running pre-push validation..."
 
-# Запуск unit тестов
-dotnet test --nologo --verbosity minimal --no-build
-
-if [ $? -ne 0 ]; then
-    echo "❌ Тесты не пройдены! Пуш отменен."
-    echo "💡 Запустите 'dotnet test' для деталей"
+# 1. Запуск всех тестов
+echo "🔬 Running tests..."
+if ! dotnet test --verbosity quiet --nologo; then
+    echo "❌ Tests failed! Cannot push."
     exit 1
 fi
 
-echo "✅ Все тесты пройдены успешно"
+# 2. Проверка уязвимостей в пакетах
+echo "🔒 Checking for vulnerable packages..."
+VULNERABLE_PACKAGES=$(dotnet list package --vulnerable --include-transitive)
+if [[ $VULNERABLE_PACKAGES == *"has the following vulnerable packages"* ]]; then
+    echo "❌ Vulnerable packages detected:"
+    echo "$VULNERABLE_PACKAGES"
+    exit 1
+fi
+
+# 3. Проверка размера сборки (Avalonia специфика)
+echo "📦 Checking build size..."
+dotnet publish -c Release -r win-x64 --self-contained false -o ./temp-publish
+BUILD_SIZE=$(du -sh ./temp-publish | cut -f1)
+rm -rf ./temp-publish
+
+echo "📊 Build size: $BUILD_SIZE"
+
+# 4. Проверка на наличие секретов в коде
+echo "🔑 Checking for secrets..."
+if git diff origin/HEAD..HEAD | grep -i "password\|secret\|key\|token" > /dev/null; then
+    echo "❌ Possible secrets detected in code! Review changes."
+    exit 1
+fi
+
+# 5. Avalonia-specific проверки
+echo "🎨 Running Avalonia-specific checks..."
+# Проверка на использование deprecated контролов
+find . -name "*.cs" -o -name "*.axaml" | xargs grep -l "ApplicationCommands\|InputBindings" > /dev/null
+if [ $? -eq 0 ]; then
+    echo "⚠️  Found deprecated Avalonia features"
+fi
+
+echo "✅ Pre-push validation passed!"
