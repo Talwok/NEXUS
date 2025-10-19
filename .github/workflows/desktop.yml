@@ -288,10 +288,10 @@ jobs:
           $body = $bodyLines -join "`n"
 
           # Сохраняем в файл
-          $body | Out-File -FilePath "./release_body.md" -Encoding utf8
+          $body | Out-File -FilePath "./release_body.md" -Encoding utf8 -NoNewline
 
           Write-Host "Release body prepared"
-          
+
       - name: Create GitHub Release
         id: create-release
         uses: softprops/action-gh-release@v1
@@ -299,8 +299,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: NEXUS ${{ env.VERSION }}${{ env.APP && format(' ({0})', env.APP) || '' }}
+          name: NEXUS ${{ env.VERSION }}${{ env.APP && format('-{0}', env.APP) || '' }}
           body_file: release_body.md
           files: |
-            NEXUS.*.zip
+            ${{ steps.create-archives.outputs.files }}
             hashes.md5
