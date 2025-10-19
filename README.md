@@ -3,6 +3,14 @@
 <img src="https://github.com/Talwok/NEXUS/actions/workflows/desktop.yml/badge.svg" alt="NEXUS release workflow status badge">
 <p>Scientific software for working with MDT, BCR and image files of SEM (AFM and STM) microscope data.</p>
 
+# GIT HOOKS
+
+For propper work with project you need to set our hooks!
+
+```
+git config core.hooksPath .githooks
+```
+
 # Future plans
 - [x] Add parsing of MDT and BCR files :tada:
 - [x] Add visualization of 3d surface using OpenGL :tada:
