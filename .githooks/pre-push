@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "🧪 Запуск тестовой базы..."
+
+# Запуск unit тестов
+dotnet test --nologo --verbosity minimal --no-build
+
+if [ $? -ne 0 ]; then
+    echo "❌ Тесты не пройдены! Пуш отменен."
+    echo "💡 Запустите 'dotnet test' для деталей"
+    exit 1
+fi
+
+echo "✅ Все тесты пройдены успешно"
