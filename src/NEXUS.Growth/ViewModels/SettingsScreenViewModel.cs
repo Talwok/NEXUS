@@ -12,7 +12,7 @@ using ReactiveUI.Fody.Helpers;
 namespace NEXUS.Growth.ViewModels;
 
 public class SettingsScreenViewModel : ViewModelBase
-{ 
+{
     public SettingsScreenViewModel(IEnumerable<StatefulViewModelBase> statefulViewModels)
     {
         CommonSettingsViewModel = statefulViewModels.First<CommonSettingsViewModel>();

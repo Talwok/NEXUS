@@ -234,9 +234,9 @@ public static class FramesHelper
 
     private static void Process64BitData(byte[] source, Image<Rgba32> image)
     {
-        
+
     }
-    
+
     private static void Process32SBitData(byte[] source, Image<Rgba32> image)
     {
         image.ProcessPixelRows(accessor =>
@@ -255,7 +255,7 @@ public static class FramesHelper
             }
         });
     }
-    
+
     private static void Process64SBitData(byte[] source, Image<Rgba32> image)
     {
         // Автоматическое определение диапазона значений
@@ -304,7 +304,7 @@ public static class FramesHelper
     }
 
     #endregion
-    
+
     public static Image<Rgba32> ApplyColorMap(Image<Rgba32> image, Color[] colorMap)
     {
         var colorImage = image.Clone();
@@ -323,9 +323,9 @@ public static class FramesHelper
         return colorImage;
     }
 
-    public static Color[] ToImageSharpColors(PaletteColorTable table) 
+    public static Color[] ToImageSharpColors(PaletteColorTable table)
         => table.Colors
-            .Select(c => 
+            .Select(c =>
                 new Color(new Rgba32(c.Red, c.Green, c.Blue)))
             .ToArray();
 }

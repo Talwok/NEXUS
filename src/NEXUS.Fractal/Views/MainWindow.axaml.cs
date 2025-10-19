@@ -18,9 +18,9 @@ public partial class MainWindow : Window
     private void OnLayoutUpdated(object? sender, EventArgs e)
     {
         if (e == null) throw new ArgumentNullException(nameof(e));
-        if (DataContext is MainWindowViewModel vm 
-            && sender is Grid grid 
-            && vm.SettingsMenuItemScreen.Settings is {} settings 
+        if (DataContext is MainWindowViewModel vm
+            && sender is Grid grid
+            && vm.SettingsMenuItemScreen.Settings is { } settings
             && grid.ColumnDefinitions.Count == settings.ColumnWidths.Count)
         {
             for (int i = 0; i < grid.ColumnDefinitions.Count; i++)

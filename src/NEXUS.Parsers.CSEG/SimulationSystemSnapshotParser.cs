@@ -36,7 +36,7 @@ public class SimulationSystemSnapshotParser
             throw new InvalidDataException("Error parsing SSS file", ex);
         }
     }
-    
+
     public static void Save(string filePath, SimulationSystemSnapshot sssFile)
     {
         using var writer = new StreamWriter(filePath);
@@ -175,7 +175,7 @@ public class SimulationSystemSnapshotParser
 
         return footer;
     }
-    
+
     private static string FormatCoordinateRecord(SssCoordinate coord)
     {
         var baseRecord = $"{coord.Type} {coord.X:F6} {coord.Y:F6} {coord.Z:F6}";

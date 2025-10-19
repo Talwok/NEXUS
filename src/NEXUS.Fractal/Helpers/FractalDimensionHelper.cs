@@ -58,7 +58,7 @@ public static class FractalDimensionHelper
             Y = logN,
         };
     }
-    
+
     /// <summary>
     /// Метод дисперсий (размаха)
     /// </summary>
@@ -82,12 +82,12 @@ public static class FractalDimensionHelper
                 {
                     float sum = 0, sumSq = 0;
                     for (int dy = 0; dy < window; dy++)
-                    for (int dx = 0; dx < window; dx++)
-                    {
-                        float val = heightMap[y + dy, x + dx];
-                        sum += val;
-                        sumSq += val * val;
-                    }
+                        for (int dx = 0; dx < window; dx++)
+                        {
+                            float val = heightMap[y + dy, x + dx];
+                            sum += val;
+                            sumSq += val * val;
+                        }
 
                     float n = window * window;
                     float mean = sum / n;
@@ -110,7 +110,7 @@ public static class FractalDimensionHelper
             Y = logRms,
         };
     }
-    
+
     /// <summary>
     /// Метод триангуляции
     /// </summary>
@@ -181,7 +181,7 @@ public static class FractalDimensionHelper
             _ => null
         };
     }
-    
+
     /// <summary>
     /// Вычисление площади треугольника по трём 3D-точкам
     /// </summary>

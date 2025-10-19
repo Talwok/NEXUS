@@ -6,7 +6,6 @@
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
              xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
-             xmlns:controls="clr-namespace:NEXUS.Fractal.Controls"
              xmlns:rangeSlider="clr-namespace:NEXUS.Styles.Control.Custom.RangeSlider;assembly=NEXUS"
              xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"

@@ -17,9 +17,9 @@ public class GeometryService : ServiceBase
     {
         _projectService = statefulServices.FirstOrDefault<ProjectService>();
     }
-    
+
     [Reactive] public bool IsCalculating { get; set; }
-    
+
     public void UpdateGeometry(GeometryUpdateType updateType)
     {
         IsCalculating = true;
@@ -31,10 +31,10 @@ public class GeometryService : ServiceBase
                 GeometryUpdateType.RemoveLinearTrend => frame.HeightMap.RemoveLinearTrend(),
                 GeometryUpdateType.RemoveQuadraticTrend => frame.HeightMap.RemoveQuadraticTrend(),
                 GeometryUpdateType.LocalAlignment => frame.HeightMap.LocalAlignment(),
-                
+
                 GeometryUpdateType.RemoveHorizontalStripes => frame.HeightMap.RemoveHorizontalStripes(),
                 GeometryUpdateType.RemoveVerticalStripes => frame.HeightMap.RemoveVerticalStripes(),
-                
+
                 _ => null
             };
 
@@ -52,8 +52,8 @@ public class GeometryService : ServiceBase
                 _projectService.SelectedFrame = frameVm;
             }
         }
-        
+
         IsCalculating = false;
     }
-    
+
 }

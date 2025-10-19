@@ -24,7 +24,7 @@ public static class PotentialHelper
                 throw new ArgumentOutOfRangeException(nameof(potential), potential, null);
         }
     }
-    
+
     public static Dictionary<Potential, string> GetDictionary()
     {
         return new Dictionary<Potential, string>

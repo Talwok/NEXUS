@@ -24,7 +24,7 @@ public class MdaFrameImageProcessor
         _currentRange = _originalRange; // По умолчанию используем полный диапазон
         _image = CreateBaseImage();
     }
-    
+
     public MdaFrameImageProcessor WithRange(double min, double max)
     {
         _currentRange = new MinMax(
@@ -32,7 +32,7 @@ public class MdaFrameImageProcessor
             Math.Min(max, _originalRange.MaxValue));
         return this;
     }
-    
+
     public Image<Rgba32> ApplyColorMap(PaletteColorTable colorTable)
     {
         var colors = colorTable.Colors
@@ -50,7 +50,7 @@ public class MdaFrameImageProcessor
         var buffer = _frame.ImageBuffer;
         var dataType = _frame.Mesurands[0].DataType;
         var range = _currentRange.MaxValue - _currentRange.MinValue;
-        
+
         colorImage.ProcessPixelRows(accessor =>
         {
             for (int y = 0; y < accessor.Height; y++)
@@ -59,7 +59,7 @@ public class MdaFrameImageProcessor
                 for (int x = 0; x < accessor.Width; x++)
                 {
                     double value = ReadValue(buffer, dataType, (y * accessor.Width + x));
-                    
+
                     // Обработка значений за границами диапазона
                     if (value < _currentRange.MinValue)
                     {
@@ -90,7 +90,7 @@ public class MdaFrameImageProcessor
         int height = (int)(_frame.Dimensions[1].MaxIndex - _frame.Dimensions[1].MinIndex + 1);
         return new Image<Rgba32>(width, height);
     }
-    
+
     private MinMax CalculateDataRange()
     {
         var buffer = _frame.ImageBuffer;
@@ -103,12 +103,12 @@ public class MdaFrameImageProcessor
         {
             if (i * GetTypeSize(dataType) == buffer.Length)
                 break;
-            
+
             var value = ReadValue(buffer, dataType, i);
-            
-            if (i == 0) 
+
+            if (i == 0)
                 min = max = value;
-            
+
             min = Math.Min(min, value);
             max = Math.Max(max, value);
         }
@@ -128,7 +128,7 @@ public class MdaFrameImageProcessor
             MdaDataType.Int32 => BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(offset)),
             MdaDataType.UInt32 => BinaryPrimitives.ReadUInt32LittleEndian(buffer.AsSpan(offset)),
             MdaDataType.Int64 => BinaryPrimitives.ReadInt64LittleEndian(buffer.AsSpan(offset)),
-            MdaDataType.UInt64 => BinaryPrimitives.ReadUInt64LittleEndian(buffer.AsSpan(offset)), 
+            MdaDataType.UInt64 => BinaryPrimitives.ReadUInt64LittleEndian(buffer.AsSpan(offset)),
             MdaDataType.Float32 => BinaryPrimitives.ReadSingleLittleEndian(buffer.AsSpan(offset)),
             MdaDataType.Float64 => BinaryPrimitives.ReadDoubleLittleEndian(buffer.AsSpan(offset)),
             _ => throw new NotSupportedException($"Data type {dataType} is not supported")
@@ -152,28 +152,28 @@ public class MdaFrameImageProcessor
         int width = (int)(_frame.Dimensions[0].MaxIndex - _frame.Dimensions[0].MinIndex + 1);
         int height = (int)(_frame.Dimensions[1].MaxIndex - _frame.Dimensions[1].MinIndex + 1);
         var dataType = _frame.Mesurands[0].DataType;
-    
+
         // Получаем диапазон для нормализации
         var range = _originalRange.MaxValue - _originalRange.MinValue;
         if (range == 0) range = 1; // защита от деления на ноль
-    
+
         var map = new float[height, width]; // Обратите внимание на порядок height/width
-    
+
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
                 // Правильный расчет индекса для двумерных данных
                 int index = y * width + x;
-            
+
                 // Чтение и нормализация значения
                 double value = ReadValue(_frame.ImageBuffer, dataType, index);
                 float normalized = (float)((value - _originalRange.MinValue) / range);
-            
+
                 map[y, x] = normalized;
             }
         }
-    
+
         return map;
     }
 }

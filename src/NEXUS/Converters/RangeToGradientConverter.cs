@@ -8,12 +8,12 @@ namespace NEXUS.Converters;
 public class RangeToGradientConverter : IMultiValueConverter
 {
     public static RangeToGradientConverter Instance = new();
-    
+
     public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
     {
-        if (values.Count != 3 || 
-            !(values[0] is LinearGradientBrush originalBrush) || 
-            !(values[1] is double rangeStart) || 
+        if (values.Count != 3 ||
+            !(values[0] is LinearGradientBrush originalBrush) ||
+            !(values[1] is double rangeStart) ||
             !(values[2] is double rangeMaximum))
             return Brushes.Transparent;
 

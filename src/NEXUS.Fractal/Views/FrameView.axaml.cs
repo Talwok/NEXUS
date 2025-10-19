@@ -13,7 +13,7 @@ public partial class FrameView : UserControl
 {
     private Point _lastMousePosition;
     private bool _isRotating;
-    
+
     public FrameView()
     {
         InitializeComponent();
@@ -26,11 +26,11 @@ public partial class FrameView : UserControl
         if (DataContext is FrameViewModel frameViewModel)
         {
             ActualThemeVariantChanged += (_, _) => ReinsertOpenGlControl();
-            
+
             frameViewModel.WhenAnyValue(
                     vm => vm.HeightMap,
                     vm => vm.ColorTable)
-                .Subscribe(_ => ReinsertOpenGlControl());    
+                .Subscribe(_ => ReinsertOpenGlControl());
         }
     }
 
@@ -39,8 +39,8 @@ public partial class FrameView : UserControl
         ViewPanel.Children.Remove(SurfaceOpenGl);
         ViewPanel.Children.Add(SurfaceOpenGl);
     }
-    
-    private void OnViewCubeViewSelected(AxisViewType type) 
+
+    private void OnViewCubeViewSelected(AxisViewType type)
         => SurfaceOpenGl.SetCameraPreset(type);
 
     private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)

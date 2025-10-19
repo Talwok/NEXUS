@@ -58,9 +58,9 @@ public class ScannedFrame(MdtFrame frame) : MdtFrame(frame)
     public ushort FrameYRes { get; set; }
     [Reactive]
     public ushort FrameNDots { get; set; }
-    [Reactive] 
+    [Reactive]
     public byte[] Dots { get; set; } = [];
-    [Reactive] 
+    [Reactive]
     public short[] ImageBuffer { get; set; } = [];
     [Reactive]
     public uint TitleLength { get; set; }

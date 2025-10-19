@@ -24,10 +24,10 @@ public class SimulationService : ServiceBase
 {
     private const string CSEG_EXE_PATH = @"Assets\CSEG\CSEG.exe";
     private const string STARTUP_FILE_NAME = "start.xml";
-    
+
     private CompositeDisposable _disposables = new();
     private readonly SourceCache<SimulationProcess, int> _processesCache = new(p => p.Id);
-    
+
     public SimulationService()
     {
         _disposables.Add(
@@ -36,11 +36,11 @@ public class SimulationService : ServiceBase
                 .Subscribe());
 
         Processes = processes;
-    }    
-    
+    }
+
     [Reactive]
     public ReadOnlyObservableCollection<SimulationProcess> Processes { get; set; }
-    
+
     public async Task StartSimulation(string outputFolder)
     {
         var processStartInfo = new ProcessStartInfo
@@ -53,20 +53,20 @@ public class SimulationService : ServiceBase
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8
         };
-        
+
         var process = new Process();
-        
+
         process.StartInfo = processStartInfo;
-        
+
         process.OutputDataReceived += OnOutputDataReceived;
         process.ErrorDataReceived += OnErrorDataReceived;
-        
+
         process.Start();
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
-        
+
         var simulationProcess = new SimulationProcess(process);
-        
+
         _processesCache.AddOrUpdate(simulationProcess);
 
         await process.WaitForExitAsync();
@@ -79,7 +79,7 @@ public class SimulationService : ServiceBase
 
     private void OnErrorDataReceived(object sender, DataReceivedEventArgs e)
     {
-        if (sender is Process process 
+        if (sender is Process process
             && e.Data != null
             && _processesCache.Lookup(process.Id).Value is { } simlationProcess)
         {
@@ -89,7 +89,7 @@ public class SimulationService : ServiceBase
 
     private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
     {
-        if (sender is Process process 
+        if (sender is Process process
             && e.Data != null
             && _processesCache.Lookup(process.Id).Value is { } simlationProcess)
         {
@@ -106,8 +106,8 @@ public class SimulationProcess : ReactiveObject
     {
         _process = process;
 
-        KillProcessCommand = ReactiveCommand.Create(KillProcess, outputScheduler:RxApp.MainThreadScheduler);
-        
+        KillProcessCommand = ReactiveCommand.Create(KillProcess, outputScheduler: RxApp.MainThreadScheduler);
+
         Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(_ => ElapsedTime = DateTime.Now - _process.StartTime);
     }
 
@@ -116,7 +116,7 @@ public class SimulationProcess : ReactiveObject
     private void KillProcess() => _process.Kill();
 
     public int Id => _process.Id;
-    
+
     [Reactive]
     public TimeSpan ElapsedTime { get; set; }
     public ObservableCollection<string> Logs { get; set; } = [];
@@ -127,6 +127,6 @@ public class SimulationProcess : ReactiveObject
         if (Logs.Count > 50)
         {
             Logs.RemoveAt(0);
-        }   
+        }
     }
 }

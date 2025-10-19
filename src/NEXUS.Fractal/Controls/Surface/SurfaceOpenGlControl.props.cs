@@ -16,7 +16,7 @@ internal partial class SurfaceOpenGlControl
     private VertexArrayObject<float, uint>? _axisVao;
     private Shader? _axisShader;
     private uint _axisTexture;
-    
+
     // Camera parameters
     private static readonly Vector3 CameraStartPosition = new(0, 0, 75);
     private Vector3 _cameraPosition = CameraStartPosition;

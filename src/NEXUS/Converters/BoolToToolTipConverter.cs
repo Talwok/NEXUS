@@ -19,6 +19,6 @@ public class BoolToToolTipConverter : IValueConverter
     {
         throw new NotImplementedException();
     }
-    
-    public static BoolToToolTipConverter Instance { get; } = new ();
+
+    public static BoolToToolTipConverter Instance { get; } = new();
 }

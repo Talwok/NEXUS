@@ -21,7 +21,7 @@ public class ScannedFrameImageProcessor
         _currentRange = _originalRange; // По умолчанию используем полный диапазон
         _image = CreateBaseImage();
     }
-    
+
     public ScannedFrameImageProcessor WithRange(double min, double max)
     {
         _currentRange = new MinMax(
@@ -29,7 +29,7 @@ public class ScannedFrameImageProcessor
             Math.Min(max, _originalRange.MaxValue));
         return this;
     }
-    
+
     public Image<Rgba32> ApplyColorMap(PaletteColorTable colorTable)
     {
         var colors = colorTable.Colors
@@ -46,7 +46,7 @@ public class ScannedFrameImageProcessor
         var colorImage = _image.Clone();
         var buffer = _frame.ImageBuffer;
         var range = _currentRange.MaxValue - _currentRange.MinValue;
-        
+
         colorImage.ProcessPixelRows(accessor =>
         {
             for (int y = 0; y < accessor.Height; y++)
@@ -55,7 +55,7 @@ public class ScannedFrameImageProcessor
                 for (int x = 0; x < accessor.Width; x++)
                 {
                     var value = buffer[y * accessor.Width + x];
-                    
+
                     // Обработка значений за границами диапазона
                     if (value < _currentRange.MinValue)
                     {
@@ -79,14 +79,14 @@ public class ScannedFrameImageProcessor
 
         return colorImage;
     }
-    
+
     private Image<Rgba32> CreateBaseImage()
     {
         int width = _frame.FrameXRes;
         int height = _frame.FrameYRes;
         return new Image<Rgba32>(width, height);
     }
-    
+
     private MinMax CalculateDataRange()
     {
         var buffer = _frame.ImageBuffer;
@@ -98,45 +98,45 @@ public class ScannedFrameImageProcessor
         {
             if (i * sizeof(short) == buffer.Length)
                 break;
-            
+
             var value = buffer[i];
-            
-            if (i == 0) 
+
+            if (i == 0)
                 min = max = value;
-            
+
             min = Math.Min(min, value);
             max = Math.Max(max, value);
         }
 
         return new MinMax(min, max);
     }
-    
+
     public float[,] GetHeightMap()
     {
         int width = _frame.FrameXRes;
         int height = _frame.FrameYRes;
-    
+
         // Получаем диапазон для нормализации
         var range = _originalRange.MaxValue - _originalRange.MinValue;
         if (range == 0) range = 1; // защита от деления на ноль
-    
+
         var map = new float[height, width]; // Обратите внимание на порядок height/width
-    
+
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
                 // Правильный расчет индекса для двумерных данных
                 int index = y * width + x;
-            
+
                 // Чтение и нормализация значения
                 short value = _frame.ImageBuffer[index];
                 float normalized = (float)((value - _originalRange.MinValue) / range);
-            
+
                 map[y, x] = normalized;
             }
         }
-    
+
         return map;
     }
 }

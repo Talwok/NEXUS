@@ -24,11 +24,11 @@ namespace NEXUS.Fractal.Services
         public void CalculateDimension(FractalDimensionType fractalDimensionType)
         {
             IsCalculating = true;
-                
+
             foreach (var frame in _projectService?.SelectedFrames)
             {
                 if (frame == null) continue;
-                
+
                 var model = fractalDimensionType switch
                 {
                     FractalDimensionType.BoxCountingFractalDimension => frame.HeightMap.CalculateBoxCountingDimension(),
@@ -48,7 +48,7 @@ namespace NEXUS.Fractal.Services
                         Y = model.Y
                     };
                     _projectService?.Project?.Researches.Add(new FractalDimensionResearchViewModel(researchModel));
-                }   
+                }
             }
 
             IsCalculating = false;

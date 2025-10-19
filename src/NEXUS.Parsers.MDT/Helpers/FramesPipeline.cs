@@ -12,7 +12,7 @@ public static class FramesPipeline
 
         return new MdaFrameImageProcessor(frame);
     }
-    
+
     public static ScannedFrameImageProcessor? CreateFromScannedFrame(this ScannedFrame frame)
     {
         if (frame.FrameXRes == 0 || frame.FrameYRes == 0 || frame.ImageBuffer.Length == 0)

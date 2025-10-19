@@ -50,7 +50,7 @@ public class StartupScreenViewModel : StatefulViewModelBase
             ReactiveCommand.CreateFromTask(SaveStartOptionsAsync, outputScheduler: RxApp.MainThreadScheduler);
         LoadStartOptionsCommand =
             ReactiveCommand.CreateFromTask(LoadStartOptionsAsync, outputScheduler: RxApp.MainThreadScheduler);
-        StartProcessCommand = 
+        StartProcessCommand =
             ReactiveCommand.CreateRunInBackground(StartProcessAsync, outputScheduler: RxApp.MainThreadScheduler);
 
         PropertyChanged += OnPropertyChanged;
@@ -61,8 +61,8 @@ public class StartupScreenViewModel : StatefulViewModelBase
     {
         SimulationService = simulationSvc;
     }
-    
-    
+
+
     public SimulationService SimulationService { get; set; }
 
 
@@ -186,9 +186,9 @@ public class StartupScreenViewModel : StatefulViewModelBase
     {
         if (string.IsNullOrEmpty(OutputFolder))
             return;
-        
+
         Directory.CreateDirectory(OutputFolder);
-            
+
         ElementConfigParser.Save(Path.Combine(OutputFolder, $"TB_{SelectedElement.Value.Global.Title}.conf"), SelectedElement.Value);
         ElementConfigParser.Save(Path.Combine(OutputFolder, $"TB_{SelectedSubstrateElement.Value.Global.Title}.conf"), SelectedSubstrateElement.Value);
         StartOptionsParser.Save(Path.Combine(OutputFolder, "start.xml"), GetStartOptions());

@@ -9,7 +9,7 @@ public class ParsingTests
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
-    
+
     [Test]
     [TestCase("Bcr/Mo80 11 10 24 (20,2).bcr")]
     [TestCase("Bcr/Mo80 11 10 24 (21,7).bcr")]
@@ -27,10 +27,10 @@ public class ParsingTests
     public void LoadingTest(string fileName)
     {
         var bcr = BcrParser.Parse(fileName);
-        
-        foreach (var keyValuePair in bcr.Metadata) 
+
+        foreach (var keyValuePair in bcr.Metadata)
             Console.WriteLine(keyValuePair.Key + " : " + keyValuePair.Value);
-        
+
         // var bcr = BcrParser.Parse(fileName);
         Assert.Pass();
     }

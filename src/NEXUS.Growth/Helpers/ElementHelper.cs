@@ -11,7 +11,7 @@ namespace NEXUS.Growth.Helpers;
 public static class ElementsHelper
 {
     private static string ElementsFolderName = "Assets\\Elements";
-    
+
     /// <summary>
     /// Gets elements
     /// </summary>
@@ -19,11 +19,11 @@ public static class ElementsHelper
     public static IEnumerable<ElementConfig> GetElements()
     {
         var elementsDir = Path.Combine(Environment.CurrentDirectory, ElementsFolderName);
-        
+
         if (!Directory.Exists(elementsDir)) yield break;
-        
+
         var fileNames = Directory.GetFiles(elementsDir);
-        
+
         foreach (var fileName in fileNames)
         {
             yield return ElementConfigParser.Parse(Path.Combine(elementsDir, fileName));

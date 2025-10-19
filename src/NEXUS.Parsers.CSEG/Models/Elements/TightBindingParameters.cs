@@ -5,7 +5,7 @@ namespace NEXUS.Parsers.CSEG.Models.Elements;
 public class TightBindingParameters
 {
     public const string Namespace = "TightBinding";
-    
+
     [XmlElement("A")]
     public double A { get; set; }
     [XmlElement("E")]

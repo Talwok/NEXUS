@@ -10,7 +10,7 @@ public class ParsingTests
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    
+
     [Test]
     [TestCase("Palletes/Palette.pal")]
     [TestCase("Palletes/Stylish.pal")]
@@ -20,7 +20,7 @@ public class ParsingTests
     public void PalletesParsingTest(string fileName)
     {
         var pallete = PaletteParser.Parse(fileName);
-        
+
         Console.WriteLine($"################################################################");
         Console.WriteLine($"Palletes signature: {Encoding.UTF8.GetString(pallete.Signature)};");
         Console.WriteLine($"Color tables count: {pallete.Count};");
@@ -40,7 +40,7 @@ public class ParsingTests
 
         Assert.Pass();
     }
-    
+
     [Test]
     [TestCase("Mdt/Fe_#1_Th=65nm_2024.03.31_0.mdt")]
     [TestCase("Mdt/Fe_#2_Th=80nm_2024.03.21_0.mdt")]

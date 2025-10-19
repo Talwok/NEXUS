@@ -7,9 +7,9 @@ public class StatefulServiceBase : StatefulViewModelBase
 {
     public StatefulServiceBase(string fileName) : base(fileName)
     {
-        
+
     }
-    
+
     public CompositeDisposable Disposable { get; } = new();
 
 }

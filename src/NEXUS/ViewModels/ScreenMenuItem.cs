@@ -5,12 +5,12 @@ namespace NEXUS.ViewModels;
 
 public class ScreenMenuItem : ViewModelBase
 {
-    [Reactive] 
+    [Reactive]
     public string Name { get; set; }
 
-    [Reactive] 
+    [Reactive]
     public MaterialIconKind Icon { get; set; }
 
-    [Reactive] 
+    [Reactive]
     public ViewModelBase Screen { get; set; }
 }

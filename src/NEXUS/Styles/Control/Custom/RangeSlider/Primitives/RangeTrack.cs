@@ -337,7 +337,7 @@ public class RangeTrack : Avalonia.Controls.Control
     }
 
     private bool ComputeScrollBarLengths(Size arrangeSize, double viewportSize, bool isVertical,
-        out double thumbLength,out double backgroundButtonLength, out double foregroundButtonLength,
+        out double thumbLength, out double backgroundButtonLength, out double foregroundButtonLength,
         out double lowerThumbOffset, out double upperThumbOffset)
     {
         var range = Math.Max(0.0, Maximum - Minimum);

@@ -136,7 +136,7 @@ namespace NEXUS.Fractal.Controls.ViewCube
 
             _isoTextPosition = new Point(_center.X, _center.Y + _cubeSize * 0.5);
         }
-        
+
         public override void Render(DrawingContext context)
         {
             base.Render(context);
@@ -266,7 +266,7 @@ namespace NEXUS.Fractal.Controls.ViewCube
             var previousHover = _hoveredFace;
 
             _hoveredFace = null;
-            
+
             if (IsPointInPolygon(pos, _frontFace))
                 _hoveredFace = AxisViewType.Front;
             else if (IsPointInPolygon(pos, _topFace))

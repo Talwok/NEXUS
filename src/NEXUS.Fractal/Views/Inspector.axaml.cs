@@ -24,7 +24,7 @@ public partial class Inspector : UserControl
         var containers = FrameTree.GetRealizedTreeContainers();
         foreach (var container in containers)
         {
-            if(container is TreeViewItem item)
+            if (container is TreeViewItem item)
                 FrameTree.CollapseSubTree(item);
         }
     }
@@ -34,7 +34,7 @@ public partial class Inspector : UserControl
         var containers = FrameTree.GetRealizedTreeContainers();
         foreach (var container in containers)
         {
-            if(container is TreeViewItem item)
+            if (container is TreeViewItem item)
                 FrameTree.ExpandSubTree(item);
         }
     }
@@ -49,7 +49,7 @@ public partial class Inspector : UserControl
                 Expand(child);
             }
         }
-        
+
         if (sender is Control { DataContext: FrameViewModel frameViewModel })
         {
             Expand(frameViewModel);
@@ -66,7 +66,7 @@ public partial class Inspector : UserControl
                 Collapse(child);
             }
         }
-        
+
         if (sender is Control { DataContext: FrameViewModel frameViewModel })
         {
             Collapse(frameViewModel);

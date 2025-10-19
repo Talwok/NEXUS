@@ -17,7 +17,7 @@ public record MinMax(
 
 public static class BcrFramesPipeline
 {
-    public static BcrFrameImageProcessor CreateFromBcrFrame(this BcrFile file) 
+    public static BcrFrameImageProcessor CreateFromBcrFrame(this BcrFile file)
         => new BcrFrameImageProcessor(file);
 }
 
@@ -37,7 +37,7 @@ public class BcrFrameImageProcessor
         _currentRange = _originalRange; // По умолчанию используем полный диапазон
         _image = CreateBaseImage();
     }
-    
+
     public BcrFrameImageProcessor WithRange(double min, double max)
     {
         _currentRange = new MinMax(
@@ -45,7 +45,7 @@ public class BcrFrameImageProcessor
             Math.Min(max, _originalRange.MaxValue));
         return this;
     }
-    
+
     public Image<Rgba32> ApplyColorMap(PaletteColorTable colorTable)
     {
         var colors = colorTable.Colors
@@ -61,7 +61,7 @@ public class BcrFrameImageProcessor
         _aboveThresholdColor = colorMap.Last();
         var colorImage = _image.Clone();
         var range = _currentRange.MaxValue - _currentRange.MinValue;
-        
+
         colorImage.ProcessPixelRows(accessor =>
         {
             for (int y = 0; y < accessor.Height; y++)
@@ -70,7 +70,7 @@ public class BcrFrameImageProcessor
                 for (int x = 0; x < accessor.Width; x++)
                 {
                     double value = _frame.Data[y, x];
-                    
+
                     // Обработка значений за границами диапазона
                     if (value < _currentRange.MinValue)
                     {
@@ -102,7 +102,7 @@ public class BcrFrameImageProcessor
     {
         return new Image<Rgba32>(_frame.XPixels, _frame.YPixels);
     }
-    
+
     private MinMax CalculateDataRange()
     {
         double min = 0;
@@ -113,13 +113,13 @@ public class BcrFrameImageProcessor
             for (int j = 0; j < _frame.YPixels; j++)
             {
                 var value = _frame.Data[i, j];
-                
-                if (i == 0) 
+
+                if (i == 0)
                     min = max = value;
-            
+
                 min = Math.Min(min, value);
                 max = Math.Max(max, value);
-                
+
             }
         }
 
@@ -132,13 +132,13 @@ public class BcrFrameImageProcessor
     private float[,] ConvertToFloatHeightMap(double[,] heightMap)
     {
         var floatHeightMap = new float[
-            heightMap.GetLength(0), 
+            heightMap.GetLength(0),
             heightMap.GetLength(1)];
-        
+
         for (int i = 0; i < heightMap.GetLength(0); i++)
-        for (int j = 0; j < heightMap.GetLength(1); j++) 
-            floatHeightMap[i, j] = (float)heightMap[i, j];
-        
+            for (int j = 0; j < heightMap.GetLength(1); j++)
+                floatHeightMap[i, j] = (float)heightMap[i, j];
+
         return floatHeightMap;
     }
 }

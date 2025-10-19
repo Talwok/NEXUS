@@ -11,9 +11,9 @@ public class StartupViewModel : StatefulViewModelBase
 {
     public StartupViewModel() : base("StartupState.json")
     {
-        
+
     }
 
-    
+
 
 }

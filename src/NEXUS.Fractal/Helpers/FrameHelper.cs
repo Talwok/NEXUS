@@ -13,7 +13,7 @@ public static class FrameHelper
         var frameModels = frames.ToArray();
         var lookup = frameModels.ToDictionary(f => f.Id, f => new FrameViewModel(f));
         var rootNodes = new List<FrameViewModel>();
-    
+
         foreach (var frame in frameModels)
         {
             if (frame.ParentId == null)
@@ -25,23 +25,23 @@ public static class FrameHelper
                 parentNode.Children.Add(lookup[frame.Id]);
             }
         }
-    
+
         return rootNodes;
     }
-    
+
     public static IEnumerable<FrameModel> FlattenTree(this IEnumerable<FrameViewModel> nodes)
     {
         foreach (var node in nodes)
         {
             yield return node.GetModel();
-        
+
             foreach (var child in FlattenTree(node.Children))
             {
                 yield return child;
             }
         }
     }
-    
+
     public static float[,] Normalize(this float[,] data)
     {
         if (data.Length == 0)
@@ -51,7 +51,7 @@ public static class FrameHelper
         int cols = data.GetLength(1);
 
         var (min, max) = GetMinMax(data);
-    
+
         // Normalize the data
         float[,] normalized = new float[rows, cols];
         for (int i = 0; i < rows; i++)
@@ -61,21 +61,21 @@ public static class FrameHelper
                 normalized[i, j] = (data[i, j] - min) / (max - min);
             }
         }
-    
+
         return normalized;
     }
-    
+
     public static float[,] NormalizeWithOutliers(this float[,] data, float lowerPercentile = 1f, float upperPercentile = 99f)
     {
         int rows = data.GetLength(0);
         int cols = data.GetLength(1);
         int total = rows * cols;
-    
+
         // Собираем все значения в одномерный список
         List<float> values = new List<float>(total);
         for (int i = 0; i < rows; i++)
-        for (int j = 0; j < cols; j++)
-            values.Add(data[i, j]);
+            for (int j = 0; j < cols; j++)
+                values.Add(data[i, j]);
 
         // Вычисляем значения процентилей
         values.Sort();
@@ -95,7 +95,7 @@ public static class FrameHelper
             {
                 float value = data[i, j];
                 float normalizedValue = (value - minVal) / range;
-            
+
                 // Обрезаем значения за пределами [0, 1]
                 normalized[i, j] = Math.Clamp(normalizedValue, minVal, maxVal);
             }
@@ -107,26 +107,26 @@ public static class FrameHelper
     {
         float[,] result = new float[rows, cols];
         for (int i = 0; i < rows; i++)
-        for (int j = 0; j < cols; j++)
-            result[i, j] = value;
+            for (int j = 0; j < cols; j++)
+                result[i, j] = value;
         return result;
     }
-    
-    public static float Denormalize(float value, float min, float max) 
+
+    public static float Denormalize(float value, float min, float max)
         => value * (max - min) + min;
 
-    public static float Normalize(float value, float min, float max) 
+    public static float Normalize(float value, float min, float max)
         => (value - min) / (max - min);
-    
+
     public static (float min, float max) GetMinMax(this float[,] data)
     {
         int rows = data.GetLength(0);
         int cols = data.GetLength(1);
-        
+
         // Find min and max values in the array
         float min = data[0, 0];
         float max = data[0, 0];
-    
+
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < cols; j++)
@@ -135,10 +135,10 @@ public static class FrameHelper
                 if (data[i, j] > max) max = data[i, j];
             }
         }
-        
+
         return (min, max);
     }
-    
+
     public static float GetAverage(this float[,] array)
     {
         if (array == null || array.Length == 0)
@@ -157,7 +157,7 @@ public static class FrameHelper
 
         return sum / totalElements;
     }
-    
+
     public static float[,] IncreaseContrast(this float[,] input, float power)
     {
         int width = input.GetLength(0);
@@ -193,7 +193,7 @@ public static class FrameHelper
 
         return output;
     }
-    
+
     public static float[,] HistogramEqualization(this float[,] input, int bins = 256)
     {
         int width = input.GetLength(0);

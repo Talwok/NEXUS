@@ -11,11 +11,11 @@ public class ViewLocator : IDataTemplate
     {
         if (data is null)
             return null;
-        
+
         var name = data.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
         var type = Assembly.GetEntryAssembly()?.GetType(name)
             ?? Assembly.GetExecutingAssembly().GetType(name);
-        
+
         if (type != null)
         {
             var control = (Control)Activator.CreateInstance(type)!;

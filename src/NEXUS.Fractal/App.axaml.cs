@@ -32,18 +32,18 @@ public partial class App : Application
         serviceCollection.AddSingleton<Application>(this);
 
         serviceCollection.AddCommon();
-        
+
         serviceCollection.AddSingleton<InfoService>();
         serviceCollection.AddSingleton<CalculationService>();
         serviceCollection.AddSingleton<GeometryService>();
         serviceCollection.AddSingleton<FilterService>();
 
         serviceCollection.AddSingleton<StatefulServiceBase, ProjectService>();
-        
+
         serviceCollection.AddSingleton<SettingsScreenViewModel>();
-        
+
         serviceCollection.AddSingleton<StatefulViewModelBase, SettingsViewModel>();
-        
+
         serviceCollection.AddSingleton<MainWindowViewModel>();
 
         var mainWindow = new MainWindow();
@@ -63,35 +63,35 @@ public partial class App : Application
         };
         serviceCollection.AddSingleton(mainWindow.StorageProvider);
         serviceCollection.AddSingleton(mainWindow);
-        
+
         ServiceProvider = serviceCollection.BuildServiceProvider();
-        
+
         foreach (var statefulVm in ServiceProvider.GetServices<StatefulViewModelBase>())
         {
             _ = statefulVm.Load();
         }
-        
+
         foreach (var statefulSvc in ServiceProvider.GetServices<StatefulServiceBase>())
         {
             _ = statefulSvc.Load();
         }
-        
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var dataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            
+
             dataContext.TrySetArgs(
-                desktop.Args == null 
-                || desktop.Args.Length == 0 
+                desktop.Args == null
+                || desktop.Args.Length == 0
                     ? string.Empty : desktop.Args?[0]);
-            
+
             mainWindow.DataContext = dataContext;
-            
+
             desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();
     }
-    
-    public static IServiceProvider ServiceProvider { get; private set; } 
+
+    public static IServiceProvider ServiceProvider { get; private set; }
 }

@@ -16,7 +16,7 @@ public class HorizontalColorsToGradientConverter : IValueConverter
         if (value is List<PaletteColor> { Count: > 0 } colors)
         {
             var gradientStops = new GradientStops();
-            
+
             // Равномерно распределяем цвета вдоль линии
             double offsetStep = 1.0 / (colors.Count - 1);
             for (int i = 0; i < colors.Count; i++)
@@ -26,7 +26,7 @@ public class HorizontalColorsToGradientConverter : IValueConverter
                     Color.FromRgb(color.Red, color.Green, color.Blue),
                     i * offsetStep));
             }
-            
+
             return new LinearGradientBrush
             {
                 StartPoint = new RelativePoint(0, 0.5, RelativeUnit.Relative),
@@ -34,7 +34,7 @@ public class HorizontalColorsToGradientConverter : IValueConverter
                 GradientStops = gradientStops
             };
         }
-        
+
         return Brushes.Transparent;
     }
 

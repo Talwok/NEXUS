@@ -20,7 +20,7 @@ public class ViewerScreenViewModel : StatefulViewModelBase
         _configuration = AppConfigurationExtensions.DeserializeDefaultsFromXml() ?? new AppConfiguration();
 
         Processes = ProcessHelper.GetDictionary();
-        
+
         // LastProcesses = new ObservableCollection<ProcessDirectoryViewModel>(_configuration.RecentFolders
         //     .Where(folder => File.Exists($"..\\{folder}\\start.xml"))
         //     .Select(folder =>

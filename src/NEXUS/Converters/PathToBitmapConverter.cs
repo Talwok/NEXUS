@@ -20,5 +20,5 @@ public class PathToBitmapConverter : IValueConverter
         throw new NotImplementedException();
     }
 
-    public static PathToBitmapConverter Instance { get; } = new ();
+    public static PathToBitmapConverter Instance { get; } = new();
 }

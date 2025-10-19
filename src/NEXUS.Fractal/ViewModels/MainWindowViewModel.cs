@@ -28,7 +28,7 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     private readonly GitHubUpdater? _updater;
 
     public MainWindowViewModel(
-        GeometryService geometryService, 
+        GeometryService geometryService,
         CalculationService calculationService,
         FilterService filterService,
         SettingsScreenViewModel settings,
@@ -40,20 +40,20 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         InfoService = infoService;
         GeometryService = geometryService;
         CalculationService = calculationService;
-// #if !DEBUG
-//         if (Version != null)
-//         {
-//             _updater = new GitHubUpdater(ApplicationType.Fractal, Version);
-//         }
-//         _ = CheckForUpdates();
-// #endif
-        
+        // #if !DEBUG
+        //         if (Version != null)
+        //         {
+        //             _updater = new GitHubUpdater(ApplicationType.Fractal, Version);
+        //         }
+        //         _ = CheckForUpdates();
+        // #endif
+
         UpdateCommand = ReactiveCommand.CreateFromTask(
             async () =>
             {
-                if(_updater == null)
+                if (_updater == null)
                     return;
-                
+
                 var mainWindow = App.ServiceProvider.GetService<MainWindow>();
 
                 var startMessage = new InfoMessageViewModel
@@ -98,15 +98,15 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     public GeometryService GeometryService { get; set; }
 
     public ProjectService? ProjectService { get; set; }
-    
+
     public SettingsScreenViewModel SettingsMenuItemScreen { get; set; }
-    
+
     public ICommand OpenRecentProjectCommand { get; set; }
     public ICommand CreateProjectCommand { get; set; }
     public ICommand OpenProjectCommand { get; set; }
     public ICommand SaveProjectCommand { get; set; }
     public ICommand SaveAsProjectCommand { get; set; }
-    public ICommand ExportFromProjectCommand { get; set; } 
+    public ICommand ExportFromProjectCommand { get; set; }
     public ICommand ImportToProjectCommand { get; set; }
     public ICommand GeometryUpdateCommand { get; }
     public ICommand ApplyFilterCommand { get; }

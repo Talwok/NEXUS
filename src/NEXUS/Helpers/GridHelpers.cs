@@ -29,8 +29,8 @@ public static class GridHelpers
                 foreach (var width in widths)
                 {
                     grid.ColumnDefinitions.Add(new ColumnDefinition(
-                        i == 2 
-                        ? new GridLength(1, GridUnitType.Star) 
+                        i == 2
+                        ? new GridLength(1, GridUnitType.Star)
                         : new GridLength(width, GridUnitType.Pixel)));
                     i++;
                 }

@@ -18,7 +18,7 @@ public static class ProcessHelper
                 throw new ArgumentOutOfRangeException(nameof(processName), processName, null);
         }
     }
-    
+
     public static string ToOptionsString(this Process process)
     {
         switch (process)
@@ -31,7 +31,7 @@ public static class ProcessHelper
                 throw new ArgumentOutOfRangeException(nameof(process), process, null);
         }
     }
-    
+
     public static Dictionary<Process, string> GetDictionary()
     {
         return new Dictionary<Process, string>

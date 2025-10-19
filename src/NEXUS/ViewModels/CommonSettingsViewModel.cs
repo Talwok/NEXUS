@@ -27,18 +27,18 @@ public class CommonSettingsViewModel : StatefulViewModelBase
 
     [Reactive]
     public bool IsDarkThemeToggled { get; set; }
-    
+
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if(Application.Current is not {} app)
+        if (Application.Current is not { } app)
             return;
-        
+
         if (e.PropertyName == nameof(IsDarkThemeToggled))
         {
             app.RequestedThemeVariant = IsDarkThemeToggled ? ThemeVariant.Dark : ThemeVariant.Light;
         }
 
-        if(!IsDeserializing)
+        if (!IsDeserializing)
             _ = Save(this);
     }
 }

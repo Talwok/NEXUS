@@ -28,27 +28,27 @@ public class FractalDimensionResearchViewModel : ResearchViewModel
     {
         var statefulServices = App.ServiceProvider.GetServices<StatefulServiceBase>();
         _projectService = statefulServices.FirstOrDefault<ProjectService>();
-        
+
         ParentId = model.ParentId;
         ParentName = _projectService?.Project?.Frames.FirstOrDefault(f => f.Id == ParentId)?.Name;
         Name = model.Name;
         DimensionType = model.DimensionType;
         X = model.X;
         Y = model.Y;
-        
+
         (MinX, MaxX) = X.GetMinMax();
         (MinY, MaxY) = Y.GetMinMax();
-        
+
         LowerLimitX = float.IsNaN(model.LowerLimitX) ? MinX : model.LowerLimitX;
         UpperLimitX = float.IsNaN(model.UpperLimitX) ? MaxX : model.UpperLimitX;
         LowerLimitY = float.IsNaN(model.LowerLimitY) ? MinY : model.LowerLimitY;
         UpperLimitY = float.IsNaN(model.UpperLimitY) ? MaxY : model.UpperLimitY;
-        
+
         LowerLimitX = 2.5f;
         UpperLimitX = 3.5f;
-        
+
         var valueList = new ObservableCollection<Point>();
-        
+
         _series = new LineSeries<Point>
         {
             Name = "Расчетный диапазон",
@@ -70,9 +70,9 @@ public class FractalDimensionResearchViewModel : ResearchViewModel
             .Subscribe(tuple =>
             {
                 var (lowerLimitX, upperLimitX, lowerLimitY, upperLimitY) = tuple;
-                
+
                 valueList.Clear();
-                
+
                 for (var i = 0; i < X.Count; i++)
                 {
                     var x = X[i];
@@ -83,7 +83,7 @@ public class FractalDimensionResearchViewModel : ResearchViewModel
                         valueList.Add(new Point(x, y));
                     }
                 }
-                
+
                 var dictionary = valueList.ToDictionary(p => (float)p.X, p => (float)p.Y);
 
                 if (FractalDimensionHelper.CalculateDimension(dictionary.Keys.ToList(), dictionary.Values.ToList(),

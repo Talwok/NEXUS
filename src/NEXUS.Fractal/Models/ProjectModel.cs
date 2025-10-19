@@ -7,9 +7,9 @@ namespace NEXUS.Fractal.Models;
 [MessagePackObject]
 public class ProjectModel
 {
-    [Key(nameof(Frames))] 
+    [Key(nameof(Frames))]
     public List<FrameModel> Frames { get; set; } = [];
 
-    [Key(nameof(Researches))] 
+    [Key(nameof(Researches))]
     public List<ResearchModel> Researches { get; set; } = [];
 }

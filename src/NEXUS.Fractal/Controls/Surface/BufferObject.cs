@@ -23,7 +23,7 @@ public class BufferObject<TDataType> : IDisposable
         GlException.ThrowIfError(gl);
         fixed (void* d = data)
         {
-            _gl.BufferData(bufferType, (nuint) (data.Length * sizeof(TDataType)), d, BufferUsageARB.StaticDraw);
+            _gl.BufferData(bufferType, (nuint)(data.Length * sizeof(TDataType)), d, BufferUsageARB.StaticDraw);
         }
         GlException.ThrowIfError(gl);
     }

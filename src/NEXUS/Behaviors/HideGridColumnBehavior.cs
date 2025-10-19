@@ -10,7 +10,7 @@ public class HideGridColumnBehavior : Behavior<Grid>
     // Определяем свойство для номера столбца
     public static readonly StyledProperty<int> ColumnIndexProperty =
         AvaloniaProperty.Register<HideGridColumnBehavior, int>(
-            nameof(ColumnIndex), 
+            nameof(ColumnIndex),
             defaultBindingMode: BindingMode.TwoWay);
 
     public int ColumnIndex
@@ -22,7 +22,7 @@ public class HideGridColumnBehavior : Behavior<Grid>
     // Определяем свойство для видимости
     public static readonly StyledProperty<bool> IsVisibleProperty =
         AvaloniaProperty.Register<HideGridColumnBehavior, bool>(
-            nameof(IsVisible), 
+            nameof(IsVisible),
             true,
             defaultBindingMode: BindingMode.TwoWay);
 
@@ -40,24 +40,24 @@ public class HideGridColumnBehavior : Behavior<Grid>
     protected override void OnAttached()
     {
         base.OnAttached();
-        
+
         // Подписываемся на изменения свойств
         this.GetObservable(ColumnIndexProperty).Subscribe(_ => UpdateColumnVisibility());
         this.GetObservable(IsVisibleProperty).Subscribe(_ => UpdateColumnVisibility());
-        
+
         // Первоначальное обновление
         UpdateColumnVisibility();
     }
 
     private void UpdateColumnVisibility()
     {
-        if (AssociatedObject == null || 
-            ColumnIndex < 0 || 
+        if (AssociatedObject == null ||
+            ColumnIndex < 0 ||
             ColumnIndex >= AssociatedObject.ColumnDefinitions.Count)
             return;
 
         var columnDefinition = AssociatedObject.ColumnDefinitions[ColumnIndex];
-        
+
         if (IsVisible)
         {
             // Восстанавливаем исходную ширину, если она была сохранена
@@ -74,7 +74,7 @@ public class HideGridColumnBehavior : Behavior<Grid>
             {
                 columnDefinition.SetValue(OriginalWidthProperty, columnDefinition.Width);
             }
-            
+
             // Устанавливаем нулевую ширину
             columnDefinition.Width = new GridLength(0);
         }

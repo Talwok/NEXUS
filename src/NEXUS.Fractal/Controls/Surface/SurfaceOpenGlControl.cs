@@ -64,12 +64,12 @@ internal partial class SurfaceOpenGlControl : OpenGlControlBase, INotifyProperty
     {
         var n = new Vector3[rows, cols];
         for (int z = 1; z < rows - 1; z++)
-        for (int x = 1; x < cols - 1; x++)
-        {
-            var dx = new Vector3(2 * stepX, heightMap[z, x + 1] - heightMap[z, x - 1], 0);
-            var dz = new Vector3(0, heightMap[z + 1, x] - heightMap[z - 1, x], 2 * stepZ);
-            n[z, x] = Vector3.Normalize(Vector3.Cross(dz, dx));
-        }
+            for (int x = 1; x < cols - 1; x++)
+            {
+                var dx = new Vector3(2 * stepX, heightMap[z, x + 1] - heightMap[z, x - 1], 0);
+                var dz = new Vector3(0, heightMap[z + 1, x] - heightMap[z - 1, x], 2 * stepZ);
+                n[z, x] = Vector3.Normalize(Vector3.Cross(dz, dx));
+            }
 
         for (int i = 0; i < rows; i++)
         {
@@ -92,20 +92,20 @@ internal partial class SurfaceOpenGlControl : OpenGlControlBase, INotifyProperty
         var verts = new List<OpenGlPoint>();
 
         for (int z = 0; z < rows; z++)
-        for (int x = 0; x < cols; x++)
-        {
-            float normH = (_heightMap[z, x] - minH) / rangeH;
-            float posX = x * stepX - sizeX / 2;
-            float posZ = z * stepZ - sizeZ / 2;
-            float posY = normH;
+            for (int x = 0; x < cols; x++)
+            {
+                float normH = (_heightMap[z, x] - minH) / rangeH;
+                float posX = x * stepX - sizeX / 2;
+                float posZ = z * stepZ - sizeZ / 2;
+                float posY = normH;
 
-            int colorIndex = GetColorIndex(normH);
-            var c = _colorTable.Colors[colorIndex];
-            var n = normals[z, x];
+                int colorIndex = GetColorIndex(normH);
+                var c = _colorTable.Colors[colorIndex];
+                var n = normals[z, x];
 
-            verts.Add(new OpenGlPoint(posX, posY, posZ, c.Red / 255f, c.Green / 255f, c.Blue / 255f, n.X, n.Y, n.Z,
-                false));
-        }
+                verts.Add(new OpenGlPoint(posX, posY, posZ, c.Red / 255f, c.Green / 255f, c.Blue / 255f, n.X, n.Y, n.Z,
+                    false));
+            }
 
         return verts;
     }
@@ -126,27 +126,27 @@ internal partial class SurfaceOpenGlControl : OpenGlControlBase, INotifyProperty
         float sizeX, float sizeZ)
     {
         for (int z = 0; z < rows; z++)
-        for (int x = 0; x < cols; x++)
-        {
-            float posX = x * stepX - sizeX / 2;
-            float posZ = z * stepZ - sizeZ / 2;
-            vertices.Add(new OpenGlPoint(posX, 0, posZ, _foundationColor.R / 255f, _foundationColor.G / 255f,
-                _foundationColor.B / 255f, 0, 1, 0, true));
-        }
+            for (int x = 0; x < cols; x++)
+            {
+                float posX = x * stepX - sizeX / 2;
+                float posZ = z * stepZ - sizeZ / 2;
+                vertices.Add(new OpenGlPoint(posX, 0, posZ, _foundationColor.R / 255f, _foundationColor.G / 255f,
+                    _foundationColor.B / 255f, 0, 1, 0, true));
+            }
     }
 
     private void AddGridIndices(List<uint> indices, int rows, int cols, uint offset = 0)
     {
         for (int z = 0; z < rows - 1; z++)
-        for (int x = 0; x < cols - 1; x++)
-        {
-            uint i0 = offset + (uint)(z * cols + x);
-            uint i1 = i0 + 1;
-            uint i2 = offset + (uint)((z + 1) * cols + x);
-            uint i3 = i2 + 1;
+            for (int x = 0; x < cols - 1; x++)
+            {
+                uint i0 = offset + (uint)(z * cols + x);
+                uint i1 = i0 + 1;
+                uint i2 = offset + (uint)((z + 1) * cols + x);
+                uint i3 = i2 + 1;
 
-            indices.AddRange(new[] { i0, i2, i1, i1, i2, i3 });
-        }
+                indices.AddRange(new[] { i0, i2, i1, i1, i2, i3 });
+            }
     }
 
     private void AddWalls(List<OpenGlPoint> vertices, List<uint> indices, int cols, int rows, int foundationStart)
@@ -194,7 +194,7 @@ internal partial class SurfaceOpenGlControl : OpenGlControlBase, INotifyProperty
         VAO.VertexAttributePointer(2, 3, VertexAttribPointerType.Float, 6);
         VAO.VertexAttributePointer(3, 1, VertexAttribPointerType.Float, 9);
     }
-    
+
     protected override void OnOpenGlInit(GlInterface gl)
     {
         base.OnOpenGlInit(gl);
@@ -217,7 +217,7 @@ internal partial class SurfaceOpenGlControl : OpenGlControlBase, INotifyProperty
 
         _gl.ClearColor(_backgroundColor.R / 255f, _backgroundColor.G / 255f, _backgroundColor.B / 255f, 1);
     }
-    
+
     protected override void OnOpenGlDeinit(GlInterface gl)
     {
         base.OnOpenGlDeinit(gl);

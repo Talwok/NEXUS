@@ -18,17 +18,17 @@ public class ProjectViewModel : ViewModelBase
     {
         Name = Path.GetFileNameWithoutExtension(projectPath);
         Directory = Path.GetDirectoryName(projectPath);
-        
+
         Frames = new ObservableCollection<FrameViewModel>(project.Frames.BuildTree());
         Researches = new ObservableCollection<ResearchViewModel>(project.Researches.Transform());
     }
-    
+
     [Reactive]
     public string Name { get; set; }
-    
+
     [Reactive]
     public string? Directory { get; set; }
-    
+
     public ObservableCollection<FrameViewModel> Frames { get; set; }
     public ObservableCollection<ResearchViewModel> Researches { get; set; }
 

@@ -9,7 +9,7 @@ namespace NEXUS.Fractal.Controls.Surface;
 public class Shader : IDisposable
 {
     private const string GlShaderVersion = "#version 300 es";
-    
+
     private readonly GL _gl;
     private readonly uint _handle;
 
@@ -92,7 +92,7 @@ public class Shader : IDisposable
         var location = GetLocation(name);
         _gl.Uniform1(location, value);
     }
-    
+
     public void Uniform1(string name, uint value)
     {
         var location = GetLocation(name);
@@ -105,7 +105,7 @@ public class Shader : IDisposable
         _gl.Uniform3(location, value);
     }
 
-    public int GetLocation(string name) => 
+    public int GetLocation(string name) =>
         _gl.GetUniformLocation(_handle, name);
 
     // Shader sources remain the same as in original

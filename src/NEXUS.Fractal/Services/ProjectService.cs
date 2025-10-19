@@ -33,7 +33,7 @@ public class ProjectService : StatefulServiceBase
 {
     public static readonly int FramesTab = 0;
     public static readonly int ResearchesTab = 1;
-    
+
     private static readonly string ProjectExtension = ".nfproj";
     private static readonly string FileName = "ProjectsConfig.json";
 
@@ -80,7 +80,7 @@ public class ProjectService : StatefulServiceBase
 
     [JsonConstructor]
     public ProjectService() : base(FileName) { }
-    
+
     [ActivatorUtilitiesConstructor]
     public ProjectService(IStorageProvider storageProvider, InfoService infoService) : base(FileName)
     {
@@ -89,12 +89,12 @@ public class ProjectService : StatefulServiceBase
 
         foreach (var newTable in PaletteParser.GetStandardPalleteFiles().SelectMany(file => file.Tables))
         {
-            if(!string.Equals(newTable.Title, "Unnamed Palette", StringComparison.OrdinalIgnoreCase)
+            if (!string.Equals(newTable.Title, "Unnamed Palette", StringComparison.OrdinalIgnoreCase)
                && !string.Equals(newTable.Title, "My Palette", StringComparison.OrdinalIgnoreCase))
                 ColorTables.Add(newTable);
         }
-        
-        if(ColorTables.FirstOrDefault() is { } table)
+
+        if (ColorTables.FirstOrDefault() is { } table)
             SelectedColorTable = table;
 
         this.WhenAnyValue(svc => svc.Project)
@@ -142,7 +142,7 @@ public class ProjectService : StatefulServiceBase
     public async Task OpenRecentProject(string recentPath)
     {
         _projectInitialPath = recentPath;
-        
+
         var fileStream = File.Open(_projectInitialPath, FileMode.OpenOrCreate);
 
         var model = await MessagePackSerializer.DeserializeAsync<ProjectModel>(fileStream);
@@ -150,7 +150,7 @@ public class ProjectService : StatefulServiceBase
         Project = new ProjectViewModel(_projectInitialPath, model);
 
         fileStream.Close();
-        
+
         UpdateRecentProjects(_projectInitialPath);
     }
 
@@ -186,7 +186,7 @@ public class ProjectService : StatefulServiceBase
         var model = await MessagePackSerializer.DeserializeAsync<ProjectModel>(fileStream);
 
         fileStream.Close();
-        
+
         Project = new ProjectViewModel(_projectInitialPath, model);
 
         UpdateRecentProjects(_projectInitialPath);
@@ -203,7 +203,7 @@ public class ProjectService : StatefulServiceBase
             await MessagePackSerializer.SerializeAsync(fileStream, model);
 
             fileStream.Close();
-            
+
             UpdateRecentProjects(_projectInitialPath);
         }
     }
@@ -226,7 +226,7 @@ public class ProjectService : StatefulServiceBase
             await MessagePackSerializer.SerializeAsync(fileStream, model);
 
             fileStream.Close();
-            
+
             UpdateRecentProjects(projectPath);
         }
     }
@@ -261,14 +261,14 @@ public class ProjectService : StatefulServiceBase
 
     private void ProcessImageFile(string filePath)
     {
-        if(Project == null)
+        if (Project == null)
             return;
-        
+
         using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(filePath);
-        
+
         int width = image.Width;
         int height = image.Height;
-        
+
         float[,] heightMap = new float[width, height];
 
         for (int y = 0; y < height; y++)
@@ -291,17 +291,17 @@ public class ProjectService : StatefulServiceBase
             HeightScaling = 1,
             MetaData = null // TODO: добавить заполнение необходимых для экспорта метаданных
         };
-        
+
         Project.Frames.Add(new FrameViewModel(frameModel));
     }
 
     private void ProcessMdtFile(string filePath)
     {
-        if(Project == null)
+        if (Project == null)
             return;
-        
+
         var mdt = MdtParser.Parse(filePath);
-        
+
         foreach (var frame in mdt.Frames)
         {
             FrameSourceType sourceType = frame.Type switch
@@ -313,8 +313,8 @@ public class ProjectService : StatefulServiceBase
             };
 
             FrameModel frameModel;
-            
-            if (frame is MdaFrame mdaFrame && mdaFrame.CreateFromMdaFrame() is {} mdaProcessor)
+
+            if (frame is MdaFrame mdaFrame && mdaFrame.CreateFromMdaFrame() is { } mdaProcessor)
             {
                 frameModel = new FrameModel
                 {
@@ -323,10 +323,10 @@ public class ProjectService : StatefulServiceBase
                     Name = mdaFrame.Title,
                     HeightMap = mdaProcessor.GetHeightMap().Normalize(),
                     MetaData = null // TODO: добавить заполнение необходимых для экспорта метаданных
-                };    
+                };
                 Project.Frames.Add(new FrameViewModel(frameModel));
             }
-            else if (frame is ScannedFrame scannedFrame && scannedFrame.CreateFromScannedFrame() is {} scannedProcessor)
+            else if (frame is ScannedFrame scannedFrame && scannedFrame.CreateFromScannedFrame() is { } scannedProcessor)
             {
                 frameModel = new FrameModel
                 {
@@ -335,7 +335,7 @@ public class ProjectService : StatefulServiceBase
                     Name = scannedFrame.Title,
                     HeightMap = scannedProcessor.GetHeightMap().Normalize(),
                     MetaData = null // TODO: добавить заполнение необходимых для экспорта метаданных
-                };    
+                };
                 Project.Frames.Add(new FrameViewModel(frameModel));
             }
             else if (frame is SpectroscopyFrame spectroscopyFrame) { }
@@ -344,9 +344,9 @@ public class ProjectService : StatefulServiceBase
 
     private void ProcessBcrFile(string filePath)
     {
-        if(Project == null)
+        if (Project == null)
             return;
-        
+
         var bcr = BcrParser.Parse(filePath);
         var processor = bcr.CreateFromBcrFrame();
         FrameModel frameModel = new FrameModel
@@ -361,7 +361,7 @@ public class ProjectService : StatefulServiceBase
         };
         Project.Frames.Add(new FrameViewModel(frameModel));
     }
-    
+
     public async Task ExportFromProject()
     {
         var file = await _storageProvider.SaveFilePickerAsync(ExportFilePickerOptions);
@@ -371,7 +371,7 @@ public class ProjectService : StatefulServiceBase
 
         var projectPath = file.Path.LocalPath;
     }
-    
+
     public void RemoveCurrentFrame()
     {
         if (SelectedFrame is { } frame)
@@ -386,14 +386,14 @@ public class ProjectService : StatefulServiceBase
             }
         }
     }
-    
+
     public void CloneCurrentFrame()
     {
         void AppendFrame(FrameViewModel? frame, FrameViewModel? parentFrame = null)
         {
-            if(frame == null)
+            if (frame == null)
                 return;
-            
+
             var frameModel = frame.GetModel();
             frameModel.Id = Guid.NewGuid();
 
@@ -412,23 +412,23 @@ public class ProjectService : StatefulServiceBase
             {
                 Project?.Frames.Add(frameViewModel);
             }
-            
+
             var children = frame.Children.ToList();
-            
+
             foreach (var child in children)
             {
                 AppendFrame(child, frameViewModel);
             }
         }
-        
+
         AppendFrame(SelectedFrame);
     }
-    
+
     private FrameViewModel? GetFrame(IEnumerable<FrameViewModel>? frames, Guid id)
     {
-        if (frames == null) 
+        if (frames == null)
             return null;
-        
+
         foreach (var frame in frames)
         {
             if (frame.Id == id)

@@ -12,8 +12,8 @@ public static class ResearchHelper
         {
             if (model is FractalDimensionResearchModel dimensionModel)
                 yield return new FractalDimensionResearchViewModel(dimensionModel);
-            
-            
-        }   
+
+
+        }
     }
 }

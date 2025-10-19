@@ -21,7 +21,7 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
 {
     private const string RepoOwner = "Talwok";
     private const string RepoName = "NEXUS";
-    
+
     private static readonly Dictionary<ApplicationType, string> Applications = new()
     {
         { ApplicationType.Fractal, "Fractal" },
@@ -69,11 +69,11 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
                 // Скачиваем обновление
                 using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "NEXUS.Updater");
-                
+
                 var appResponse = await httpClient.GetAsync(Asset.DownloadUrl);
                 await using var fs = new FileStream(tempZip, FileMode.Create);
                 await appResponse.Content.CopyToAsync(fs);
-                
+
                 return true;
             }
         }
@@ -97,10 +97,10 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
     {
         try
         {
-            var hashesAsset = release.Assets?.FirstOrDefault(a => 
-                a.Name != null && 
+            var hashesAsset = release.Assets?.FirstOrDefault(a =>
+                a.Name != null &&
                 a.Name.Equals("hashes.md5", StringComparison.OrdinalIgnoreCase));
-            
+
             if (hashesAsset == null)
                 return false;
 
@@ -110,15 +110,15 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
             var hashesResponse = await httpClient.GetAsync(hashesAsset.DownloadUrl);
             var stream = await hashesResponse.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
-            
+
             var localHash = await CalculateMd5Async(filePath);
-            
+
             while (!reader.EndOfStream)
             {
                 var line = await reader.ReadLineAsync();
                 if (line == null)
                     continue;
-                
+
                 if (line.Contains($"NEXUS.{Applications[appType]}"))
                 {
                     var remoteHash = line.Split('-').Last().Trim().ToLower();
@@ -141,12 +141,12 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("User-Agent", "NEXUS.Updater");
             httpClient.Timeout = TimeSpan.FromSeconds(15);
-            
+
             var response = await httpClient.GetAsync(
                 $"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases");
-            
+
             response.EnsureSuccessStatusCode();
-            
+
             return await response.Content.ReadFromJsonAsync<GitHubRelease[]>();
         }
         catch
@@ -154,12 +154,12 @@ public class GitHubUpdater(ApplicationType appType, Version currentVersion)
             return null;
         }
     }
-    
+
     public async Task<bool> UpdateApplication()
     {
         try
         {
-            if (Asset?.Name == null ) 
+            if (Asset?.Name == null)
                 return false;
 
             var appDir = AppContext.BaseDirectory.TrimEnd('\\', '/');
@@ -239,15 +239,15 @@ del ""!TEMP_ZIP!"" >nul 2>&1
 
 public class GitHubRelease
 {
-    [JsonPropertyName("tag_name")] 
+    [JsonPropertyName("tag_name")]
     public string? Tag { get; set; }
-    [JsonPropertyName("assets")] 
+    [JsonPropertyName("assets")]
     public GitHubAsset[]? Assets { get; set; }
 }
 
 public class GitHubAsset
 {
-    [JsonPropertyName("name")] 
+    [JsonPropertyName("name")]
     public string? Name { get; set; }
 
     [JsonPropertyName("browser_download_url")]

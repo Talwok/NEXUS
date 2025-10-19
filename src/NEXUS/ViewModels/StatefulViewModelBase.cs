@@ -7,12 +7,12 @@ public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
 {
     [JsonIgnore]
     protected bool IsDeserializing { get; private set; }
-    
+
     [JsonIgnore]
     protected bool IsDeserialized { get; private set; }
 
-    protected bool ValidateState() => 
-        File.Exists(fileName) 
+    protected bool ValidateState() =>
+        File.Exists(fileName)
         && File.ReadAllText(fileName).Length != 0;
 
     public async Task Save() => await Save(this);
@@ -21,11 +21,11 @@ public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
     {
         try
         {
-            if (Path.GetDirectoryName(fileName) is {} dir
-                && !string.IsNullOrEmpty(dir) 
-                && !Directory.Exists(dir)) 
+            if (Path.GetDirectoryName(fileName) is { } dir
+                && !string.IsNullOrEmpty(dir)
+                && !Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
-            
+
             await File.WriteAllTextAsync(fileName, JsonSerializer.Serialize(obj));
         }
         catch (Exception e)
@@ -45,20 +45,20 @@ public abstract class StatefulViewModelBase(string fileName) : ViewModelBase
                 await Save(this);
                 return;
             }
-            
+
             await using var fileStream = new FileStream(fileName, FileMode.OpenOrCreate);
             var obj = await JsonSerializer.DeserializeAsync(fileStream, GetType());
-            
+
             foreach (var propertyInfo in GetType().GetProperties())
             {
-                if(!propertyInfo.CanWrite)
+                if (!propertyInfo.CanWrite)
                     continue;
 
                 if (propertyInfo.CustomAttributes.All(atr => atr.AttributeType != typeof(JsonIgnoreAttribute)))
                 {
                     var propertyValue = propertyInfo.GetValue(obj);
-                    propertyInfo.SetValue(this, propertyValue);    
-                }                
+                    propertyInfo.SetValue(this, propertyValue);
+                }
             }
 
             IsDeserialized = true;

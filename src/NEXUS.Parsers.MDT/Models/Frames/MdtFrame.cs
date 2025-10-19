@@ -9,9 +9,9 @@ public class MdtFrame : ReactiveObject
 {
     public MdtFrame()
     {
-        
+
     }
-    
+
     public MdtFrame(MdtFrame frame)
     {
         Size = frame.Size;
@@ -26,7 +26,7 @@ public class MdtFrame : ReactiveObject
         VarSize = frame.VarSize;
         Buffer = frame.Buffer;
     }
-    
+
     [Reactive]
     public uint Size { get; set; }
     [Reactive]

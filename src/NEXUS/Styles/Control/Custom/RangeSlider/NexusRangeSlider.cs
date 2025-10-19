@@ -139,10 +139,10 @@ public class NexusRangeSlider : RangeBase
     /// </summary>
     public static readonly StyledProperty<AvaloniaList<double>?> TicksProperty =
         TickBar.TicksProperty.AddOwner<NexusRangeSlider>();
-    
+
     public static readonly StyledProperty<GradientStops> ColorPaletteProperty =
         AvaloniaProperty.Register<NexusRangeSlider, GradientStops>(nameof(ColorPalette));
-    
+
     // Slider required parts
     private double _previousValue = 0.0;
     private bool _isDragging = false;
@@ -241,7 +241,7 @@ public class NexusRangeSlider : RangeBase
     public bool IsThumbOverlap
     {
         get { return GetValue(IsThumbOverlapProperty); }
-        set { SetValue(IsThumbOverlapProperty, value);}
+        set { SetValue(IsThumbOverlapProperty, value); }
     }
     /// <summary>
     /// Gets or sets the interval between tick marks.
@@ -267,7 +267,7 @@ public class NexusRangeSlider : RangeBase
         get => GetValue(ColorPaletteProperty);
         set => SetValue(ColorPaletteProperty, value);
     }
-    
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
@@ -405,7 +405,7 @@ public class NexusRangeSlider : RangeBase
             return;
 
         //if (sender is Thumb thumb)
-            //FlyoutBase.ShowAttachedFlyout(thumb);
+        //FlyoutBase.ShowAttachedFlyout(thumb);
     }
 
     private void TrackPressed(object? sender, PointerPressedEventArgs e)
@@ -467,7 +467,7 @@ public class NexusRangeSlider : RangeBase
                 break;
             case TrackThumb.Both:
                 var delta = value - _previousValue;
-                
+
                 if ((Math.Abs(LowerSelectedValue - Minimum) <= Tolerance && delta <= 0d)
                     || (Math.Abs(UpperSelectedValue - Maximum) <= Tolerance && delta >= 0d))
                     return;

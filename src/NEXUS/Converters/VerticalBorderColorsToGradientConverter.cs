@@ -30,13 +30,13 @@ public class VerticalBorderColorsToGradientConverter : IValueConverter
 
             if (range.Maximum - range.Minimum != 0)
             {
-                var lowerStopOffset = (range.LowerSelection - range.Minimum) / (range.Maximum - range.Minimum); 
-                var upperStopOffset = (range.UpperSelection - range.Minimum) / (range.Maximum - range.Minimum); 
-            
+                var lowerStopOffset = (range.LowerSelection - range.Minimum) / (range.Maximum - range.Minimum);
+                var upperStopOffset = (range.UpperSelection - range.Minimum) / (range.Maximum - range.Minimum);
+
                 gradientStops.Add(new GradientStop(firstColor, 0));
                 gradientStops.Add(new GradientStop(firstColor, lowerStopOffset));
                 gradientStops.Add(new GradientStop(lastColor, upperStopOffset));
-                gradientStops.Add(new GradientStop(lastColor, 1));    
+                gradientStops.Add(new GradientStop(lastColor, 1));
             }
             else
             {
@@ -45,7 +45,7 @@ public class VerticalBorderColorsToGradientConverter : IValueConverter
                 gradientStops.Add(new GradientStop(lastColor, 0.5));
                 gradientStops.Add(new GradientStop(lastColor, 1));
             }
-            
+
             return new LinearGradientBrush
             {
                 StartPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
@@ -53,7 +53,7 @@ public class VerticalBorderColorsToGradientConverter : IValueConverter
                 GradientStops = gradientStops
             };
         }
-        
+
         return Brushes.Transparent;
     }
 

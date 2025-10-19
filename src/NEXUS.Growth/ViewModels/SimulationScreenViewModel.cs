@@ -14,7 +14,7 @@ public class SimulationScreenViewModel : StatefulViewModelBase
     public SimulationScreenViewModel() : base("SimulationsState.json")
     {
         PropertyChanged += OnPropertyChanged;
-        
+
         if (Design.IsDesignMode)
         {
             SimulationService = new SimulationService();
@@ -26,13 +26,13 @@ public class SimulationScreenViewModel : StatefulViewModelBase
     {
         SimulationService = simulationSvc;
     }
-    
+
     [Reactive]
     public SimulationService SimulationService { get; set; }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if(!IsDeserializing)
+        if (!IsDeserializing)
             _ = Save(this);
     }
 }

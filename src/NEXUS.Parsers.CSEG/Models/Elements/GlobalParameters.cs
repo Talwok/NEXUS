@@ -5,7 +5,7 @@ namespace NEXUS.Parsers.CSEG.Models.Elements;
 public class GlobalParameters
 {
     public const string Namespace = "Global";
-    
+
     [XmlElement("Title")]
     public string Title { get; set; }
     [XmlElement("Name")]

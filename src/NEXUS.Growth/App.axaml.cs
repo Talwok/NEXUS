@@ -33,47 +33,47 @@ public partial class App : Application
         serviceCollection.AddSingleton<Application>(this);
 
         serviceCollection.AddCommon();
-        
+
         serviceCollection.AddSingleton<StartupViewModel>();
         serviceCollection.AddSingleton<SettingsService>();
         serviceCollection.AddSingleton<StartupService>();
         serviceCollection.AddSingleton<SimulationService>();
         serviceCollection.AddSingleton<ViewerService>();
-        
+
         serviceCollection.AddSingleton<SettingsScreenViewModel>();
         serviceCollection.AddSingleton<StatefulViewModelBase, SimulationScreenViewModel>();
         serviceCollection.AddSingleton<StatefulViewModelBase, StartupScreenViewModel>();
         serviceCollection.AddSingleton<StatefulViewModelBase, ViewerScreenViewModel>();
-        
+
         serviceCollection.AddSingleton<MainWindowViewModel>();
-        
+
         ServiceProvider = serviceCollection.BuildServiceProvider();
-        
+
         foreach (var statefulViewModelBase in ServiceProvider.GetServices<StatefulViewModelBase>())
         {
             _ = statefulViewModelBase.Load();
         }
-        
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var dataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            
+
             dataContext.TrySetArgs(
-                desktop.Args == null 
-                || desktop.Args.Length == 0 
+                desktop.Args == null
+                || desktop.Args.Length == 0
                     ? string.Empty : desktop.Args?[0]);
-            
+
             _mainWindow = new MainWindow
             {
-                DataContext = dataContext 
+                DataContext = dataContext
             };
 
             desktop.MainWindow = _mainWindow;
         }
-        
+
         base.OnFrameworkInitializationCompleted();
     }
 
-    public static IServiceProvider ServiceProvider { get; private set; } 
+    public static IServiceProvider ServiceProvider { get; private set; }
     public static IStorageProvider StorageProvider => _mainWindow.StorageProvider;
 }

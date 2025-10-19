@@ -11,13 +11,13 @@ public class ElementConfigParser
     {
         var config = new ElementConfig();
         var currentNamespace = "";
-            
+
         var lines = File.ReadAllLines(filePath);
 
         foreach (var line in lines)
         {
             var trimmedLine = line.Trim();
-                
+
             // Пропускаем пустые строки и комментарии
             if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith("#"))
                 continue;
@@ -42,18 +42,18 @@ public class ElementConfigParser
     public static void Save(string filePath, ElementConfig config)
     {
         List<string> lines = [];
-        
+
         // Global parameters
         AddPropertiesToLines(lines, config.Global, "Global");
         lines.Add("");
-        
+
         // TightBinding parameters
         AddPropertiesToLines(lines, config.TightBinding, "TightBinding");
         lines.Add("");
-        
+
         File.WriteAllLines(filePath, lines);
     }
-        
+
     private static void ProcessLine(string line, string currentNamespace, ElementConfig config)
     {
         var parts = line.Split('=');
@@ -91,8 +91,8 @@ public class ElementConfigParser
             {
                 // Fixed: Use invariant culture for numeric types
                 object convertedValue;
-                if (property.PropertyType == typeof(decimal) || 
-                    property.PropertyType == typeof(float) || 
+                if (property.PropertyType == typeof(decimal) ||
+                    property.PropertyType == typeof(float) ||
                     property.PropertyType == typeof(double))
                 {
                     convertedValue = Convert.ChangeType(value, property.PropertyType, CultureInfo.InvariantCulture);
@@ -101,7 +101,7 @@ public class ElementConfigParser
                 {
                     convertedValue = Convert.ChangeType(value, property.PropertyType);
                 }
-            
+
                 property.SetValue(targetObject, convertedValue);
             }
         }
@@ -120,7 +120,7 @@ public class ElementConfigParser
                 return xmlAttr?.ElementName == xmlElementName;
             });
     }
-        
+
     private static void AddPropertiesToLines(List<string> lines, object obj, string namespaceName)
     {
         var properties = obj.GetType().GetProperties()

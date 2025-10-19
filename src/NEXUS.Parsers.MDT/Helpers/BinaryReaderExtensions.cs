@@ -25,13 +25,13 @@ public static class BinaryReaderExtensions
         var bytes = reader.ReadBytes(4);
         return BitConverter.ToUInt32(bytes.Reverse().ToArray(), 0);
     }
-    
+
     public static long ReadInt64Le(this BinaryReader reader)
     {
         var bytes = reader.ReadBytes(8);
         return BitConverter.ToInt64(bytes.Reverse().ToArray(), 0);
     }
-    
+
     public static ulong ReadUInt64Le(this BinaryReader reader)
     {
         var bytes = reader.ReadBytes(8);

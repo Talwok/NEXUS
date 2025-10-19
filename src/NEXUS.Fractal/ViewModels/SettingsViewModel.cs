@@ -30,10 +30,10 @@ public class SettingsViewModel : StatefulViewModelBase
     [Reactive, JsonIgnore] public bool LeftPaneOpened { get; set; } = true;
 
     [Reactive, JsonIgnore] public bool RightPaneOpened { get; set; } = true;
-    
+
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if(!IsDeserializing)
+        if (!IsDeserializing)
             _ = Save(this);
     }
 }

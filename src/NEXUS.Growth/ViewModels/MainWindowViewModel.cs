@@ -14,7 +14,7 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
     public MainWindowViewModel(IEnumerable<StatefulViewModelBase> viewModels, SettingsScreenViewModel settings)
     {
         var viewModelBases = viewModels.ToList();
-        
+
         SimulationMenuItem = new ScreenMenuItem()
         {
             Name = "Симуляции",
@@ -39,7 +39,7 @@ public class MainWindowViewModel : MainViewModel<MainArguments>
             Icon = MaterialIconKind.SettingsOutline,
             Screen = settings
         };
-        
+
         /*ScreenViewModel = ViewerHelper.IsFileValid(filePath)
             ? new ViewerScreenViewModel(filePath!)
             : new StartupScreenViewModel();*/

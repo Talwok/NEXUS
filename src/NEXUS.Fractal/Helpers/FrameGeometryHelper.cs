@@ -22,8 +22,8 @@ namespace NEXUS.Fractal.Helpers
             // 1. Преобразуем входные данные в вектор-столбец
             var z = Vector<float>.Build.Dense(totalPixels);
             for (int y = 0, i = 0; y < height; y++)
-            for (int x = 0; x < width; x++, i++)
-                z[i] = inputData[y, x];
+                for (int x = 0; x < width; x++, i++)
+                    z[i] = inputData[y, x];
 
             // 2. Строим матрицу плана A (размер totalPixels × 3)
             var A = Matrix<float>.Build.Dense(totalPixels, 3);
@@ -67,8 +67,8 @@ namespace NEXUS.Fractal.Helpers
             // 1. Преобразуем входные данные в вектор-столбец
             var z = Vector<float>.Build.Dense(totalPixels);
             for (int y = 0, i = 0; y < height; y++)
-            for (int x = 0; x < width; x++, i++)
-                z[i] = inputData[y, x];
+                for (int x = 0; x < width; x++, i++)
+                    z[i] = inputData[y, x];
 
             // 2. Строим матрицу плана A (размер totalPixels × 6 для квадратичного тренда)
             var A = Matrix<float>.Build.Dense(totalPixels, 6);

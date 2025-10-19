@@ -23,7 +23,7 @@ namespace NEXUS.Fractal.ViewModels;
 public class FrameViewModel : ViewModelBase
 {
     private readonly ProjectService _svc;
-    
+
     public static readonly int Tab2DIndex = 0;
     public static readonly int Tab3DIndex = 1;
 
@@ -51,7 +51,7 @@ public class FrameViewModel : ViewModelBase
         ColorTableMinimum = frame.ColorTableMinimum;
         ColorTableUpperSelection = frame.ColorTableUpperSelection;
         ColorTableLowerSelection = frame.ColorTableLowerSelection;
-        
+
         if (App.ServiceProvider
                 .GetServices<StatefulServiceBase>()
                 .FirstOrDefault<ProjectService>() is { } svc)
@@ -61,15 +61,15 @@ public class FrameViewModel : ViewModelBase
             _svc.WhenAnyValue(s => s.SelectedColorTable)
                 .Subscribe(colorTable => ColorTable = colorTable);
         }
-        
+
         if (ColorTableMaximum == 0 && ColorTableMinimum == 0)
         {
             var (min, max) = HeightMap.GetMinMax();
             ColorTableMaximum = ColorTableUpperSelection = max;
-            ColorTableMinimum = ColorTableLowerSelection = min;    
+            ColorTableMinimum = ColorTableLowerSelection = min;
         }
-        
-        
+
+
         this.WhenAnyValue(
                 vm => vm.HeightMap,
                 vm => vm.ColorTable)
@@ -78,7 +78,7 @@ public class FrameViewModel : ViewModelBase
                 UpdateColorLimits();
                 UpdateImage();
             });
-        
+
         this.WhenAnyValue(
                 vm => vm.ColorTableMinimum,
                 vm => vm.ColorTableMaximum,
@@ -93,7 +93,7 @@ public class FrameViewModel : ViewModelBase
                 UpdateImage();
             });
     }
-    
+
     [Reactive] public Guid Id { get; set; }
     [Reactive] public Guid? ParentId { get; set; }
     [Reactive] public FrameSourceType SourceType { get; set; }
@@ -133,7 +133,7 @@ public class FrameViewModel : ViewModelBase
                 for (int x = 0; x < accessor.Width; x++)
                 {
                     var value = HeightMap[y, x];
-                    
+
                     if (ColorTable != null)
                     {
                         int colorIndex;
@@ -167,24 +167,24 @@ public class FrameViewModel : ViewModelBase
         FrameImage = new Bitmap(stream);
         stream.Close();
     }
-    
+
     private void UpdateColorLimits()
     {
         var lowerSelection = ColorTableLowerSelection;
         var upperSelection = ColorTableUpperSelection;
         var currentMin = ColorTableMinimum;
         var currentMax = ColorTableMaximum;
-        
+
         var denormalizedLowerSelection = FrameHelper.Denormalize(lowerSelection, currentMin, currentMax);
         var denormalizedUpperSelection = FrameHelper.Denormalize(upperSelection, currentMin, currentMax);
-        
+
         var (min, max) = HeightMap.GetMinMax();
-        
+
         ColorTableLowerSelection = FrameHelper.Normalize(denormalizedLowerSelection, min, max);
         ColorTableUpperSelection = FrameHelper.Normalize(denormalizedUpperSelection, min, max);
     }
-    
-    
+
+
     public FrameModel GetModel()
     {
         return new FrameModel

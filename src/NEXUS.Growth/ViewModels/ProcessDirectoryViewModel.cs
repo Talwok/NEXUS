@@ -7,13 +7,13 @@ public class ProcessDirectoryViewModel : ViewModelBase
 {
     [Reactive]
     public string? Process { get; set; }
-    
+
     [Reactive]
     public string? ElementName { get; set; }
-    
+
     [Reactive]
     public string? SubstrateElementName { get; set; }
-    
+
     [Reactive]
     public double AtomCount { get; set; }
 

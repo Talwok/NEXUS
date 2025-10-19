@@ -20,7 +20,7 @@ public class BcrParser
     private const int HeaderSizeBytes = 2048;
 
     private BcrParser() { }
-    
+
     public static BcrFile Parse(string path)
     {
         var fileBytes = File.ReadAllBytes(path);

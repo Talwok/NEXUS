@@ -22,8 +22,8 @@ public class VertexArrayObject<TVertexType, TIndexType> : IDisposable
 
     public unsafe void VertexAttributePointer(uint index, int count, VertexAttribPointerType type, int offSet)
     {
-        
-        _gl.VertexAttribPointer(index, count, type, false, (uint) sizeof(TVertexType), (void*) (offSet * sizeof(float)));
+
+        _gl.VertexAttribPointer(index, count, type, false, (uint)sizeof(TVertexType), (void*)(offSet * sizeof(float)));
         _gl.EnableVertexAttribArray(index);
     }
 

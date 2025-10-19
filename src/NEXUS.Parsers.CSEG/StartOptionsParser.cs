@@ -15,7 +15,7 @@ public class StartOptionsParser
         {
             IgnoreWhitespace = true
         });
-        
+
         if (serializer.Deserialize(xmlReader) is StartOptions startOptions)
             return startOptions;
 

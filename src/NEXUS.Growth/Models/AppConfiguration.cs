@@ -9,7 +9,7 @@ public class AppConfiguration
 {
     [XmlElement("is-startup-pane-opened")]
     public bool IsStartupPaneOpened { get; set; }
-    
+
     [XmlElement("is-startup-auto-folder-naming")]
     public bool IsStartupAutoFolderNaming { get; set; }
 
@@ -21,7 +21,7 @@ public static class AppConfigurationExtensions
 {
     private static string AppConfigurationFolderName = "Assets";
     private static string AppConfigurationFileName = "app-config.xml";
-    
+
     private static void SerializeToXml(this AppConfiguration config, string filePath)
     {
         var serializer = new XmlSerializer(typeof(AppConfiguration));
@@ -39,10 +39,10 @@ public static class AppConfigurationExtensions
     public static AppConfiguration? DeserializeDefaultsFromXml()
     {
         var filePath = Path.Combine(AppConfigurationFolderName, AppConfigurationFileName);
-        
+
         return !File.Exists(filePath) ? null : DeserializeFromXml(filePath);
     }
-    
+
     public static void SerializeDefaultsToXml(this AppConfiguration options)
     {
         var filePath = Path.Combine(AppConfigurationFolderName, AppConfigurationFileName);
