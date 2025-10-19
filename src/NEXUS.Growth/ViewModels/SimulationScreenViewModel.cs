@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
+using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Growth.Services;
 using NEXUS.ViewModels;
@@ -13,6 +14,11 @@ public class SimulationScreenViewModel : StatefulViewModelBase
     public SimulationScreenViewModel() : base("SimulationsState.json")
     {
         PropertyChanged += OnPropertyChanged;
+        
+        if (Design.IsDesignMode)
+        {
+            SimulationService = new SimulationService();
+        }
     }
 
     [ActivatorUtilitiesConstructor]

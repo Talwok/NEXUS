@@ -4,12 +4,18 @@
     <Styles.Resources>
         <x:Double x:Key="NexusMaterialIconHeigth">20</x:Double>
         <x:Double x:Key="NexusMaterialIconWidth">20</x:Double>
+        <x:Double x:Key="NexusTextBlockFontSize">12</x:Double>
     </Styles.Resources>
     
     <Style Selector="avalonia|MaterialIcon">
         <Setter Property="Foreground" Value="{StaticResource SystemAccentColor}" />
         <Setter Property="Width" Value="{StaticResource NexusMaterialIconWidth}" />
         <Setter Property="Height" Value="{StaticResource NexusMaterialIconHeigth}" />
+    </Style>
+    
+    <Style Selector="avalonia|MaterialIconText">
+        <Setter Property="FontFamily" Value="avares://NEXUS/Styles/Fonts/JetBrainsMono-Regular.ttf#JetBrains Mono"/>
+        <Setter Property="FontSize" Value="{StaticResource NexusTextBlockFontSize}"/>
     </Style>
     
     <!-- Стиль для иконки внутри ToggleButton -->

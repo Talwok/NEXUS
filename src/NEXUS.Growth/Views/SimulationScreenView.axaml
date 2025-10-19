@@ -5,34 +5,57 @@
              xmlns:startup1="clr-namespace:NEXUS.Growth.ViewModels"
              xmlns:services="clr-namespace:NEXUS.Growth.Services"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
              x:Class="NEXUS.Growth.Views.SimulationScreenView"
              x:DataType="startup1:SimulationScreenViewModel">
+
     <ItemsControl ItemsSource="{Binding SimulationService.Processes}">
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <WrapPanel/>
+                <WrapPanel />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="services:SimulationProcess">
-                <Border CornerRadius="{DynamicResource ControlCornerRadius}" Background="{DynamicResource ButtonBackground}"
+                <Border CornerRadius="{DynamicResource ControlCornerRadius}"
+                        Background="{DynamicResource ButtonBackground}"
                         Margin="8"
-                        Padding="8">
-                    <StackPanel Spacing="8" Width="300" Height="400">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <SelectableTextBlock VerticalAlignment="Center" Text="{Binding Id, StringFormat='ID Процесса: {0}'}" />
-                            <Button Theme="{StaticResource TransparentButton}" Content="{avalonia:MaterialIconExt Kind=ContentCopy}"/>
-                        </StackPanel>
-                        <TextBlock Text="{Binding ElapsedTime, StringFormat='В работе: {0:dd\\.hh\\:mm\\:ss}'}"/>
-                        <ScrollViewer Width="250" Height="300" >
-                            <ItemsControl ItemsSource="{Binding Logs}"/>
+                        Padding="8"
+                        Width="300">
+                    <StackPanel Spacing="8">
+
+                        <Grid ColumnDefinitions="Auto, Auto, *, Auto" RowDefinitions="Auto, Auto" RowSpacing="4"
+                              ColumnSpacing="8">
+                            <avalonia:MaterialIcon Grid.Row="0" Grid.Column="0" Kind="Identifier" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="Процесс:" />
+                            <SelectableTextBlock Grid.Row="0" Grid.Column="2" VerticalAlignment="Center"
+                                                 Text="{Binding Id}" />
+                            <Button Grid.Row="0" Grid.Column="3" ToolTip.Tip="Опции" Theme="{StaticResource TransparentButton}"
+                                    Content="{avalonia:MaterialIconExt Kind=Cog, Size=12}" Width="24">
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuItem Icon="{avalonia:MaterialIconExt Kind=ContentDuplicate}"
+                                                  Header="Клонировать параметры" />
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+
+                            <avalonia:MaterialIcon Grid.Row="1" Grid.Column="0" Kind="Clock" Width="12"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="В работе:" />
+                            <SelectableTextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center"
+                                                 Text="{Binding ElapsedTime, StringFormat='{}{0:hh\\:mm\\:ss}'}" />
+                            <Button Grid.Row="1" Grid.Column="3" ToolTip.Tip="Остановить процесс" Theme="{StaticResource TransparentButton}"
+                                    Width="24" Command="{Binding KillProcessCommand}">
+                                <avalonia:MaterialIcon Width="12" Height="12" Foreground="Red" Kind="Stop" />
+                            </Button>
+                        </Grid>
+
+                        <ScrollViewer Height="100" Background="#161616">
+                            <ItemsControl ItemsSource="{Binding Logs}" Margin="8"/>
                         </ScrollViewer>
-                        <Button HorizontalAlignment="Stretch" Content="{avalonia:MaterialIconTextExt Kind=Stop, Text='Снять процесс', TextFirst=True}"
-                                Command="{Binding KillProcessCommand}"/>
-                    </StackPanel>    
+                    </StackPanel>
+
                 </Border>
-                
             </DataTemplate>
         </ItemsControl.ItemTemplate>
     </ItemsControl>

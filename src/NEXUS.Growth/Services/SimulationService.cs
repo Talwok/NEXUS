@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Controls;
 using DynamicData;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -99,9 +100,9 @@ public class SimulationService : ServiceBase
 
 public class SimulationProcess : ReactiveObject
 {
-    private readonly Process _process;
+    private readonly Process? _process;
 
-    public SimulationProcess(Process process)
+    public SimulationProcess(Process? process)
     {
         _process = process;
 
@@ -122,7 +123,7 @@ public class SimulationProcess : ReactiveObject
 
     public void AppendLogString(string info)
     {
-        Logs.Insert(Logs.Count, info);
+        Logs.Insert(Logs.Count, info.Trim());
         if (Logs.Count > 50)
         {
             Logs.RemoveAt(0);

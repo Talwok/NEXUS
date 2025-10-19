@@ -40,13 +40,13 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         InfoService = infoService;
         GeometryService = geometryService;
         CalculationService = calculationService;
-#if !DEBUG
-        if (Version != null)
-        {
-            _updater = new GitHubUpdater(ApplicationType.Fractal, Version);
-        }
-        _ = CheckForUpdates();
-#endif
+// #if !DEBUG
+//         if (Version != null)
+//         {
+//             _updater = new GitHubUpdater(ApplicationType.Fractal, Version);
+//         }
+//         _ = CheckForUpdates();
+// #endif
         
         UpdateCommand = ReactiveCommand.CreateFromTask(
             async () =>
