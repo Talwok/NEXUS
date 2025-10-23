@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\NEXUS.Parsers.MDT\NEXUS.Parsers.MDT.csproj" />
+      <ProjectReference Include="..\NEXUS.Parsers.Ovito\NEXUS.Parsers.Ovito.csproj" />
     </ItemGroup>
 
 </Project>

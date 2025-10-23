@@ -108,9 +108,9 @@ public class BcrFrameImageProcessor
         double min = 0;
         double max = 0;
 
-        for (int i = 0; i < _frame.XPixels; i++)
+        for (int i = 0; i < _frame.Data.GetLength(0); i++)
         {
-            for (int j = 0; j < _frame.YPixels; j++)
+            for (int j = 0; j < _frame.Data.GetLength(1); j++)
             {
                 var value = _frame.Data[i, j];
 

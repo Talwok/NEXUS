@@ -1,12 +1,12 @@
-﻿namespace NEXUS.Parsers.Ovito.Models.CoordinateFile;
+﻿namespace NEXUS.Parsers.Ovito.Models.XYZFile;
 
-public class XYZFile
+public class XyzFile
 {
     public int AtomCount { get; set; }
     public string Comment { get; set; }
     public List<Particle> Particles { get; set; }
 
-    public XYZFile()
+    public XyzFile()
     {
         Particles = [];
     }

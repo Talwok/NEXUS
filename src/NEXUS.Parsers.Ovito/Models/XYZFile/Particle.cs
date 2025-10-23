@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace NEXUS.Parsers.Ovito.Models.CoordinateFile;
+namespace NEXUS.Parsers.Ovito.Models.XYZFile;
 
 public class Particle(string element, double x, double y, double z)
 {

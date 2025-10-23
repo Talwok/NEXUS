@@ -22,6 +22,7 @@ using NEXUS.Parsers.MDT.Models.Frames.MDA;
 using NEXUS.Parsers.MDT.Models.Frames.Scanned;
 using NEXUS.Parsers.MDT.Models.Frames.Spectroscopy;
 using NEXUS.Parsers.MDT.Models.Pallete;
+using NEXUS.Parsers.Ovito;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp.PixelFormats;
@@ -47,9 +48,10 @@ public class ProjectService : StatefulServiceBase
         AllowMultiple = true,
         FileTypeFilter =
         [
-            new FilePickerFileType("Все типы") {Patterns = ["*.mdt", "*.bcr", "*.jpeg", "*.jpg", "*.png", "*.bmp"]},
+            new FilePickerFileType("Все типы") {Patterns = ["*.mdt", "*.bcr", "*.jpeg", "*.jpg", "*.png", "*.bmp", "*.xyz"]},
             new FilePickerFileType("NT-MDT") { Patterns = ["*.mdt"] },
             new FilePickerFileType("DigitalSurf") { Patterns = ["*.bcr"] },
+            new FilePickerFileType("XYZ Ovito") { Patterns = ["*.xyz"]},
             new FilePickerFileType("Изображения") { Patterns = ["*.jpeg", "*.jpg", "*.png", "*.bmp"] }
         ]
     };
@@ -255,6 +257,9 @@ public class ProjectService : StatefulServiceBase
                 case ".bcr":
                     ProcessBcrFile(filePath);
                     break;
+                case ".xyz":
+                    ProcessXyzFile(filePath);
+                    break;
             }
         }
     }
@@ -348,6 +353,26 @@ public class ProjectService : StatefulServiceBase
             return;
 
         var bcr = BcrParser.Parse(filePath);
+        var processor = bcr.CreateFromBcrFrame();
+        FrameModel frameModel = new FrameModel
+        {
+            Id = Guid.NewGuid(),
+            SourceType = FrameSourceType.DigitalSurf,
+            Name = Path.GetFileNameWithoutExtension(filePath),
+            HeightMap = processor.GetHeightMap().Normalize(),
+            HeightSpacing = 10,
+            HeightScaling = 1,
+            MetaData = bcr.Metadata
+        };
+        Project.Frames.Add(new FrameViewModel(frameModel));
+    }
+
+    private void ProcessXyzFile(string filePath)
+    {
+        if (Project == null)
+            return;
+
+        var bcr = XYZParser.Parse(filePath).Convert();
         var processor = bcr.CreateFromBcrFrame();
         FrameModel frameModel = new FrameModel
         {
