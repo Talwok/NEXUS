@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:converters="clr-namespace:NEXUS.Converters;assembly=NEXUS"
              xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
              xmlns:services="clr-namespace:NEXUS.Fractal.Services"
@@ -42,7 +41,7 @@
                             <Panel>
                                 <ScrollViewer
                                     IsVisible="{Binding SelectedViewTabIndex, Converter={x:Static converters:ValueEqualityConverter.Instance}, ConverterParameter={x:Static viewModels:FrameViewModel.Tab2DIndex}}">
-                                    <StackPanel Spacing="8" Margin="8">
+                                    <!--<StackPanel Spacing="8" Margin="8">
                                         <StackPanel.Styles>
                                             <Style Selector="controls|NumberBox">
                                                 <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -71,11 +70,11 @@
                                                             Maximum="{ReflectionBinding #ColorTableUpper.Value}"
                                                             Header="{avalonia:MaterialIconTextExt Kind=ArrowDownThin, Text=Нижнее значение высоты}"
                                                             Value="{Binding ColorTableLowerSelection}" />
-                                    </StackPanel>
+                                    </StackPanel>-->
                                 </ScrollViewer>
                                 <ScrollViewer
                                     IsVisible="{Binding SelectedViewTabIndex, Converter={x:Static converters:ValueEqualityConverter.Instance}, ConverterParameter={x:Static viewModels:FrameViewModel.Tab3DIndex}}">
-                                    <StackPanel Spacing="8" Margin="8">
+                                    <!--<StackPanel Spacing="8" Margin="8">
                                         <StackPanel.Styles>
                                             <Style Selector="controls|NumberBox">
                                                 <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -129,7 +128,7 @@
                                         <controls:NumberBox
                                             Header="{avalonia:MaterialIconTextExt Kind=Glasses, Text=Зеркальность}"
                                             Value="{Binding SpecularStrength}" />
-                                    </StackPanel>
+                                    </StackPanel>-->
                                 </ScrollViewer>
                             </Panel>
                         </DockPanel>
@@ -163,7 +162,7 @@
                             </Panel>
                             <Panel>
                                 <ScrollViewer>
-                                    <StackPanel Spacing="8" Margin="8">
+                                    <!--<StackPanel Spacing="8" Margin="8">
                                         <StackPanel.Styles>
                                             <Style Selector="controls|NumberBox">
                                                 <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -191,16 +190,16 @@
                                             Header="{avalonia:MaterialIconTextExt Kind=FormatVerticalAlignTop, Text=Верхнее ограничение Y}"
                                             Value="{Binding UpperLimitY, Mode=TwoWay}" 
                                             Minimum="{Binding MinY}" Maximum="{Binding MaxY}" />
-                                        <!--<avalonia:MaterialIconText Kind="AxisXArrow" Text="Ось X"/>
+                                        ~1~<avalonia:MaterialIconText Kind="AxisXArrow" Text="Ось X"/>
                                         <rangeSlider:NexusRangeSlider Orientation="Horizontal" Minimum="{Binding MinX}" Maximum="{Binding MaxX}" LowerSelectedValue="{Binding LowerLimitX}" UpperSelectedValue="{Binding UpperLimitX}"/> 
                                         <avalonia:MaterialIconText Kind="AxisYArrow" Text="Ось Y"/>
                                         <rangeSlider:NexusRangeSlider Orientation="Horizontal" Minimum="{Binding MinY}" Maximum="{Binding MaxY}" LowerSelectedValue="{Binding LowerLimitY}" UpperSelectedValue="{Binding UpperLimitY}"/>
                                         <Rectangle Fill="{DynamicResource SystemAccentColor}"
                                                    HorizontalAlignment="Stretch"
-                                                   Height="2" />-->
+                                                   Height="2" />@1@
                                         <avalonia:MaterialIconText Kind="FractionOneHalf" Text="Фрактальная размерность"/>
                                         <TextBlock Text="{Binding Dimension, StringFormat=''}"/>
-                                    </StackPanel>
+                                    </StackPanel>-->
                                 </ScrollViewer>
                             </Panel>
                         </DockPanel>

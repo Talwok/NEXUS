@@ -23,6 +23,8 @@ using NEXUS.Parsers.MDT.Models.Frames.Scanned;
 using NEXUS.Parsers.MDT.Models.Frames.Spectroscopy;
 using NEXUS.Parsers.MDT.Models.Pallete;
 using NEXUS.Parsers.Ovito;
+using NEXUS.Parsers.Ovito.Helpers;
+using NEXUS.Parsers.Ovito.Models.XYZFile;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp.PixelFormats;
@@ -240,6 +242,13 @@ public class ProjectService : StatefulServiceBase
         if (files.Count == 0)
             return;
 
+        /*_infoService.AppendMessage(new InfoMessageViewModel
+        {
+            Severity = InfoBarSeverity.Informational,
+            Title = "Импорт файлов",
+            Message = $"Идёт импортирование файлов, всего: {files.Count}"
+        });*/
+
         foreach (var storageFile in files)
         {
             var filePath = storageFile.Path.LocalPath;
@@ -258,7 +267,7 @@ public class ProjectService : StatefulServiceBase
                     ProcessBcrFile(filePath);
                     break;
                 case ".xyz":
-                    ProcessXyzFile(filePath);
+                    await ProcessXyzFile(filePath);
                     break;
             }
         }
@@ -306,6 +315,12 @@ public class ProjectService : StatefulServiceBase
             return;
 
         var mdt = MdtParser.Parse(filePath);
+
+        /*_infoService.AppendMessage(new InfoMessageViewModel
+        {
+            Severity = InfoBarSeverity.Informational,
+            Message = $"Идёт импортирование MDT файла, всего фреймов: {mdt.Frames.Count}"
+        });*/
 
         foreach (var frame in mdt.Frames)
         {
@@ -367,24 +382,41 @@ public class ProjectService : StatefulServiceBase
         Project.Frames.Add(new FrameViewModel(frameModel));
     }
 
-    private void ProcessXyzFile(string filePath)
+    private async Task ProcessXyzFile(string filePath)
     {
         if (Project == null)
             return;
 
-        var bcr = XYZParser.Parse(filePath).Convert();
-        var processor = bcr.CreateFromBcrFrame();
-        FrameModel frameModel = new FrameModel
+        var frames = (await XYZParser.Parse(filePath));
+
+        /*_infoService.AppendMessage(new InfoMessageViewModel
         {
-            Id = Guid.NewGuid(),
-            SourceType = FrameSourceType.DigitalSurf,
-            Name = Path.GetFileNameWithoutExtension(filePath),
-            HeightMap = processor.GetHeightMap().Normalize(),
-            HeightSpacing = 10,
-            HeightScaling = 1,
-            MetaData = bcr.Metadata
-        };
-        Project.Frames.Add(new FrameViewModel(frameModel));
+            Severity = InfoBarSeverity.Informational,
+            Title = "Импорт файлов",
+            Message = $"Импортирование XYZ файла, всего фреймов: {frames.Count}"
+        });*/
+
+        foreach (var frame in frames)
+        {
+            var processor = frame.CreateFromXyzFrame();
+
+            Dictionary<string, string> metadata = new Dictionary<string, string>();
+            metadata[nameof(XYZFrame.FrameNumber)] = frame.FrameNumber.ToString();
+            metadata[nameof(XYZFrame.PropertyNames)] = string.Join(", ", frame.PropertyNames);
+            metadata[nameof(XYZFrame.Comment)] = frame.Comment;
+
+            var frameModel = new FrameModel
+            {
+                Id = Guid.NewGuid(),
+                SourceType = FrameSourceType.OvitoXyz,
+                Name = Path.GetFileNameWithoutExtension(filePath),
+                HeightMap = processor.GetHeightMap().Normalize(),
+                HeightSpacing = 10,
+                HeightScaling = 1,
+                MetaData = metadata
+            };
+            Project.Frames.Add(new FrameViewModel(frameModel));
+        }
     }
 
     public async Task ExportFromProject()

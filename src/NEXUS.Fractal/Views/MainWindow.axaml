@@ -1,20 +1,348 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-        xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
-        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        xmlns:views="clr-namespace:NEXUS.Fractal.Views"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="NEXUS.Fractal.Views.MainWindow"
-        x:DataType="viewModels:MainWindowViewModel"
-        MinWidth="600"
-        MinHeight="400"
-        Icon="/Assets/FractalSurface.ico"
-        Title="{Binding Version, StringFormat='NEXUS.Fractal {0}'}">
-    <DockPanel>
+<u:UrsaWindow xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+              xmlns:u="https://irihi.tech/ursa"
+              xmlns:iri="https://irihi.tech/shared"
+              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+              xmlns:converters="clr-namespace:NEXUS.Fractal.Converters"
+              xmlns:converters1="clr-namespace:NEXUS.Converters;assembly=NEXUS"
+              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+              x:Class="NEXUS.Fractal.Views.MainWindow"
+              x:DataType="viewModels:MainWindowViewModel"
+              MinWidth="600"
+              MinHeight="400"
+              Icon="/Assets/FractalSurface.ico"
+              IsFullScreenButtonVisible="{OnPlatform {x:True}, macOS={x:False}}"
+              IsManagedResizerVisible="{OnPlatform {x:False}, Linux={x:True}}"
+              Title="{Binding Version, StringFormat='NEXUS.Fractal {0}'}"
+              Name="MainAppWindow">
+    <u:UrsaWindow.LeftContent>
+        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16">
+            <Menu Grid.Column="0">
+                <MenuItem Padding="0">
+                    <MenuItem.Header>
+                        <Image Grid.Column="0" Margin="8" Source="../../Assets/FractalSurface.ico" Width="14" />
+                    </MenuItem.Header>
+                </MenuItem>
+                <MenuItem Header="File">
+                    <MenuItem Header="Open"></MenuItem>
+                    <MenuItem Header="Save"></MenuItem>
+                    <MenuItem Header="Save as"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Filter">
+                    <MenuItem Header="Open"></MenuItem>
+                    <MenuItem Header="Save"></MenuItem>
+                    <MenuItem Header="Save as"></MenuItem>
+                </MenuItem>
+                
+                
+                <MenuItem Header="Study">
+                    <MenuItem Header="Open"></MenuItem>
+                    <MenuItem Header="Save"></MenuItem>
+                    <MenuItem Header="Save as"></MenuItem>
+                </MenuItem>
+            </Menu>
+
+        </Grid>
+    </u:UrsaWindow.LeftContent>
+    <u:UrsaWindow.RightContent>
+        <StackPanel Orientation="Horizontal">
+            <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                          IsVisible="{Binding IsUpdateFound}"
+                          Command="{Binding UpdateCommand}">
+                <u:IconButton.Icon>
+                    <avalonia:MaterialIcon IconSize="14" Classes="UpdateButton" Kind="Download" />
+                </u:IconButton.Icon>
+            </u:IconButton>
+            <u:ThemeToggleButton
+                HorizontalAlignment="Left"
+                IsThreeState="False"
+                Mode="Controller" />
+            <u:IconButton
+                Theme="{StaticResource BorderlessIconButton}"
+                Icon="{avalonia:MaterialIconExt Kind=Settings, IconSize=14}"
+                Command="{Binding OpenSettingsDrawerCommand}" />
+        </StackPanel>
+    </u:UrsaWindow.RightContent>
+    <u:UrsaWindow.Styles>
+        <Style Selector="avalonia|MaterialIcon.UpdateButton">
+            <Style.Animations>
+                <Animation Duration="0:0:1.5" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Foreground" Value="DarkOrange"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="50%">
+                        <Setter Property="Foreground" Value="Transparent"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Foreground" Value="DarkOrange"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>    
+        </Style>
+        <!--This style is created to demonstrate Dialog StyleClass feature. This style is applied to dialogs in MainWindow OverlayDialogHost -->
+        <Style Selector="u|DefaultDialogControl.Custom">
+            <Style Selector="^ /template/ Button#PART_OKButton">
+                <Setter Property="Content" Value="CUSTOM" />
+                <Setter Property="iri:ClassHelper.Classes" Value="Warning" />
+            </Style>
+        </Style>
+        <Style Selector="MenuItem">
+            <Setter Property="Padding" Value="4 0" />
+        </Style>
+    </u:UrsaWindow.Styles>
+    <DockPanel Margin="0 0 0 0">
+        <Border DockPanel.Dock="Top"
+                Height="32"
+                Padding="0"
+                Margin="0"
+                VerticalAlignment="Stretch"
+                CornerRadius="0"
+                Theme="{DynamicResource CardBorder}" />
+        <Border DockPanel.Dock="Bottom" CornerRadius="0" Margin="0" Padding="0" Theme="{DynamicResource CardBorder}">
+            <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto, Auto, Auto, *, Auto, Auto" ColumnSpacing="8">
+                <Border Grid.Column="0" Theme="{StaticResource CardBorder}" Padding="8 0">
+                    <TextBlock Text="{Binding FileWatcherService.WatchedFolder}" />
+                </Border>
+                <ScrollViewer Margin="8 0 0 0" Grid.Column="1">
+                    <u:Breadcrumb ItemsSource="{Binding FileTree.Breadcrumbs}">
+
+                    </u:Breadcrumb>
+                </ScrollViewer>
+
+                <u:IconButton Grid.Column="2"
+                              Theme="{StaticResource BorderlessIconButton}"
+                              IsLoading="True"
+                              Content="Загрузка всей хуйни"
+                              Height="20" />
+                <u:IconButton Grid.Column="4"
+                              Theme="{StaticResource BorderlessIconButton}"
+                              Icon="{avalonia:MaterialIconExt Kind=Journal, IconSize=14}"
+                              Command="{Binding OpenLogsJournalDrawerCommand}"/>
+                <u:IconButton Grid.Column="5"
+                              Theme="{StaticResource BorderlessIconButton}"
+                              Icon="{avalonia:MaterialIconExt Kind=About, IconForeground=Gray, IconSize=14}">
+                    <u:IconButton.Flyout>
+                        <Flyout>
+                            <DockPanel LastChildFill="False">
+                                <Image DockPanel.Dock="Left" Source="../Assets/FractalSurface.ico" Width="40" Height="40"/>
+                                <StackPanel Margin="16 0 0 0" DockPanel.Dock="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="NEXUS.Fractal"/>
+                                    <TextBlock Text="{Binding Version, StringFormat='Версия: {0}'}"/>
+                                </StackPanel>
+                            </DockPanel>
+                            
+                        </Flyout>
+                    </u:IconButton.Flyout>
+                </u:IconButton>
+            </Grid>
+        </Border>
+
+        <Grid ColumnDefinitions="*, 2, 2*, 2, *">
+            <Border Grid.Column="0"
+                    Padding="0"
+                    Margin="0"
+                    VerticalAlignment="Stretch"
+                    CornerRadius="0"
+                    Theme="{DynamicResource CardBorder}">
+                <DockPanel>
+                    <u:ToolBar DockPanel.Dock="Top" HorizontalAlignment="Right" OverflowMode="Always" 
+                               IsVisible="{Binding FileTree.Root.IsDirectory}">
+                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                                      Icon="{avalonia:MaterialIconExt Kind=ChevronDoubleUp, IconSize=14}" />
+                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                                      Icon="{avalonia:MaterialIconExt Kind=ChevronDoubleDown, IconSize=14}" />
+                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                                      Icon="{avalonia:MaterialIconExt Kind=Import, IconSize=14}" />
+                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                                      Icon="{avalonia:MaterialIconExt Kind=Folder, IconSize=14}" />
+                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                                      Icon="{avalonia:MaterialIconExt Kind=Trash, IconSize=14}" />
+
+                    </u:ToolBar>
+
+                    <Panel>
+                        <StackPanel Spacing="8" VerticalAlignment="Center"
+                                    IsVisible="{Binding !FileTree.Root.IsDirectory}">
+                            <TextBlock TextWrapping="WrapWithOverflow"
+                                       Text="Для продолжения работы выберите рабочую папку"
+                                       HorizontalAlignment="Center" />
+                            <u:IconButton HorizontalAlignment="Stretch"
+                                          Margin="8"
+                                          Command="{Binding FileTree.SelectFolderCommand}"
+                                          Icon="{avalonia:MaterialIconExt Kind=Folder}"
+                                          Content="Выбрать папку">
+
+                            </u:IconButton>
+                        </StackPanel>
+                        <TreeView IsVisible="{Binding FileTree.Root.IsDirectory}"
+                                  ItemsSource="{Binding FileTree.Root.Children}"
+                                  SelectionMode="Multiple"
+                                  SelectedItems="{Binding FileTree.SelectedNodes}">
+                            <TreeView.Styles>
+                                <Style Selector="TreeViewItem">
+                                    <Setter Property="IsExpanded" Value="{ReflectionBinding   IsExpanded}" />
+                                </Style>
+                            </TreeView.Styles>
+                            <TreeView.ItemTemplate>
+                                <TreeDataTemplate ItemsSource="{Binding  Children}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <avalonia:MaterialIcon Width="14" Height="14" IsVisible="{Binding IsDirectory}"
+                                                               Kind="Folder" />
+                                        <avalonia:MaterialIcon Width="14" Height="14"
+                                                               IsVisible="{Binding !IsDirectory}"
+                                                               Kind="{Binding Extension, Converter={x:Static converters:FileExtensionToIconConverter.Instance}}" />
+                                        <TextBlock Text="{Binding Name}" />
+                                    </StackPanel>
+                                </TreeDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                    </Panel>
+                </DockPanel>
+
+            </Border>
+            <GridSplitter Grid.Column="1" Background="Transparent" />
+            <DockPanel Grid.Column="2">
+                <TabControl ItemsSource="{Binding FileTree.SelectedNodes}"
+                            SelectedItem="{Binding FileTree.SelectedTab}">
+                    <TabControl.Styles>
+                        <Style Selector="TabControl">
+                            <Setter Property="Template">
+                                <ControlTemplate>
+                                    <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="{TemplateBinding CornerRadius}"
+                                            Background="{TemplateBinding Background}"
+                                            HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalAlignment}">
+                                        <DockPanel>
+                                            <!-- Scrollable Tab Strip -->
+                                            <ScrollViewer DockPanel.Dock="{TemplateBinding TabStripPlacement}"
+                                                          HorizontalAlignment="Stretch"
+                                                          HorizontalScrollBarVisibility="Auto">
+                                                <ItemsPresenter Name="PART_ItemsPresenter"
+                                                                Margin="0 0 0 8"
+                                                                ItemsPanel="{TemplateBinding ItemsPanel}" />
+                                            </ScrollViewer>
+
+                                            <!-- Content Area -->
+                                            <ContentPresenter Name="PART_SelectedContentHost"
+                                                              Margin="{TemplateBinding Padding}"
+                                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                              Content="{TemplateBinding SelectedContent}"
+                                                              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+                                        </DockPanel>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter>
+                            <Setter Property="ItemsPanel">
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </Setter>
+                        </Style>
+                    </TabControl.Styles>
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                    <TabControl.DataTemplates>
+                        <DataTemplate x:DataType="viewModels:EntityNodeViewModel">
+                            <Panel>
+                                <DockPanel IsVisible="{Binding IsDirectory}">
+                                    <u:Form LabelPosition="Left" LabelWidth="*">
+                                        <u:FormGroup Header="Basic Information">
+                                            <TextBox Width="300" u:FormItem.Label="Name" />
+                                            <TextBox Width="300" u:FormItem.Label="Email" />
+                                        </u:FormGroup>
+                                        <u:FormGroup Header="Education Information">
+                                            <TextBox Width="300" u:FormItem.Label="Collage" />
+                                            <u:FormItem Label="Study Time">
+                                                <u:DateRangePicker Width="300"></u:DateRangePicker>
+                                            </u:FormItem>
+                                        </u:FormGroup>
+                                        <Button Content="Submit" Theme="{DynamicResource SolidButton}" u:FormItem.NoLabel="True" HorizontalAlignment="Stretch"/>
+                                    </u:Form>
+                                </DockPanel>
+                                <DockPanel IsVisible="{Binding !IsDirectory}">
+                                    <Panel DockPanel.Dock="Right">
+                                        <Rectangle VerticalAlignment="Stretch" 
+                                                   Width="4"
+                                                   Fill="{Binding ColorTableRange, Converter={x:Static converters1:VerticalBorderColorsToGradientConverter.Instance}}"/>
+                                        <u:RangeSlider Orientation="Vertical"
+                                                       Minimum="{Binding ColorTableMinimum}"
+                                                       Maximum="{Binding ColorTableMaximum}"
+                                                       LowerValue="{Binding ColorTableLowerSelection}"
+                                                       UpperValue="{Binding ColorTableUpperSelection}"
+                                                       Background="Transparent"
+                                                       Foreground="{Binding ColorTable.Colors, Converter={x:Static converters1:VerticalColorsToGradientConverter.Instance}}">
+                                            <u:RangeSlider.Styles>
+                                                <Style Selector="u|RangeSlider">
+                                                    <!-- По умолчанию (без hover) сделать thumbs невидимыми -->
+                                                    <Style Selector="^ /template/ Thumb">
+                                                        <Setter Property="Opacity" Value="0" />  <!-- Или Visibility="Collapsed" -->
+                                                    </Style>
+
+                                                    <!-- При наведении (pointerover) показать thumbs -->
+                                                    <Style Selector="^:pointerover /template/ Thumb">
+                                                        <Setter Property="Opacity" Value="1" />  <!-- Или Visibility="Visible" -->
+                                                    </Style>
+                                                    
+                                                    <Style Selector="^:pressed /template/ Thumb">
+                                                        <Setter Property="Opacity" Value="1" />  <!-- Или Visibility="Visible" -->
+                                                    </Style>  
+                                                </Style>
+
+                                            </u:RangeSlider.Styles>
+                                        </u:RangeSlider>
+                                        
+                                    </Panel>
+                                    
+                                    <TabControl TabStripPlacement="Bottom">
+                                        <TabItem Header="2D"></TabItem>
+                                        <TabItem Header="3D"></TabItem>
+                                    </TabControl>    
+                                </DockPanel>
+                            </Panel>
+                            
+                            
+                            
+                        </DataTemplate>
+                    </TabControl.DataTemplates>
+                </TabControl>
+            </DockPanel>
+
+            <GridSplitter Grid.Column="3" Background="Transparent" />
+            <Border Grid.Column="4"
+                    Padding="0"
+                    Margin="0"
+                    VerticalAlignment="Stretch"
+                    Theme="{DynamicResource CardBorder}"
+                    CornerRadius="0">
+
+            </Border>
+        </Grid>
+    </DockPanel>
+
+    <!--<DockPanel>
         <views:MenuSection DockPanel.Dock="Top"/>
+        <controls:InfoBar DockPanel.Dock="Bottom" 
+                          Padding="0"
+                          Margin="0"
+                          IsOpen="True"
+                          IsClosable="True"
+                          IsIconVisible="True"
+                          Title="{Binding InfoService.LastMessage.Title}"
+                          Message="{Binding InfoService.LastMessage.Message}">
+            <controls:InfoBar.ActionButton>
+                <Button Content="{avalonia:MaterialIconExt Kind=ExpandVertical}">
+                </Button>
+            </controls:InfoBar.ActionButton>
+        </controls:InfoBar>
         <controls:InfoBar DockPanel.Dock="Top"
                           Padding="0"
                           Margin="0"
@@ -32,5 +360,5 @@
             </controls:InfoBar.ActionButton>
         </controls:InfoBar>
         <views:Workspace/>
-    </DockPanel>
-</Window>
+    </DockPanel>-->
+</u:UrsaWindow>

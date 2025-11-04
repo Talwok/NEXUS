@@ -10,13 +10,13 @@ namespace NEXUS.Fractal.Services;
 
 public class InfoService : ServiceBase
 {
-    private readonly SourceCache<InfoMessageViewModel, Guid> _sourceCache;
-
+    /*private readonly SourceCache<InfoMessageViewModel, Guid> _messagesSourceCache;
+    
     public InfoService()
     {
-        _sourceCache = new SourceCache<InfoMessageViewModel, Guid>(message => message.Id);
-
-        _sourceCache.Connect()
+        _messagesSourceCache = new SourceCache<InfoMessageViewModel, Guid>(message => message.Id);
+        
+        _messagesSourceCache.Connect()
             .ObserveOn(AvaloniaScheduler.Instance)
             .Bind(out var messages)
             .DisposeMany()
@@ -27,6 +27,7 @@ public class InfoService : ServiceBase
 
     public ReadOnlyObservableCollection<InfoMessageViewModel> Messages { get; }
 
+    
     [Reactive]
     public InfoMessageViewModel? LastMessage { get; private set; }
 
@@ -37,7 +38,7 @@ public class InfoService : ServiceBase
     /// <param name="timeout">Timeout</param>
     private void AppendMessage(InfoMessageViewModel message, TimeSpan timeout)
     {
-        _sourceCache.AddOrUpdate(message);
+        _messagesSourceCache.AddOrUpdate(message);
 
         if (timeout > TimeSpan.Zero)
             Observable.Timer(timeout).Subscribe(_ => RemoveMessage(message));
@@ -59,7 +60,7 @@ public class InfoService : ServiceBase
     /// <param name="guid">Message id</param>
     public void RemoveMessage(Guid guid)
     {
-        if (_sourceCache.Lookup(guid) is { HasValue: true, Value: { } message })
+        if (_messagesSourceCache.Lookup(guid) is { HasValue: true, Value: { } message })
             RemoveMessage(message);
     }
 
@@ -69,9 +70,9 @@ public class InfoService : ServiceBase
     /// <param name="message">Message</param>
     public void RemoveMessage(InfoMessageViewModel message)
     {
-        _sourceCache.Remove(message);
+        _messagesSourceCache.Remove(message);
 
         if (LastMessage?.Id == message.Id)
             LastMessage = null;
-    }
+    }*/
 }

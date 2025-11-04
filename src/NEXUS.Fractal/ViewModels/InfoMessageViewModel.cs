@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using FluentAvalonia.UI.Controls;
 using Material.Icons;
 using NEXUS.ViewModels;
@@ -14,4 +14,4 @@ public class InfoMessageViewModel : ViewModelBase
     public bool IsOpen { get; set; } = true;
     public bool IsClosable { get; set; } = true;
     public InfoBarSeverity Severity { get; set; } = InfoBarSeverity.Informational;
-}
+}*/

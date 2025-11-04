@@ -1,14 +1,16 @@
 using System;
+using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
-using FluentAvalonia.UI.Controls;
+using Microsoft.Extensions.DependencyInjection;
+using NEXUS.Extensions;
+using NEXUS.Fractal.Services;
 using NEXUS.Fractal.ViewModels;
-using NEXUS.ViewModels;
+using NEXUS.Parsers.MDT.Models.Pallete;
+using Ursa.Controls;
 
 namespace NEXUS.Fractal.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : UrsaWindow
 {
     public MainWindow()
     {

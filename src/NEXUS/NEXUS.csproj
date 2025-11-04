@@ -8,23 +8,26 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Avalonia" Version="11.3.0" />
-      <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
-      <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" />
-      <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
-      <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.0" />
-      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
-      <PackageReference Include="FluentAvaloniaUI" Version="2.3.0" />
-      <PackageReference Include="Material.Icons.Avalonia" Version="2.4.1" />
-      <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
-      <PackageReference Include="protobuf-net" Version="3.2.52" />
-      <PackageReference Include="ReactiveUI" Version="20.2.45" />
+      <PackageReference Include="Avalonia" Version="11.3.8" />
+      <PackageReference Include="Avalonia.Desktop" Version="11.3.8" />
+      <PackageReference Include="Avalonia.Diagnostics" Version="11.3.8" />
+      <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.8" />
+      <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8" />
+      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.8" />
+      <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+      <PackageReference Include="Irihi.Ursa" Version="1.13.0" />
+      <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.13.0" />
+      <PackageReference Include="Material.Icons.Avalonia" Version="3.0.0-preview3.1" />
+      <PackageReference Include="MathNet.Numerics" Version="6.0.0-beta2" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-rc.2.25502.107" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-rc.2.25502.107" />
+      <PackageReference Include="protobuf-net" Version="3.2.56" />
+      <PackageReference Include="ReactiveUI" Version="20.4.1" />
       <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
-      <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.6" />
-      <PackageReference Include="Xaml.Behaviors" Version="11.3.0" />
+      <PackageReference Include="Semi.Avalonia" Version="11.3.7" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+      <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
+      <PackageReference Include="Xaml.Behaviors" Version="11.3.6.6" />
     </ItemGroup>
   
     <ItemGroup>

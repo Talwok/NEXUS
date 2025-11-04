@@ -5,64 +5,70 @@ namespace NEXUS.Parsers.Ovito;
 
 public static class XYZParser
 {
-    public static XyzFile Parse(string filePath)
+    public static async Task<List<XYZFrame>> Parse(string filePath)
     {
         if (!File.Exists(filePath))
-            throw new FileNotFoundException($"File not found: {filePath}");
+            throw new FileNotFoundException($"XYZ file not found: {filePath}");
 
-        var lines = File.ReadAllLines(filePath);
-        if (lines.Length < 2)
-            throw new FormatException("Invalid XYZ file format: too few lines");
+        await using var stream = File.Open(filePath, FileMode.Open);
+        using var reader = new StreamReader(stream);
+        return ParseStream(reader);
+    }
 
-        var xyzFile = new XyzFile();
+    private static List<XYZFrame> ParseStream(TextReader reader)
+    {
+        List<XYZFrame> frames = [];
+        int frameNumber = 0;
+        string line;
 
-        // Parse atom count (first line)
-        if (!int.TryParse(lines[0].Trim(), out int atomCount))
-            throw new FormatException("Invalid atom count format");
-
-        xyzFile.AtomCount = atomCount;
-
-        // Parse comment (second line)
-        xyzFile.Comment = lines[1].Trim();
-
-        // Parse atoms (remaining lines)
-        for (int i = 2; i < lines.Length; i++)
+        while ((line = reader.ReadLine()) != null)
         {
-            var line = lines[i].Trim();
             if (string.IsNullOrWhiteSpace(line))
                 continue;
 
-            var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            // First line: number of particles
+            if (!int.TryParse(line.Trim(), out int numParticles))
+                throw new FormatException($"Invalid number of particles: {line}");
 
-            if (parts.Length < 4)
-                throw new FormatException($"Invalid atom data at line {i + 1}");
+            // Second line: comment line (may contain property names)
+            string commentLine = reader.ReadLine();
+            if (commentLine == null)
+                throw new FormatException("Unexpected end of file after particle count");
 
-            if (!double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double x))
-                throw new FormatException($"Invalid X coordinate at line {i + 1}");
+            var frame = new XYZFrame
+            {
+                FrameNumber = frameNumber++,
+                NumberOfParticles = numParticles,
+                Comment = commentLine.Trim()
+            };
 
-            if (!double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out double y))
-                throw new FormatException($"Invalid Y coordinate at line {i + 1}");
+            // Parse property names from comment line (OVITO extended XYZ format)
+            ParsePropertyNames(frame, commentLine);
 
-            if (!double.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out double z))
-                throw new FormatException($"Invalid Z coordinate at line {i + 1}");
+            // Parse particles
+            for (int i = 0; i < numParticles; i++)
+            {
+                line = reader.ReadLine();
+                if (line == null)
+                    throw new FormatException($"Unexpected end of file at particle {i + 1}");
 
-            var particle = new Particle(parts[0], x, y, z);
-            xyzFile.Particles.Add(particle);
+                var particle = ParseParticleLine(line, frame.PropertyNames, i);
+                frame.Particles.Add(particle);
+            }
+
+            frames.Add(RemoveFloatingAtoms(frame));
         }
 
-        // Validate atom count
-        if (xyzFile.Particles.Count != xyzFile.AtomCount)
-            throw new FormatException($"Atom count mismatch: expected {xyzFile.AtomCount}, found {xyzFile.Particles.Count}");
-
-        return RemoveFloatingAtoms(xyzFile);
+        return frames;
     }
 
-    public static XyzFile RemoveFloatingAtoms(this XyzFile xyzFile, double connectionThreshold = 2.0, double surfaceZThreshold = 10.0)
-    {
-        if (xyzFile?.Particles == null || xyzFile.Particles.Count == 0)
-            return xyzFile;
 
-        var particles = xyzFile.Particles;
+    public static XYZFrame RemoveFloatingAtoms(this XYZFrame inputFrame, double connectionThreshold = 2.0, double surfaceZThreshold = 10.0)
+    {
+        if (inputFrame?.Particles == null || inputFrame.Particles.Count == 0)
+            return inputFrame;
+
+        var particles = inputFrame.Particles;
         var connectedAtoms = new HashSet<int>();
         var surfaceAtoms = new List<int>();
 
@@ -103,13 +109,14 @@ public static class XYZParser
         }
 
         // Создаем новый файл только с связанными атомами
-        var filteredFile = new XyzFile
+        var filteredFile = new XYZFrame()
         {
-            Comment = $"{xyzFile.Comment} (floating atoms removed)",
-            AtomCount = connectedAtoms.Count
+            Comment = $"{inputFrame.Comment} (floating atoms removed)",
+            NumberOfParticles = connectedAtoms.Count,
+            FrameNumber = inputFrame.FrameNumber
         };
 
-        foreach (int index in connectedAtoms.OrderBy(i => i))
+        foreach (var index in connectedAtoms.OrderBy(i => i))
         {
             filteredFile.Particles.Add(particles[index]);
         }
@@ -125,27 +132,92 @@ public static class XYZParser
         return Math.Sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-    public static void Save(this XyzFile xyzFile, string filePath)
+
+    private static void ParsePropertyNames(XYZFrame frame, string commentLine)
     {
-        Save(filePath, xyzFile);
+        // Look for property names in comment line
+        // OVITO format: "Properties=species:S:1:pos:R:3:mass:R:1:..."
+        if (commentLine.Contains("Properties="))
+        {
+            var propertiesSection = commentLine.Split(new[] { "Properties=" }, StringSplitOptions.None)[1];
+            // Take only the part before any other keywords
+            propertiesSection = propertiesSection.Split(new[] { " ", "\t" }, StringSplitOptions.RemoveEmptyEntries)[0];
+
+            var propertyDefinitions = propertiesSection.Split(':');
+
+            for (int i = 0; i < propertyDefinitions.Length; i += 3)
+            {
+                if (i + 2 < propertyDefinitions.Length)
+                {
+                    string name = propertyDefinitions[i];
+                    string type = propertyDefinitions[i + 1];
+                    int count = int.Parse(propertyDefinitions[i + 2]);
+
+                    // Add property name for each component
+                    if (count == 1)
+                    {
+                        frame.PropertyNames.Add(name);
+                    }
+                    else
+                    {
+                        for (int j = 0; j < count; j++)
+                        {
+                            frame.PropertyNames.Add($"{name}_{j + 1}");
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Default properties for basic XYZ format
+            frame.PropertyNames.AddRange(new[] { "species", "x", "y", "z" });
+        }
     }
 
-    public static void Save(string filePath, XyzFile xyzFile)
+    private static Particle ParseParticleLine(string line, List<string> propertyNames, int particleId)
     {
-        if (xyzFile == null)
-            throw new ArgumentNullException(nameof(xyzFile));
+        var tokens = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
-        // Update atom count to match actual atoms
-        xyzFile.AtomCount = xyzFile.Particles.Count;
+        if (tokens.Length < 4)
+            throw new FormatException($"Invalid particle data at line: {line}");
 
-        var lines = new List<string>
+        var particle = new Particle { Id = particleId };
+
+        // Parse basic XYZ format: species x y z [additional properties...]
+        particle.Type = tokens[0];
+        particle.X = ParseFloat(tokens[1]);
+        particle.Y = ParseFloat(tokens[2]);
+        particle.Z = ParseFloat(tokens[3]);
+
+        // Parse additional properties
+        for (int i = 4; i < tokens.Length && i - 4 < propertyNames.Count; i++)
         {
-            xyzFile.AtomCount.ToString(),
-            xyzFile.Comment
-        };
+            string propertyName = propertyNames[i - 4];
 
-        lines.AddRange(xyzFile.Particles.Select(atom => atom.ToString()));
+            // Skip position properties as they're already handled
+            if (propertyName == "x" || propertyName == "y" || propertyName == "z" || propertyName == "species")
+                continue;
 
-        File.WriteAllLines(filePath, lines);
+            particle.Properties[propertyName] = ParseValue(tokens[i]);
+        }
+
+        return particle;
+    }
+
+    private static float ParseFloat(string value)
+    {
+        return float.Parse(value, CultureInfo.InvariantCulture);
+    }
+
+    private static object ParseValue(string value)
+    {
+        if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double doubleResult))
+            return doubleResult;
+
+        if (int.TryParse(value, out int intResult))
+            return intResult;
+
+        return value; // Return as string if not numeric
     }
 }

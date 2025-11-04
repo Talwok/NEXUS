@@ -1,0 +1,31 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             xmlns:converters1="clr-namespace:NEXUS.Converters;assembly=NEXUS"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Dialogs.SettingsDialog"
+             x:DataType="viewModels:SettingsDialogViewModel">
+    <StackPanel Margin="0 40 0 0">
+        
+        <ComboBox ItemsSource="{Binding ColorTableService.ColorTables}"
+                  SelectedItem="{Binding ColorTableService.SelectedColorTable}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="*, 8, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Title}" />
+                        <Rectangle Grid.Column="2"
+                                   Width="100"
+                                   Height="20"
+                                   Fill="{Binding Colors, Converter={x:Static converters1:HorizontalColorsToGradientConverter.Instance}}" />
+                    </Grid>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+    </StackPanel>
+
+</UserControl>

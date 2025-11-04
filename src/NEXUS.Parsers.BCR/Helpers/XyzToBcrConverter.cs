@@ -6,17 +6,17 @@ namespace NEXUS.Parsers.BCR.Helpers;
 
 public static class XyzToBcrConverter
 {
-    public static BcrFile Convert(this XyzFile xyzFile, double pixelSize = 0.5, double atomRadius = 1.34,
+    public static BcrFile ConvertToBcr(this XYZFrame xyzFrame, double pixelSize = 0.5, double atomRadius = 1.34,
         double baseZ = -10.0, string unit = "nm", BcrParser.BcrDataType dataType = BcrParser.BcrDataType.Float32)
     {
-        if (xyzFile == null || xyzFile.Particles.Count == 0)
+        if (xyzFrame == null || xyzFrame.Particles.Count == 0)
             throw new ArgumentException("XYZ файл пустой или невалидный.");
 
         // Определяем bounding box
-        double minX = xyzFile.Particles.Min(p => p.X);
-        double maxX = xyzFile.Particles.Max(p => p.X);
-        double minY = xyzFile.Particles.Min(p => p.Y);
-        double maxY = xyzFile.Particles.Max(p => p.Y);
+        double minX = xyzFrame.Particles.Min(p => p.X);
+        double maxX = xyzFrame.Particles.Max(p => p.X);
+        double minY = xyzFrame.Particles.Min(p => p.Y);
+        double maxY = xyzFrame.Particles.Max(p => p.Y);
 
         int xPixels = (int)Math.Ceiling((maxX - minX) / pixelSize) + 1;
         int yPixels = (int)Math.Ceiling((maxY - minY) / pixelSize) + 1;
@@ -43,7 +43,7 @@ public static class XyzToBcrConverter
                 double gridX = minX + i * pixelSize;
                 double maxHeight = baseZ;
 
-                foreach (var atom in xyzFile.Particles)
+                foreach (var atom in xyzFrame.Particles)
                 {
                     double distXY = Math.Sqrt(Math.Pow(gridX - atom.X, 2) + Math.Pow(gridY - atom.Y, 2));
                     if (distXY <= atomRadius) // <= вместо < для полного покрытия

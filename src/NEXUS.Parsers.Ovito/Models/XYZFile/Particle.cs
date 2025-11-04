@@ -2,17 +2,17 @@
 
 namespace NEXUS.Parsers.Ovito.Models.XYZFile;
 
-public class Particle(string element, double x, double y, double z)
+public class Particle
 {
-    public string Element { get; set; } = element;
-    public double X { get; set; } = x;
-    public double Y { get; set; } = y;
-    public double Z { get; set; } = z;
+    public int Id { get; set; }
+    public string Type { get; set; }
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Z { get; set; }
+    public Dictionary<string, object> Properties { get; set; } = new();
 
     public override string ToString()
     {
-        return $"{Element} {X.ToString("F6", CultureInfo.InvariantCulture)} " +
-               $"{Y.ToString("F6", CultureInfo.InvariantCulture)} " +
-               $"{Z.ToString("F6", CultureInfo.InvariantCulture)}";
+        return $"Particle {Id}: {Type} at ({X:F6}, {Y:F6}, {Z:F6})";
     }
 }

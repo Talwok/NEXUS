@@ -2,7 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:viewModels="clr-namespace:NEXUS.Growth.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -35,7 +34,7 @@
                     </Button>
                 </UniformGrid>
 
-                <controls:TabView Name="Tabs"
+                <!--<controls:TabView Name="Tabs"
                                   CanDragTabs="False" 
                                   CanReorderTabs="False" 
                                   TabWidthMode="Compact"
@@ -100,7 +99,7 @@
                         </controls:TabViewItem.Content>
                     </controls:TabViewItem>
                     
-                </controls:TabView>
+                </controls:TabView>-->
 
             </DockPanel>
 

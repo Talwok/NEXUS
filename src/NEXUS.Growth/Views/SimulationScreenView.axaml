@@ -31,7 +31,7 @@
                             <SelectableTextBlock Grid.Row="0" Grid.Column="2" VerticalAlignment="Center"
                                                  Text="{Binding Id}" />
                             <Button Grid.Row="0" Grid.Column="3" ToolTip.Tip="Опции" Theme="{StaticResource TransparentButton}"
-                                    Content="{avalonia:MaterialIconExt Kind=Cog, Size=12}" Width="24">
+                                    Content="{avalonia:MaterialIconExt Kind=Cog}" Width="24">
                                 <Button.Flyout>
                                     <MenuFlyout>
                                         <MenuItem Icon="{avalonia:MaterialIconExt Kind=ContentDuplicate}"

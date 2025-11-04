@@ -227,17 +227,17 @@ public class RangeTrack : Avalonia.Controls.Control
 
             BackgroundButton?.Arrange(new Rect(offset, pieceSize));
 
-            offset = offset.WithY(isDirectionReversed ? 0.0 : upperThumbOffset + halfThumbLength);
+            offset = offset.WithY(isDirectionReversed ? 0.0 : (double.IsNaN(upperThumbOffset) ? 0 : upperThumbOffset) + halfThumbLength);
             pieceSize = pieceSize.WithHeight(foregroundButtonLength);
 
             ForegroundButton?.Arrange(new Rect(offset, pieceSize));
 
-            offset = offset.WithY(isDirectionReversed ? 0.0 : lowerThumbOffset);
+            offset = offset.WithY(isDirectionReversed ? 0.0 : (double.IsNaN(lowerThumbOffset) ? 0 : lowerThumbOffset));
             pieceSize = pieceSize.WithHeight(thumbLength);
 
             LowerThumb?.Arrange(new Rect(offset, pieceSize));
 
-            offset = offset.WithY(isDirectionReversed ? 0.0 : upperThumbOffset);
+            offset = offset.WithY(isDirectionReversed ? 0.0 : (double.IsNaN(upperThumbOffset) ? 0 : upperThumbOffset));
             pieceSize = pieceSize.WithHeight(thumbLength);
 
             UpperThumb?.Arrange(new Rect(offset, pieceSize));

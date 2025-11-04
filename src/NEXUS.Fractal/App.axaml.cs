@@ -37,6 +37,10 @@ public partial class App : Application
         serviceCollection.AddSingleton<CalculationService>();
         serviceCollection.AddSingleton<GeometryService>();
         serviceCollection.AddSingleton<FilterService>();
+        serviceCollection.AddSingleton<FileWatcherService>();
+        serviceCollection.AddSingleton<ColorTableService>();
+
+        serviceCollection.AddSingleton<StatefulServiceBase, ColorTableService>();
 
         serviceCollection.AddSingleton<StatefulServiceBase, ProjectService>();
 

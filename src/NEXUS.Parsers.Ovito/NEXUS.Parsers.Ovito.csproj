@@ -6,4 +6,14 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+      <PackageReference Include="MIConvexHull" Version="1.1.19.1019" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NEXUS.Parsers.MDT\NEXUS.Parsers.MDT.csproj" />
+    </ItemGroup>
+
 </Project>

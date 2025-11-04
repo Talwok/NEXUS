@@ -126,7 +126,6 @@ public class BcrFrameImageProcessor
         return new MinMax(min, max);
     }
 
-
     public float[,] GetHeightMap() => ConvertToFloatHeightMap(_frame.Data);
 
     private float[,] ConvertToFloatHeightMap(double[,] heightMap)

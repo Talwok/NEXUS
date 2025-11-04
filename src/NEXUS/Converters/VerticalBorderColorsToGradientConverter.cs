@@ -48,9 +48,9 @@ public class VerticalBorderColorsToGradientConverter : IValueConverter
 
             return new LinearGradientBrush
             {
-                StartPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
-                GradientStops = gradientStops
+                StartPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                GradientStops = gradientStops,
             };
         }
 

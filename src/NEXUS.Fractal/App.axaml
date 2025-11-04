@@ -1,10 +1,10 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:nexus="clr-namespace:NEXUS;assembly=NEXUS"
-             x:Class="NEXUS.Fractal.App"
-             RequestedThemeVariant="Default">
+             xmlns:u-semi="https://irihi.tech/ursa/themes/semi"
+             xmlns:semi="https://irihi.tech/semi"
+             x:Class="NEXUS.Fractal.App">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
     <Application.DataTemplates>
         <nexus:ViewLocator/>
@@ -17,7 +17,10 @@
         </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>
-        <styling:FluentAvaloniaTheme />
+        <semi:SemiTheme Locale="ru-RU" />
+        <semi:SemiPopupAnimations />
+        <u-semi:SemiTheme Locale="ru-RU" />
+        
         <avalonia:MaterialIconStyles />
         <StyleInclude Source="avares://NEXUS/Styles/Styles.axaml" />
     </Application.Styles>
