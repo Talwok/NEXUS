@@ -41,16 +41,21 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         SettingsScreenViewModel settings,
         IEnumerable<StatefulServiceBase> statefulServices,
         FileWatcherService fileWatcherService,
-        ColorTableService colorTableService/*,
-        InfoService infoService*/)
+        ColorTableService colorTableService,
+        InfoService infoService,
+        ProcessService processService,
+        FileTabsViewModel fileTabsViewModel,
+        FileTreeViewModel fileTreeViewModel)
     {
         SettingsMenuItemScreen = settings;
         ProjectService = statefulServices.FirstOrDefault<ProjectService>();
-        //InfoService = infoService;
+        InfoService = infoService;
+        ProcessService = processService;
         GeometryService = geometryService;
         CalculationService = calculationService;
         FileWatcherService = fileWatcherService;
-        FileTree = new FileTreeViewModel(storageProvider, fileWatcherService);
+        FileTree = fileTreeViewModel;
+        FileTabs = fileTabsViewModel;
         ColorTableService = colorTableService;
         _statefulServices = statefulServices;
 
@@ -109,6 +114,10 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
         OpenLogsJournalDrawerCommand = ReactiveCommand.CreateFromTask(OpenLogsJournalDrawer);
     }
 
+    public ProcessService ProcessService { get; set; }
+
+    public InfoService InfoService { get; set; }
+
     public ICommand OpenLogsJournalDrawerCommand { get; set; }
 
     public ColorTableService ColorTableService { get; set; }
@@ -116,6 +125,9 @@ public class MainWindowViewModel : MainViewModel<MainArgumentsModel>
     public FileWatcherService FileWatcherService { get; set; }
 
     public FileTreeViewModel FileTree { get; set; }
+
+    public FileTabsViewModel FileTabs { get; set; }
+
 
     private async Task OpenLogsJournalDrawer(CancellationToken arg)
     {

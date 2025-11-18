@@ -1,8 +1,5 @@
 using System;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -11,7 +8,10 @@ using NEXUS.Extensions;
 using NEXUS.Fractal.Services;
 using NEXUS.Fractal.ViewModels;
 using NEXUS.Fractal.Views;
+using NEXUS.Helpers;
 using NEXUS.ViewModels;
+using NLog;
+using NLog.Config;
 using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 namespace NEXUS.Fractal;
@@ -25,6 +25,10 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var config = LogManager.Configuration ?? new LoggingConfiguration();
+        config.AddRuleForAllLevels(new LogCallbackTarget());
+        LogManager.Configuration = config;
+
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
 
         var serviceCollection = new ServiceCollection();
@@ -39,6 +43,10 @@ public partial class App : Application
         serviceCollection.AddSingleton<FilterService>();
         serviceCollection.AddSingleton<FileWatcherService>();
         serviceCollection.AddSingleton<ColorTableService>();
+        serviceCollection.AddSingleton<ProcessService>();
+
+        serviceCollection.AddSingleton<FileTabsViewModel>();
+        serviceCollection.AddSingleton<FileTreeViewModel>();
 
         serviceCollection.AddSingleton<StatefulServiceBase, ColorTableService>();
 

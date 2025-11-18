@@ -1,0 +1,57 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="345"
+             d:DesignHeight="60"
+             x:Class="NEXUS.Fractal.Views.TestView">
+    <Grid ColumnDefinitions="*, Auto, Auto"
+          ColumnSpacing="8"
+          RowDefinitions="Auto, Auto">
+        
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   Text="Some running process" />
+        <ProgressBar Grid.Row="1"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="2"
+                     Maximum="80"
+                     Minimum="0"
+                     Value="20" />
+        
+        <u:IconButton Grid.Row="1"
+                      Grid.Column="2"
+                      Padding="0"
+                      MinHeight="0"
+                      HorizontalAlignment="Left"
+                      Theme="{StaticResource BorderlessIconButton}"
+                      Content="{avalonia:MaterialIconExt CancelOctagon, IconSize=14}" />
+        <!--<u:IconButton Grid.Row="0"
+                      Grid.Column="2"
+                      Padding="0"
+                      Theme="{StaticResource BorderlessIconButton}"
+                      Content="{avalonia:MaterialIconExt Cancel, IconSize=14}" />-->
+    </Grid>
+<!--
+<DockPanel>
+    <u:IconButton DockPanel.Dock="Right"
+                  Padding="4 0"
+                  Theme="{StaticResource BorderlessIconButton}"
+                  Height="20"
+                  Content="{avalonia:MaterialIconExt Kind=CancelOctagon, IconSize=14}"/>
+    
+    <u:IconButton IsLoading="True" Theme="{StaticResource BorderlessIconButton}"
+                  Height="20">
+        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
+            <TextBlock Grid.Column="0" Text="Some process in work"/>
+            <ProgressBar MinWidth="100" Grid.Column="1" Value="10"/>
+            <TextBlock Grid.Column="2" Text="[2]"></TextBlock>
+        </Grid>
+    </u:IconButton>
+</DockPanel>
+-->
+
+</UserControl>

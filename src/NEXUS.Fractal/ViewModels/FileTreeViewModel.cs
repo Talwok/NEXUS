@@ -8,8 +8,12 @@ using NEXUS.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Windows.Input;
 using DynamicData;
+using NEXUS.Fractal.Models;
 
 namespace NEXUS.Fractal.ViewModels;
 
@@ -21,31 +25,38 @@ public class FileTreeViewModel : ViewModelBase
     public FileTreeViewModel(IStorageProvider storageProvider, FileWatcherService service)
     {
         _storageProvider = storageProvider;
+
         _service = service;
         _service.TreeUpdated += OnTreeUpdated;
 
-        SelectFolderCommand = new AsyncRelayCommand(SelectFolderAsync);
-        Root = _service.RootNode;
+        //Root = new EntityNodeModel();
 
-        this.WhenAnyValue(vm => vm.SelectedTab)
-            .Subscribe(OnTabChanged);
-    }
-
-    private void OnTabChanged(EntityNodeViewModel? tab)
-    {
-        var pathLasting = tab?.FullPath.Split(_service.WatchedFolder + "\\").LastOrDefault();
-        if (pathLasting != null)
+        SelectFolderCommand = ReactiveCommand.CreateFromTask(SelectFolderAsync, outputScheduler: RxApp.MainThreadScheduler);
+        /*ExpandAllCommand = ReactiveCommand.Create(() =>
         {
-            Breadcrumbs.Clear();
-            Breadcrumbs.AddRange(pathLasting.Split('\\'));
-        }
+            UpdateAllNodesByCallback(Root, n => n.IsExpanded = true);
+            this.RaisePropertyChanged(nameof(Root));
+        });
+        CollapseAllCommand = ReactiveCommand.Create(() =>
+        {
+            UpdateAllNodesByCallback(Root, n => n.IsExpanded = false);
+            this.RaisePropertyChanged(nameof(Root));
+        });*/
+
     }
 
-    public AsyncRelayCommand SelectFolderCommand { get; set; }
+    public ICommand ExpandAllCommand { get; }
+    public ICommand CollapseAllCommand { get; }
+    public ICommand SelectFolderCommand { get; }
+
+    [Reactive]
+    public EntityNodeModel? Root { get; private set; }
+
+    [Reactive]
+    public ObservableCollection<EntityNodeModel>? SelectedNodes { get; set; } = [];
 
     private async Task SelectFolderAsync()
     {
-
         var folders = await _storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "Select Folder to Watch",
@@ -55,28 +66,23 @@ public class FileTreeViewModel : ViewModelBase
         if (folders.Count > 0)
         {
             var folder = folders[0];
-            SelectedPath = folder.Path.LocalPath;
-            _service.SetWatchedFolder(SelectedPath);
+            await _service.SetWatchedFolder(folder.Path.LocalPath);
         }
     }
 
-    [Reactive]
-    public string SelectedPath { get; set; }
-
     private void OnTreeUpdated(object? sender, TreeUpdatedEventArgs e)
+        => Dispatcher.UIThread.InvokeAsync(() => Root = e.NewRoot);
+
+    private void UpdateAllNodesByCallback(EntityNodeModel node, Action<EntityNodeModel> callback)
     {
-        Dispatcher.UIThread.InvokeAsync(() => Root = e.NewRoot);
+        if (node != null)
+        {
+            callback?.Invoke(node);
+
+            foreach (var child in node.Children)
+            {
+                UpdateAllNodesByCallback(child, callback);
+            }
+        }
     }
-
-    [Reactive]
-    public EntityNodeViewModel Root { get; set; }
-
-    [Reactive]
-    public ObservableCollection<EntityNodeViewModel> SelectedNodes { get; set; } = [];
-
-    [Reactive]
-    public EntityNodeViewModel SelectedTab { get; set; }
-
-    [Reactive]
-    public ObservableCollection<string> Breadcrumbs { get; set; } = [];
 }

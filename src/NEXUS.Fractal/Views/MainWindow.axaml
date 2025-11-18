@@ -8,6 +8,9 @@
               xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
               xmlns:converters="clr-namespace:NEXUS.Fractal.Converters"
               xmlns:converters1="clr-namespace:NEXUS.Converters;assembly=NEXUS"
+              xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
+              xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
+              xmlns:views="clr-namespace:NEXUS.Fractal.Views"
               mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
               x:Class="NEXUS.Fractal.Views.MainWindow"
               x:DataType="viewModels:MainWindowViewModel"
@@ -36,8 +39,8 @@
                     <MenuItem Header="Save"></MenuItem>
                     <MenuItem Header="Save as"></MenuItem>
                 </MenuItem>
-                
-                
+
+
                 <MenuItem Header="Study">
                     <MenuItem Header="Open"></MenuItem>
                     <MenuItem Header="Save"></MenuItem>
@@ -71,16 +74,16 @@
             <Style.Animations>
                 <Animation Duration="0:0:1.5" IterationCount="INFINITE">
                     <KeyFrame Cue="0%">
-                        <Setter Property="Foreground" Value="DarkOrange"/>
+                        <Setter Property="Foreground" Value="DarkOrange" />
                     </KeyFrame>
                     <KeyFrame Cue="50%">
-                        <Setter Property="Foreground" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="Transparent" />
                     </KeyFrame>
                     <KeyFrame Cue="100%">
-                        <Setter Property="Foreground" Value="DarkOrange"/>
+                        <Setter Property="Foreground" Value="DarkOrange" />
                     </KeyFrame>
                 </Animation>
-            </Style.Animations>    
+            </Style.Animations>
         </Style>
         <!--This style is created to demonstrate Dialog StyleClass feature. This style is applied to dialogs in MainWindow OverlayDialogHost -->
         <Style Selector="u|DefaultDialogControl.Custom">
@@ -107,33 +110,92 @@
                     <TextBlock Text="{Binding FileWatcherService.WatchedFolder}" />
                 </Border>
                 <ScrollViewer Margin="8 0 0 0" Grid.Column="1">
-                    <u:Breadcrumb ItemsSource="{Binding FileTree.Breadcrumbs}">
+                    <u:Breadcrumb ItemsSource="{Binding FileTabs.Breadcrumbs}">
 
                     </u:Breadcrumb>
                 </ScrollViewer>
+                <DockPanel Grid.Column="2" IsVisible="{Binding !!ProcessService.LastProcess}">
+                    <u:IconButton DockPanel.Dock="Right"
+                                  Padding="4 0"
+                                  Theme="{StaticResource BorderlessIconButton}"
+                                  Height="20"
+                                  Content="{avalonia:MaterialIconExt Kind=CancelOctagon, IconSize=14}"
+                                  Command="{Binding ProcessService.LastProcess.CancelCommand}" />
 
-                <u:IconButton Grid.Column="2"
-                              Theme="{StaticResource BorderlessIconButton}"
-                              IsLoading="True"
-                              Content="Загрузка всей хуйни"
-                              Height="20" />
+                    <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                                  IsLoading="True"
+                                  Height="20">
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Text="{Binding ProcessService.LastProcess.Description}" />
+                            <ProgressBar MinWidth="100"
+                                         Grid.Column="1"
+                                         Value="{Binding ProcessService.LastProcess.CurrentProgress}"
+                                         Maximum="{Binding ProcessService.LastProcess.MaxProgress}"
+                                         Minimum="0"
+                                         IsIndeterminate="{Binding ProcessService.LastProcess.IsMarquee}" />
+                            <TextBlock Grid.Column="2" IsVisible="{Binding !!ProcessService.RunningProcesses.Count}"
+                                       Text="{Binding ProcessService.RunningProcesses.Count, StringFormat='{}[{0}]'}" />
+                        </Grid>
+                        <u:IconButton.Flyout>
+                            <Flyout>
+                                <ItemsControl ItemsSource="{Binding ProcessService.RunningProcesses}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="viewModels:RunningProcessViewModel">
+                                            <Grid ColumnDefinitions="*, Auto, Auto"
+                                                  ColumnSpacing="8"
+                                                  RowDefinitions="Auto, Auto">
+                                                <Grid Grid.Row="0"
+                                                      Grid.Column="0"
+                                                      ColumnDefinitions="*, Auto" 
+                                                      ColumnSpacing="8">
+                                                    <TextBlock Grid.Column="0"
+                                                               Text="{Binding Description}" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding ProgressText}" />    
+                                                </Grid>
+                                                
+                                                <ProgressBar Grid.Row="1"
+                                                             Grid.Column="0"
+                                                             Grid.ColumnSpan="2"
+                                                             IsIndeterminate="{Binding IsMarquee}"
+                                                             Maximum="{Binding MaxProgress}"
+                                                             Minimum="0"
+                                                             Value="{Binding CurrentProgress}" />
+                                                
+                                                <u:IconButton Grid.Row="1"
+                                                              Grid.Column="2"
+                                                              Padding="0"
+                                                              MinHeight="0"
+                                                              HorizontalAlignment="Right"
+                                                              Theme="{StaticResource BorderlessIconButton}"
+                                                              Content="{avalonia:MaterialIconExt CancelOctagon, IconSize=14}"
+                                                              Command="{Binding CancelCommand}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Flyout>
+                        </u:IconButton.Flyout>
+                    </u:IconButton>
+                </DockPanel>
                 <u:IconButton Grid.Column="4"
                               Theme="{StaticResource BorderlessIconButton}"
                               Icon="{avalonia:MaterialIconExt Kind=Journal, IconSize=14}"
-                              Command="{Binding OpenLogsJournalDrawerCommand}"/>
+                              Command="{Binding OpenLogsJournalDrawerCommand}" />
                 <u:IconButton Grid.Column="5"
                               Theme="{StaticResource BorderlessIconButton}"
                               Icon="{avalonia:MaterialIconExt Kind=About, IconForeground=Gray, IconSize=14}">
                     <u:IconButton.Flyout>
                         <Flyout>
                             <DockPanel LastChildFill="False">
-                                <Image DockPanel.Dock="Left" Source="../Assets/FractalSurface.ico" Width="40" Height="40"/>
+                                <Image DockPanel.Dock="Left" Source="../Assets/FractalSurface.ico" Width="40"
+                                       Height="40" />
                                 <StackPanel Margin="16 0 0 0" DockPanel.Dock="Left" VerticalAlignment="Center">
-                                    <TextBlock Text="NEXUS.Fractal"/>
-                                    <TextBlock Text="{Binding Version, StringFormat='Версия: {0}'}"/>
+                                    <TextBlock Text="NEXUS.Fractal" />
+                                    <TextBlock Text="{Binding Version, StringFormat='Версия: {0}'}" />
                                 </StackPanel>
                             </DockPanel>
-                            
+
                         </Flyout>
                     </u:IconButton.Flyout>
                 </u:IconButton>
@@ -148,24 +210,19 @@
                     CornerRadius="0"
                     Theme="{DynamicResource CardBorder}">
                 <DockPanel>
-                    <u:ToolBar DockPanel.Dock="Top" HorizontalAlignment="Right" OverflowMode="Always" 
-                               IsVisible="{Binding FileTree.Root.IsDirectory}">
+                    <u:ToolBar DockPanel.Dock="Top" HorizontalAlignment="Right" OverflowMode="Always"
+                               IsVisible="{Binding FileTree.Root, Converter={x:Static ObjectConverters.IsNotNull}}">
                         <u:IconButton Theme="{StaticResource BorderlessIconButton}"
-                                      Icon="{avalonia:MaterialIconExt Kind=ChevronDoubleUp, IconSize=14}" />
+                                      Icon="{avalonia:MaterialIconExt Kind=ExpandHorizontal, IconSize=14}" 
+                                      Command="{Binding FileTree.ExpandAllCommand}"/>
                         <u:IconButton Theme="{StaticResource BorderlessIconButton}"
-                                      Icon="{avalonia:MaterialIconExt Kind=ChevronDoubleDown, IconSize=14}" />
-                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
-                                      Icon="{avalonia:MaterialIconExt Kind=Import, IconSize=14}" />
-                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
-                                      Icon="{avalonia:MaterialIconExt Kind=Folder, IconSize=14}" />
-                        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
-                                      Icon="{avalonia:MaterialIconExt Kind=Trash, IconSize=14}" />
-
+                                      Icon="{avalonia:MaterialIconExt Kind=CollapseHorizontal, IconSize=14}" 
+                                      Command="{Binding FileTree.CollapseAllCommand}"/>
                     </u:ToolBar>
 
                     <Panel>
                         <StackPanel Spacing="8" VerticalAlignment="Center"
-                                    IsVisible="{Binding !FileTree.Root.IsDirectory}">
+                                    IsVisible="{Binding FileTree.Root, Converter={x:Static ObjectConverters.IsNull}}">
                             <TextBlock TextWrapping="WrapWithOverflow"
                                        Text="Для продолжения работы выберите рабочую папку"
                                        HorizontalAlignment="Center" />
@@ -177,24 +234,41 @@
 
                             </u:IconButton>
                         </StackPanel>
-                        <TreeView IsVisible="{Binding FileTree.Root.IsDirectory}"
+                        <TreeView IsVisible="{Binding FileTree.Root, Converter={x:Static ObjectConverters.IsNotNull}}"
                                   ItemsSource="{Binding FileTree.Root.Children}"
                                   SelectionMode="Multiple"
+                                  AutoScrollToSelectedItem="False"
+                                  SelectionChanged="TreeView_OnSelectionChanged"
                                   SelectedItems="{Binding FileTree.SelectedNodes}">
-                            <TreeView.Styles>
-                                <Style Selector="TreeViewItem">
-                                    <Setter Property="IsExpanded" Value="{ReflectionBinding   IsExpanded}" />
-                                </Style>
-                            </TreeView.Styles>
                             <TreeView.ItemTemplate>
                                 <TreeDataTemplate ItemsSource="{Binding  Children}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <avalonia:MaterialIcon Width="14" Height="14" IsVisible="{Binding IsDirectory}"
-                                                               Kind="Folder" />
-                                        <avalonia:MaterialIcon Width="14" Height="14"
-                                                               IsVisible="{Binding !IsDirectory}"
-                                                               Kind="{Binding Extension, Converter={x:Static converters:FileExtensionToIconConverter.Instance}}" />
-                                        <TextBlock Text="{Binding Name}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Background="Transparent">
+                                        <!--<StackPanel.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Rename" Icon="{avalonia:MaterialIconExt Rename}"/>
+                                                <MenuItem Header="Expand" Icon="{avalonia:MaterialIconExt Kind=ExpandHorizontal}" Command="{Binding ExpandToggleCommand}" CommandParameter="{x:True}">
+                                                    <MenuItem.IsVisible>
+                                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                            <Binding Path="IsDirectory"/>
+                                                            <Binding Path="!IsExpanded"/>
+                                                        </MultiBinding>
+                                                    </MenuItem.IsVisible>
+                                                </MenuItem>
+                                                <MenuItem Header="Collapse" Icon="{avalonia:MaterialIconExt Kind=CollapseHorizontal}" Command="{Binding ExpandToggleCommand}" CommandParameter="{x:False}">
+                                                    <MenuItem.IsVisible>
+                                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                            <Binding Path="IsDirectory"/>
+                                                            <Binding Path="IsExpanded"/>
+                                                        </MultiBinding>
+                                                    </MenuItem.IsVisible>
+                                                </MenuItem>
+                                                <MenuItem Header="Delete" Icon="{avalonia:MaterialIconExt TrashCan}"/>
+                                            </ContextMenu>
+                                        </StackPanel.ContextMenu>-->
+                                        <avalonia:MaterialIcon Width="14" 
+                                                               Height="14"
+                                                               Kind="{Binding FullPath, Converter={x:Static converters:EntityPathToIconConverter.Instance}}" />
+                                        <TextBlock Text="{Binding FullPath, Converter={x:Static converters:EntityPathToNameConverter.Instance}}" />
                                     </StackPanel>
                                 </TreeDataTemplate>
                             </TreeView.ItemTemplate>
@@ -205,8 +279,8 @@
             </Border>
             <GridSplitter Grid.Column="1" Background="Transparent" />
             <DockPanel Grid.Column="2">
-                <TabControl ItemsSource="{Binding FileTree.SelectedNodes}"
-                            SelectedItem="{Binding FileTree.SelectedTab}">
+                <TabControl ItemsSource="{Binding FileTabs.Tabs}"
+                            SelectedItem="{Binding FileTabs.SelectedTab}">
                     <TabControl.Styles>
                         <Style Selector="TabControl">
                             <Setter Property="Template">
@@ -265,14 +339,15 @@
                                                 <u:DateRangePicker Width="300"></u:DateRangePicker>
                                             </u:FormItem>
                                         </u:FormGroup>
-                                        <Button Content="Submit" Theme="{DynamicResource SolidButton}" u:FormItem.NoLabel="True" HorizontalAlignment="Stretch"/>
+                                        <Button Content="Submit" Theme="{DynamicResource SolidButton}"
+                                                u:FormItem.NoLabel="True" HorizontalAlignment="Stretch" />
                                     </u:Form>
                                 </DockPanel>
                                 <DockPanel IsVisible="{Binding !IsDirectory}">
                                     <Panel DockPanel.Dock="Right">
-                                        <Rectangle VerticalAlignment="Stretch" 
+                                        <Rectangle VerticalAlignment="Stretch"
                                                    Width="4"
-                                                   Fill="{Binding ColorTableRange, Converter={x:Static converters1:VerticalBorderColorsToGradientConverter.Instance}}"/>
+                                                   Fill="{Binding ColorTableRange, Converter={x:Static converters1:VerticalBorderColorsToGradientConverter.Instance}}" />
                                         <u:RangeSlider Orientation="Vertical"
                                                        Minimum="{Binding ColorTableMinimum}"
                                                        Maximum="{Binding ColorTableMaximum}"
@@ -284,33 +359,31 @@
                                                 <Style Selector="u|RangeSlider">
                                                     <!-- По умолчанию (без hover) сделать thumbs невидимыми -->
                                                     <Style Selector="^ /template/ Thumb">
-                                                        <Setter Property="Opacity" Value="0" />  <!-- Или Visibility="Collapsed" -->
+                                                        <Setter Property="Opacity" Value="0" />
+                                                        <!-- Или Visibility="Collapsed" -->
                                                     </Style>
 
                                                     <!-- При наведении (pointerover) показать thumbs -->
                                                     <Style Selector="^:pointerover /template/ Thumb">
-                                                        <Setter Property="Opacity" Value="1" />  <!-- Или Visibility="Visible" -->
+                                                        <Setter Property="Opacity" Value="1" />
+                                                        <!-- Или Visibility="Visible" -->
                                                     </Style>
-                                                    
+
                                                     <Style Selector="^:pressed /template/ Thumb">
-                                                        <Setter Property="Opacity" Value="1" />  <!-- Или Visibility="Visible" -->
-                                                    </Style>  
+                                                        <Setter Property="Opacity" Value="1" />
+                                                        <!-- Или Visibility="Visible" -->
+                                                    </Style>
                                                 </Style>
 
                                             </u:RangeSlider.Styles>
                                         </u:RangeSlider>
-                                        
+
                                     </Panel>
-                                    
-                                    <TabControl TabStripPlacement="Bottom">
-                                        <TabItem Header="2D"></TabItem>
-                                        <TabItem Header="3D"></TabItem>
-                                    </TabControl>    
+                                    <views:EntityNodeView DataContext="{Binding .}" />
                                 </DockPanel>
                             </Panel>
-                            
-                            
-                            
+
+
                         </DataTemplate>
                     </TabControl.DataTemplates>
                 </TabControl>

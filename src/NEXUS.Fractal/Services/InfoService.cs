@@ -1,78 +1,44 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Reactive.Linq;
-using Avalonia.ReactiveUI;
 using DynamicData;
-using NEXUS.Fractal.ViewModels;
-using ReactiveUI.Fody.Helpers;
+using NEXUS.Helpers;
+using NLog;
 
 namespace NEXUS.Fractal.Services;
 
-public class InfoService : ServiceBase
+public class InfoService : ServiceBase, IDisposable
 {
-    /*private readonly SourceCache<InfoMessageViewModel, Guid> _messagesSourceCache;
-    
+    private readonly LogCallbackTarget? _logTarget;
+    private readonly SourceCache<LogEventInfo, Guid> _messagesSourceCache;
+
     public InfoService()
     {
-        _messagesSourceCache = new SourceCache<InfoMessageViewModel, Guid>(message => message.Id);
-        
+        if (LogManager.Configuration?.FindTargetByName<LogCallbackTarget>(nameof(LogCallbackTarget)) is { } target)
+        {
+            _logTarget = target;
+            _logTarget.OnLogEvent += OnLogEvent;
+        }
+
+        _messagesSourceCache = new SourceCache<LogEventInfo, Guid>(_ => Guid.NewGuid());
         _messagesSourceCache.Connect()
-            .ObserveOn(AvaloniaScheduler.Instance)
             .Bind(out var messages)
-            .DisposeMany()
             .Subscribe();
 
-        Messages = messages;
+        LogMessages = messages;
     }
 
-    public ReadOnlyObservableCollection<InfoMessageViewModel> Messages { get; }
+    public ReadOnlyObservableCollection<LogEventInfo> LogMessages { get; set; }
 
-    
-    [Reactive]
-    public InfoMessageViewModel? LastMessage { get; private set; }
+    private void OnLogEvent(LogEventInfo eventInfo)
+        => _messagesSourceCache.AddOrUpdate(eventInfo);
 
-    /// <summary>
-    /// Appending message with specified timeout
-    /// </summary>
-    /// <param name="message">Message</param>
-    /// <param name="timeout">Timeout</param>
-    private void AppendMessage(InfoMessageViewModel message, TimeSpan timeout)
+    public void Dispose()
     {
-        _messagesSourceCache.AddOrUpdate(message);
-
-        if (timeout > TimeSpan.Zero)
-            Observable.Timer(timeout).Subscribe(_ => RemoveMessage(message));
-
-        LastMessage = message;
+        Disposable.Dispose();
+        if (_logTarget?.OnLogEvent != null)
+        {
+            _logTarget.OnLogEvent -= OnLogEvent;
+            _logTarget.Dispose();
+        }
     }
-
-    /// <summary>
-    /// Message with existance timeout
-    /// </summary>
-    /// <param name="message">Message</param>
-    /// <param name="withTimeout">Must have timeout</param>
-    public void AppendMessage(InfoMessageViewModel message, bool withTimeout = true)
-        => AppendMessage(message, withTimeout ? TimeSpan.FromSeconds(5) : TimeSpan.Zero);
-
-    /// <summary>
-    /// Remove message by id
-    /// </summary>
-    /// <param name="guid">Message id</param>
-    public void RemoveMessage(Guid guid)
-    {
-        if (_messagesSourceCache.Lookup(guid) is { HasValue: true, Value: { } message })
-            RemoveMessage(message);
-    }
-
-    /// <summary>
-    /// Remove message
-    /// </summary>
-    /// <param name="message">Message</param>
-    public void RemoveMessage(InfoMessageViewModel message)
-    {
-        _messagesSourceCache.Remove(message);
-
-        if (LastMessage?.Id == message.Id)
-            LastMessage = null;
-    }*/
 }
