@@ -125,6 +125,7 @@ public class EntityNodeViewModel : ReactiveObject
     [Reactive] public float ModelYaw { get; set; }
     [Reactive] public float ModelPitch { get; set; } = 1.5f;
     [Reactive] public bool ShowFoundation { get; set; } = true;
+    [Reactive] public bool IsChanged { get; set; } = true;
 
     public void Rename()
     {

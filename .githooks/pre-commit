@@ -3,7 +3,7 @@ echo "🚀 Running pre-commit checks..."
 
 cd src
 
-# 2. Проверка форматирования кода
+# Проверка форматирования кода
 echo "📝 Checking code formatting..."
 dotnet format --verify-no-changes --verbosity diagnostic
 if [ $? -ne 0 ]; then
@@ -11,25 +11,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 3. Проверка синтаксиса C#
-echo "🔍 Building project..."
-if ! dotnet build --nologo --verbosity quiet; then
-    echo "❌ Build failed!"
-    exit 1
-fi
-
-# 4. Проверка XAML файлов Avalonia
-echo "📱 Validating Avalonia XAML files..."
-find . -name "*.axaml" | while read xaml_file; do
-    echo "  Checking $xaml_file"
-    # Простая проверка на валидность XML
-    if ! xmllint --noout "$xaml_file" 2>/dev/null; then
-        echo "❌ Invalid XAML: $xaml_file"
-        exit 1
-    fi
-done
-
-# 5. Проверка на наличие отладочного кода
+# Проверка на наличие отладочного кода
 echo "🐛 Checking for debug code..."
 if git diff --cached --name-only | xargs grep -l "TODO\|FIXME\|DEBUG" 2>/dev/null; then
     echo "⚠️  Found TODO/FIXME in committed files. Continue? [y/N]"

@@ -30,7 +30,9 @@
                     </MenuItem.Header>
                 </MenuItem>
                 <MenuItem Header="File">
-                    <MenuItem Header="Open"></MenuItem>
+                    <MenuItem Header="Open" 
+                              Icon="{avalonia:MaterialIconExt Kind=Folder}"
+                              Command="{Binding FileTree.SelectFolderCommand}"></MenuItem>
                     <MenuItem Header="Save"></MenuItem>
                     <MenuItem Header="Save as"></MenuItem>
                 </MenuItem>
@@ -317,11 +319,38 @@
                                     <StackPanel Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </Setter>
+                            <Style Selector="^ TabItem">
+                                <Setter Property="Padding" Value="4 0"/>
+                            </Style>
                         </Style>
                     </TabControl.Styles>
                     <TabControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name}" />
+                            <Panel Background="Transparent" 
+                                   Margin="0"
+                                   Classes="TabItemPanel"
+                                   ToolTip.Tip="{Binding Name}">
+                                <Panel.Styles>
+                                    <Style Selector="Panel.TabItemPanel">
+                                        <Style Selector="^ u|IconButton">
+                                            <Setter Property="Opacity" Value="0" />
+                                        </Style>
+                                        <Style Selector="^:pointerover u|IconButton">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </Style>
+                                    </Style>
+                                </Panel.Styles>
+                                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" Margin="0">
+                                    <Rectangle Grid.Column="0" Width="10" Height="10" Fill="DarkOrange" RadiusX="5" RadiusY="5" IsVisible="{Binding IsChanged}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name, Converter={x:Static converters1:LongNameToShortNameConverter.Instance}}" />
+                                    <u:IconButton Grid.Column="2" 
+                                                  Icon="{avalonia:MaterialIconExt Kind=Close, IconSize=14}"
+                                                  Theme="{StaticResource BorderlessIconButton}"
+                                                  MinWidth="0"
+                                                  MinHeight="0"/>
+                                </Grid>
+                                
+                            </Panel>
                         </DataTemplate>
                     </TabControl.ItemTemplate>
                     <TabControl.DataTemplates>

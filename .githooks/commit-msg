@@ -2,13 +2,15 @@
 COMMIT_MSG_FILE=$1
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 
-# Паттерн для conventional commits
+# Паттерн: тип, необязательный scope в скобках, затем ": " и описание
 PATTERN="^(feat|fix|docs|style|refactor|test|chore|perf|build|ci|revert)(\([a-zA-Z0-9_-]+\))?: .+"
 
 if ! [[ $COMMIT_MSG =~ $PATTERN ]]; then
     echo "❌ Invalid commit message format!"
-    echo "📝 Use: <type>(<scope>): <description>"
+    echo "📝 Use: <type>(<scope>): <description>   OR   <type>: <description>"
     echo "📚 Types: feat, fix, docs, style, refactor, test, chore, perf, build, ci, revert"
-    echo "💡 Example: feat(login): add authentication service"
+    echo "💡 Examples:"
+    echo "   feat: add dark mode"
+    echo "   feat(ui): implement button component"
     exit 1
 fi

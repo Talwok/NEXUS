@@ -8,7 +8,16 @@
              d:DesignWidth="345"
              d:DesignHeight="60"
              x:Class="NEXUS.Fractal.Views.TestView">
-    <Grid ColumnDefinitions="*, Auto, Auto"
+    
+    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" Margin="8 0">
+        <Rectangle Grid.Column="0" IsVisible="False" Width="10" Height="10" Fill="DarkOrange" RadiusX="5" RadiusY="5"/>
+        <TextBlock Grid.Column="1" Text="asfasfasfasf" />
+        <u:IconButton Grid.Column="2" 
+                      Icon="{avalonia:MaterialIconExt Kind=Close, IconSize=14}"
+                      MinWidth="0"
+                      MinHeight="0"/>
+    </Grid>
+    <!--<Grid ColumnDefinitions="*, Auto, Auto"
           ColumnSpacing="8"
           RowDefinitions="Auto, Auto">
         
@@ -29,12 +38,12 @@
                       HorizontalAlignment="Left"
                       Theme="{StaticResource BorderlessIconButton}"
                       Content="{avalonia:MaterialIconExt CancelOctagon, IconSize=14}" />
-        <!--<u:IconButton Grid.Row="0"
+        ~1~<u:IconButton Grid.Row="0"
                       Grid.Column="2"
                       Padding="0"
                       Theme="{StaticResource BorderlessIconButton}"
-                      Content="{avalonia:MaterialIconExt Cancel, IconSize=14}" />-->
-    </Grid>
+                      Content="{avalonia:MaterialIconExt Cancel, IconSize=14}" />@1@
+    </Grid>-->
 <!--
 <DockPanel>
     <u:IconButton DockPanel.Dock="Right"
