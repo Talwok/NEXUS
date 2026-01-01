@@ -4,12 +4,9 @@
               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
               xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
               xmlns:u="https://irihi.tech/ursa"
-              xmlns:iri="https://irihi.tech/shared"
               xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
               xmlns:converters="clr-namespace:NEXUS.Fractal.Converters"
               xmlns:converters1="clr-namespace:NEXUS.Converters;assembly=NEXUS"
-              xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
-              xmlns:surface="clr-namespace:NEXUS.Fractal.Controls.Surface"
               xmlns:views="clr-namespace:NEXUS.Fractal.Views"
               mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
               x:Class="NEXUS.Fractal.Views.MainWindow"
@@ -22,83 +19,13 @@
               Title="{Binding Version, StringFormat='NEXUS.Fractal {0}'}"
               Name="MainAppWindow">
     <u:UrsaWindow.LeftContent>
-        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16">
-            <Menu Grid.Column="0">
-                <MenuItem Padding="0">
-                    <MenuItem.Header>
-                        <Image Grid.Column="0" Margin="8" Source="../../Assets/FractalSurface.ico" Width="14" />
-                    </MenuItem.Header>
-                </MenuItem>
-                <MenuItem Header="File">
-                    <MenuItem Header="Open" 
-                              Icon="{avalonia:MaterialIconExt Kind=Folder}"
-                              Command="{Binding FileTree.SelectFolderCommand}"></MenuItem>
-                    <MenuItem Header="Save"></MenuItem>
-                    <MenuItem Header="Save as"></MenuItem>
-                </MenuItem>
-                <MenuItem Header="Filter">
-                    <MenuItem Header="Open"></MenuItem>
-                    <MenuItem Header="Save"></MenuItem>
-                    <MenuItem Header="Save as"></MenuItem>
-                </MenuItem>
-
-
-                <MenuItem Header="Study">
-                    <MenuItem Header="Open"></MenuItem>
-                    <MenuItem Header="Save"></MenuItem>
-                    <MenuItem Header="Save as"></MenuItem>
-                </MenuItem>
-            </Menu>
-
-        </Grid>
+        <views:UpperLeftWindowContent/>
     </u:UrsaWindow.LeftContent>
     <u:UrsaWindow.RightContent>
-        <StackPanel Orientation="Horizontal">
-            <u:IconButton Theme="{StaticResource BorderlessIconButton}"
-                          IsVisible="{Binding IsUpdateFound}"
-                          Command="{Binding UpdateCommand}">
-                <u:IconButton.Icon>
-                    <avalonia:MaterialIcon IconSize="14" Classes="UpdateButton" Kind="Download" />
-                </u:IconButton.Icon>
-            </u:IconButton>
-            <u:ThemeToggleButton
-                HorizontalAlignment="Left"
-                IsThreeState="False"
-                Mode="Controller" />
-            <u:IconButton
-                Theme="{StaticResource BorderlessIconButton}"
-                Icon="{avalonia:MaterialIconExt Kind=Settings, IconSize=14}"
-                Command="{Binding OpenSettingsDrawerCommand}" />
-        </StackPanel>
+        <views:UpperRightWindowContent/>
     </u:UrsaWindow.RightContent>
-    <u:UrsaWindow.Styles>
-        <Style Selector="avalonia|MaterialIcon.UpdateButton">
-            <Style.Animations>
-                <Animation Duration="0:0:1.5" IterationCount="INFINITE">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="Foreground" Value="DarkOrange" />
-                    </KeyFrame>
-                    <KeyFrame Cue="50%">
-                        <Setter Property="Foreground" Value="Transparent" />
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="Foreground" Value="DarkOrange" />
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
-        </Style>
-        <!--This style is created to demonstrate Dialog StyleClass feature. This style is applied to dialogs in MainWindow OverlayDialogHost -->
-        <Style Selector="u|DefaultDialogControl.Custom">
-            <Style Selector="^ /template/ Button#PART_OKButton">
-                <Setter Property="Content" Value="CUSTOM" />
-                <Setter Property="iri:ClassHelper.Classes" Value="Warning" />
-            </Style>
-        </Style>
-        <Style Selector="MenuItem">
-            <Setter Property="Padding" Value="4 0" />
-        </Style>
-    </u:UrsaWindow.Styles>
     <DockPanel Margin="0 0 0 0">
+        
         <Border DockPanel.Dock="Top"
                 Height="32"
                 Padding="0"
@@ -106,104 +33,9 @@
                 VerticalAlignment="Stretch"
                 CornerRadius="0"
                 Theme="{DynamicResource CardBorder}" />
-        <Border DockPanel.Dock="Bottom" CornerRadius="0" Margin="0" Padding="0" Theme="{DynamicResource CardBorder}">
-            <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto, Auto, Auto, *, Auto, Auto" ColumnSpacing="8">
-                <Border Grid.Column="0" Theme="{StaticResource CardBorder}" Padding="8 0">
-                    <TextBlock Text="{Binding FileWatcherService.WatchedFolder}" />
-                </Border>
-                <ScrollViewer Margin="8 0 0 0" Grid.Column="1">
-                    <u:Breadcrumb ItemsSource="{Binding FileTabs.Breadcrumbs}">
-
-                    </u:Breadcrumb>
-                </ScrollViewer>
-                <DockPanel Grid.Column="2" IsVisible="{Binding !!ProcessService.LastProcess}">
-                    <u:IconButton DockPanel.Dock="Right"
-                                  Padding="4 0"
-                                  Theme="{StaticResource BorderlessIconButton}"
-                                  Height="20"
-                                  Content="{avalonia:MaterialIconExt Kind=CancelOctagon, IconSize=14}"
-                                  Command="{Binding ProcessService.LastProcess.CancelCommand}" />
-
-                    <u:IconButton Theme="{StaticResource BorderlessIconButton}"
-                                  IsLoading="True"
-                                  Height="20">
-                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
-                            <TextBlock Grid.Column="0" Text="{Binding ProcessService.LastProcess.Description}" />
-                            <ProgressBar MinWidth="100"
-                                         Grid.Column="1"
-                                         Value="{Binding ProcessService.LastProcess.CurrentProgress}"
-                                         Maximum="{Binding ProcessService.LastProcess.MaxProgress}"
-                                         Minimum="0"
-                                         IsIndeterminate="{Binding ProcessService.LastProcess.IsMarquee}" />
-                            <TextBlock Grid.Column="2" IsVisible="{Binding !!ProcessService.RunningProcesses.Count}"
-                                       Text="{Binding ProcessService.RunningProcesses.Count, StringFormat='{}[{0}]'}" />
-                        </Grid>
-                        <u:IconButton.Flyout>
-                            <Flyout>
-                                <ItemsControl ItemsSource="{Binding ProcessService.RunningProcesses}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="viewModels:RunningProcessViewModel">
-                                            <Grid ColumnDefinitions="*, Auto, Auto"
-                                                  ColumnSpacing="8"
-                                                  RowDefinitions="Auto, Auto">
-                                                <Grid Grid.Row="0"
-                                                      Grid.Column="0"
-                                                      ColumnDefinitions="*, Auto" 
-                                                      ColumnSpacing="8">
-                                                    <TextBlock Grid.Column="0"
-                                                               Text="{Binding Description}" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="{Binding ProgressText}" />    
-                                                </Grid>
-                                                
-                                                <ProgressBar Grid.Row="1"
-                                                             Grid.Column="0"
-                                                             Grid.ColumnSpan="2"
-                                                             IsIndeterminate="{Binding IsMarquee}"
-                                                             Maximum="{Binding MaxProgress}"
-                                                             Minimum="0"
-                                                             Value="{Binding CurrentProgress}" />
-                                                
-                                                <u:IconButton Grid.Row="1"
-                                                              Grid.Column="2"
-                                                              Padding="0"
-                                                              MinHeight="0"
-                                                              HorizontalAlignment="Right"
-                                                              Theme="{StaticResource BorderlessIconButton}"
-                                                              Content="{avalonia:MaterialIconExt CancelOctagon, IconSize=14}"
-                                                              Command="{Binding CancelCommand}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Flyout>
-                        </u:IconButton.Flyout>
-                    </u:IconButton>
-                </DockPanel>
-                <u:IconButton Grid.Column="4"
-                              Theme="{StaticResource BorderlessIconButton}"
-                              Icon="{avalonia:MaterialIconExt Kind=Journal, IconSize=14}"
-                              Command="{Binding OpenLogsJournalDrawerCommand}" />
-                <u:IconButton Grid.Column="5"
-                              Theme="{StaticResource BorderlessIconButton}"
-                              Icon="{avalonia:MaterialIconExt Kind=About, IconForeground=Gray, IconSize=14}">
-                    <u:IconButton.Flyout>
-                        <Flyout>
-                            <DockPanel LastChildFill="False">
-                                <Image DockPanel.Dock="Left" Source="../Assets/FractalSurface.ico" Width="40"
-                                       Height="40" />
-                                <StackPanel Margin="16 0 0 0" DockPanel.Dock="Left" VerticalAlignment="Center">
-                                    <TextBlock Text="NEXUS.Fractal" />
-                                    <TextBlock Text="{Binding Version, StringFormat='Версия: {0}'}" />
-                                </StackPanel>
-                            </DockPanel>
-
-                        </Flyout>
-                    </u:IconButton.Flyout>
-                </u:IconButton>
-            </Grid>
-        </Border>
-
+        
+        <views:LowerWindowContent DockPanel.Dock="Bottom"/>
+        
         <Grid ColumnDefinitions="*, 2, 2*, 2, *">
             <Border Grid.Column="0"
                     Padding="0"
@@ -413,8 +245,6 @@
                                     <views:EntityNodeView DataContext="{Binding .}" />
                                 </DockPanel>
                             </Panel>
-
-
                         </DataTemplate>
                     </TabControl.DataTemplates>
                 </TabControl>
@@ -431,38 +261,4 @@
             </Border>
         </Grid>
     </DockPanel>
-
-    <!--<DockPanel>
-        <views:MenuSection DockPanel.Dock="Top"/>
-        <controls:InfoBar DockPanel.Dock="Bottom" 
-                          Padding="0"
-                          Margin="0"
-                          IsOpen="True"
-                          IsClosable="True"
-                          IsIconVisible="True"
-                          Title="{Binding InfoService.LastMessage.Title}"
-                          Message="{Binding InfoService.LastMessage.Message}">
-            <controls:InfoBar.ActionButton>
-                <Button Content="{avalonia:MaterialIconExt Kind=ExpandVertical}">
-                </Button>
-            </controls:InfoBar.ActionButton>
-        </controls:InfoBar>
-        <controls:InfoBar DockPanel.Dock="Top"
-                          Padding="0"
-                          Margin="0"
-                          Title="{Binding UpdateVersion, StringFormat='Обновление {0}: '}"
-                          Message="Рекомендуется установить последнюю версию приложения"
-                          IsOpen="True"
-                          IsClosable="True"
-                          IsIconVisible="True"
-                          IsVisible="{Binding IsUpdateFound}">
-            <controls:InfoBar.ActionButton>
-                <Button Command="{Binding UpdateCommand}"
-                        ToolTip.Tip="Установить обновление (приложение перезапустится)">
-                    <avalonia:MaterialIcon Kind="MonitorArrowDownVariant" />
-                </Button>
-            </controls:InfoBar.ActionButton>
-        </controls:InfoBar>
-        <views:Workspace/>
-    </DockPanel>-->
 </u:UrsaWindow>

@@ -1,0 +1,43 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="50"
+             x:Class="NEXUS.Fractal.Views.UpperLeftWindowContent"
+             x:DataType="viewModels:MainWindowViewModel">
+    <UserControl.Styles>
+        <Style Selector="MenuItem">
+            <Setter Property="Padding" Value="4 0" />
+        </Style>
+    </UserControl.Styles>
+    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16">
+        <Menu Grid.Column="0">
+            <MenuItem Padding="0">
+                <MenuItem.Header>
+                    <Image Grid.Column="0" Margin="8" Source="../../Assets/FractalSurface.ico" Width="14" />
+                </MenuItem.Header>
+            </MenuItem>
+            
+            <MenuItem Header="File">
+                <MenuItem Header="Open" 
+                          Icon="{avalonia:MaterialIconExt Kind=Folder}"
+                          Command="{Binding FileTree.SelectFolderCommand}"></MenuItem>
+                <MenuItem Header="Save"></MenuItem>
+                <MenuItem Header="Save as"></MenuItem>
+            </MenuItem>
+            
+            <MenuItem Header="Edit">
+                <MenuItem Header="Filters"></MenuItem>
+                <MenuItem Header="Lining"></MenuItem>
+            </MenuItem>
+            
+            <MenuItem Header="Study">
+                <MenuItem Header="Open"></MenuItem>
+                <MenuItem Header="Save"></MenuItem>
+                <MenuItem Header="Save as"></MenuItem>
+            </MenuItem>
+        </Menu>
+    </Grid>
+</UserControl>

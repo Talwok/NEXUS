@@ -1,0 +1,45 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Views.UpperRightWindowContent"
+             x:DataType="viewModels:MainWindowViewModel">
+    <UserControl.Styles>
+        <Style Selector="avalonia|MaterialIcon.UpdateButton">
+            <Style.Animations>
+                <Animation Duration="0:0:1.5" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Foreground" Value="DarkOrange" />
+                    </KeyFrame>
+                    <KeyFrame Cue="50%">
+                        <Setter Property="Foreground" Value="Transparent" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Foreground" Value="DarkOrange" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </UserControl.Styles>
+    <StackPanel Orientation="Horizontal">
+        <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                      IsVisible="{Binding IsUpdateFound}"
+                      Command="{Binding UpdateCommand}">
+            <u:IconButton.Icon>
+                <avalonia:MaterialIcon IconSize="14" Classes="UpdateButton" Kind="Download" />
+            </u:IconButton.Icon>
+        </u:IconButton>
+        <u:ThemeToggleButton
+            HorizontalAlignment="Left"
+            IsThreeState="False"
+            Mode="Controller" />
+        <u:IconButton
+            Theme="{StaticResource BorderlessIconButton}"
+            Icon="{avalonia:MaterialIconExt Kind=Settings, IconSize=14}"
+            Command="{Binding OpenSettingsDrawerCommand}" />
+    </StackPanel>
+</UserControl>

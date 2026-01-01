@@ -4,63 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:u="https://irihi.tech/ursa"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewCube="clr-namespace:NEXUS.Fractal.Controls.ViewCube"
              mc:Ignorable="d"
              d:DesignWidth="345"
              d:DesignHeight="60"
              x:Class="NEXUS.Fractal.Views.TestView">
     
-    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" Margin="8 0">
-        <Rectangle Grid.Column="0" IsVisible="False" Width="10" Height="10" Fill="DarkOrange" RadiusX="5" RadiusY="5"/>
-        <TextBlock Grid.Column="1" Text="asfasfasfasf" />
-        <u:IconButton Grid.Column="2" 
-                      Icon="{avalonia:MaterialIconExt Kind=Close, IconSize=14}"
-                      MinWidth="0"
-                      MinHeight="0"/>
+    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
+        <viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
+                                  Margin="-10 -5"
+                                  Width="60" Height="60"/>
     </Grid>
-    <!--<Grid ColumnDefinitions="*, Auto, Auto"
-          ColumnSpacing="8"
-          RowDefinitions="Auto, Auto">
-        
-        <TextBlock Grid.Row="0"
-                   Grid.Column="0"
-                   Text="Some running process" />
-        <ProgressBar Grid.Row="1"
-                     Grid.Column="0"
-                     Grid.ColumnSpan="2"
-                     Maximum="80"
-                     Minimum="0"
-                     Value="20" />
-        
-        <u:IconButton Grid.Row="1"
-                      Grid.Column="2"
-                      Padding="0"
-                      MinHeight="0"
-                      HorizontalAlignment="Left"
-                      Theme="{StaticResource BorderlessIconButton}"
-                      Content="{avalonia:MaterialIconExt CancelOctagon, IconSize=14}" />
-        ~1~<u:IconButton Grid.Row="0"
-                      Grid.Column="2"
-                      Padding="0"
-                      Theme="{StaticResource BorderlessIconButton}"
-                      Content="{avalonia:MaterialIconExt Cancel, IconSize=14}" />@1@
-    </Grid>-->
-<!--
-<DockPanel>
-    <u:IconButton DockPanel.Dock="Right"
-                  Padding="4 0"
-                  Theme="{StaticResource BorderlessIconButton}"
-                  Height="20"
-                  Content="{avalonia:MaterialIconExt Kind=CancelOctagon, IconSize=14}"/>
-    
-    <u:IconButton IsLoading="True" Theme="{StaticResource BorderlessIconButton}"
-                  Height="20">
-        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
-            <TextBlock Grid.Column="0" Text="Some process in work"/>
-            <ProgressBar MinWidth="100" Grid.Column="1" Value="10"/>
-            <TextBlock Grid.Column="2" Text="[2]"></TextBlock>
-        </Grid>
-    </u:IconButton>
-</DockPanel>
--->
-
 </UserControl>

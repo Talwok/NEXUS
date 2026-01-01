@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace NEXUS.Fractal.Views;
 
-public partial class FractalDimensionResearchView : UserControl
+public partial class UpperRightWindowContent : UserControl
 {
-    public FractalDimensionResearchView()
+    public UpperRightWindowContent()
     {
         InitializeComponent();
     }

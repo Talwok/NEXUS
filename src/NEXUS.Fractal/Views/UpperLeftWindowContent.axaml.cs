@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace NEXUS.Fractal.Views;
 
-public partial class MenuSection : UserControl
+public partial class UpperLeftWindowContent : UserControl
 {
-    public MenuSection()
+    public UpperLeftWindowContent()
     {
         InitializeComponent();
     }

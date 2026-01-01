@@ -48,8 +48,8 @@
                 <Image Source="{Binding #SurfaceOpenGl.Image}" />
                 <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
                     <viewCube:ViewCubeControl Grid.Row="0" Grid.Column="1"
-                                              Margin="-20 -10"
-                                              Width="120" Height="120"
+                                              Margin="-10 -5"
+                                              Width="70" Height="70"
                                               ViewSelected="OnViewCubeViewSelected" />
                 </Grid>
             </Panel>

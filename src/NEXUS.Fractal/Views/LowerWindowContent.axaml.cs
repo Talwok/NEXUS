@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace NEXUS.Fractal.Views;
 
-public partial class Workspace : UserControl
+public partial class LowerWindowContent : UserControl
 {
-    public Workspace()
+    public LowerWindowContent()
     {
         InitializeComponent();
     }

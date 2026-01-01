@@ -1,0 +1,105 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NEXUS.Fractal.Views.LowerWindowContent"
+             x:DataType="viewModels:MainWindowViewModel">
+    <Border CornerRadius="0" Margin="0" Padding="0" Theme="{StaticResource CardBorder}">
+            <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto, Auto, Auto, *, Auto, Auto" ColumnSpacing="8">
+                <Border Grid.Column="0" Theme="{StaticResource CardBorder}" Padding="8 0">
+                    <TextBlock Text="{Binding FileWatcherService.WatchedFolder}" />
+                </Border>
+                <ScrollViewer Margin="8 0 0 0" Grid.Column="1">
+                    <u:Breadcrumb ItemsSource="{Binding FileTabs.Breadcrumbs}"/>
+                </ScrollViewer>
+                <DockPanel Grid.Column="2" IsVisible="{Binding !!ProcessService.LastProcess}">
+                    <u:IconButton DockPanel.Dock="Right"
+                                  Padding="4 0"
+                                  Theme="{StaticResource BorderlessIconButton}"
+                                  Height="20"
+                                  Content="{avalonia:MaterialIconExt Kind=CancelOctagon, IconSize=14}"
+                                  Command="{Binding ProcessService.LastProcess.CancelCommand}" />
+
+                    <u:IconButton Theme="{StaticResource BorderlessIconButton}"
+                                  IsLoading="True"
+                                  Height="20">
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Text="{Binding ProcessService.LastProcess.Description}" />
+                            <ProgressBar MinWidth="100"
+                                         Grid.Column="1"
+                                         Value="{Binding ProcessService.LastProcess.CurrentProgress}"
+                                         Maximum="{Binding ProcessService.LastProcess.MaxProgress}"
+                                         Minimum="0"
+                                         IsIndeterminate="{Binding ProcessService.LastProcess.IsMarquee}" />
+                            <TextBlock Grid.Column="2" IsVisible="{Binding !!ProcessService.RunningProcesses.Count}"
+                                       Text="{Binding ProcessService.RunningProcesses.Count, StringFormat='{}[{0}]'}" />
+                        </Grid>
+                        <u:IconButton.Flyout>
+                            <Flyout>
+                                <ItemsControl ItemsSource="{Binding ProcessService.RunningProcesses}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="viewModels:RunningProcessViewModel">
+                                            <Grid ColumnDefinitions="*, Auto, Auto"
+                                                  ColumnSpacing="8"
+                                                  RowDefinitions="Auto, Auto">
+                                                <Grid Grid.Row="0"
+                                                      Grid.Column="0"
+                                                      ColumnDefinitions="*, Auto" 
+                                                      ColumnSpacing="8">
+                                                    <TextBlock Grid.Column="0"
+                                                               Text="{Binding Description}" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding ProgressText}" />    
+                                                </Grid>
+                                                
+                                                <ProgressBar Grid.Row="1"
+                                                             Grid.Column="0"
+                                                             Grid.ColumnSpan="2"
+                                                             IsIndeterminate="{Binding IsMarquee}"
+                                                             Maximum="{Binding MaxProgress}"
+                                                             Minimum="0"
+                                                             Value="{Binding CurrentProgress}" />
+                                                
+                                                <u:IconButton Grid.Row="1"
+                                                              Grid.Column="2"
+                                                              Padding="0"
+                                                              MinHeight="0"
+                                                              HorizontalAlignment="Right"
+                                                              Theme="{StaticResource BorderlessIconButton}"
+                                                              Content="{avalonia:MaterialIconExt CancelOctagon, IconSize=14}"
+                                                              Command="{Binding CancelCommand}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Flyout>
+                        </u:IconButton.Flyout>
+                    </u:IconButton>
+                </DockPanel>
+                <u:IconButton Grid.Column="4"
+                              Theme="{StaticResource BorderlessIconButton}"
+                              Icon="{avalonia:MaterialIconExt Kind=Journal, IconSize=14}"
+                              Command="{Binding OpenLogsJournalDrawerCommand}" />
+                <u:IconButton Grid.Column="5"
+                              Theme="{StaticResource BorderlessIconButton}"
+                              Icon="{avalonia:MaterialIconExt Kind=About, IconForeground=Gray, IconSize=14}">
+                    <u:IconButton.Flyout>
+                        <Flyout>
+                            <DockPanel LastChildFill="False">
+                                <Image DockPanel.Dock="Left" Source="../Assets/FractalSurface.ico" Width="40"
+                                       Height="40" />
+                                <StackPanel Margin="16 0 0 0" DockPanel.Dock="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="NEXUS.Fractal" />
+                                    <TextBlock Text="{Binding Version, StringFormat='Версия: {0}'}" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Flyout>
+                    </u:IconButton.Flyout>
+                </u:IconButton>
+            </Grid>
+        </Border>
+</UserControl>
