@@ -69,6 +69,7 @@ public class EntityNodeViewModel : ReactiveObject
         ExpandToggleCommand = ReactiveCommand.Create<bool>(ExpandToggle);
     }
 
+    public ICommand CloseCommand { get; set; }
     public ICommand RenameCommand { get; }
     public ICommand DeleteCommand { get; }
     public ICommand ExpandToggleCommand { get; }

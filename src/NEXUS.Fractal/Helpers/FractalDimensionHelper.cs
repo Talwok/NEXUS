@@ -16,32 +16,81 @@ public static class FractalDimensionHelper
     /// <returns></returns>
     public static FractalDimensionModel? CalculateBoxCountingDimension(this float[,] heightMap)
     {
-        int width = heightMap.GetLength(1);
         int height = heightMap.GetLength(0);
+        int width = heightMap.GetLength(1);
+        if (width <= 0 || height <= 0) return null;
+
         int minBoxSize = 2;
         int maxBoxSize = Math.Min(width, height) / 2;
-        List<float> logEps = new();
-        List<float> logN = new();
 
+        // Предварительный расчёт log(1/eps) и log(N) без лишних аллокаций
+        var logEps = new List<float>(EstimateCapacity(minBoxSize, maxBoxSize));
+        var logN = new List<float>(logEps.Capacity);
+
+        // Предварительно нормализуем высоты: ищем мин/макс, чтобы избежать избыточных ячеек по Z
+        float minHeight = float.MaxValue, maxHeight = float.MinValue;
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                float h = heightMap[y, x];
+                if (h < minHeight) minHeight = h;
+                if (h > maxHeight) maxHeight = h;
+            }
+        }
+
+        float heightRange = maxHeight - minHeight;
+        bool constantHeight = heightRange == 0f;
+
+        // Размер наибольшей стороны — для нормализации epsilon
+        int maxDim = Math.Max(width, height);
+
+        // Основной цикл по размерам ящиков
         for (int boxSize = minBoxSize; boxSize <= maxBoxSize; boxSize += 2)
         {
-            float epsilon = (float)boxSize / Math.Max(width, height);
-            int boxesX = (int)Math.Ceiling((float)width / boxSize);
-            int boxesY = (int)Math.Ceiling((float)height / boxSize);
-            int boxesZ = (int)Math.Ceiling(1.0 / epsilon);
+            float epsilon = (float)boxSize / maxDim;
+            int boxesX = (width + boxSize - 1) / boxSize; // ceil(width / boxSize) без float
+            int boxesY = (height + boxSize - 1) / boxSize;
 
-            HashSet<(int, int, int)> occupied = new();
+            if (constantHeight)
+            {
+                // Поверхность плоская — все ячейки в одном слое Z
+                logEps.Add((float)Math.Log(1.0 / epsilon));
+                logN.Add((float)Math.Log(boxesX * boxesY));
+                continue;
+            }
+
+            int zScale = (int)(1.0f / epsilon); // масштаб по Z: сколько ячеек в [0,1]
+            // Но лучше основываться на реальном диапазоне:
+            // Каждая Z-ячейка покрывает heightRange / zScale по высоте
+            float zStep = heightRange / zScale;
+
+            // Используем HashSet<long> вместо кортежа — эффективнее по памяти и хэшированию
+            HashSet<long> occupied = new();
 
             for (int by = 0; by < boxesY; by++)
             {
+                int yStart = by * boxSize;
+                int yEnd = Math.Min(yStart + boxSize, height);
+
                 for (int bx = 0; bx < boxesX; bx++)
                 {
-                    for (int y = by * boxSize; y < Math.Min((by + 1) * boxSize, height); y++)
+                    int xStart = bx * boxSize;
+                    int xEnd = Math.Min(xStart + boxSize, width);
+
+                    // Сканируем блок [yStart, yEnd) × [xStart, xEnd)
+                    for (int y = yStart; y < yEnd; y++)
                     {
-                        for (int x = bx * boxSize; x < Math.Min((bx + 1) * boxSize, width); x++)
+                        for (int x = xStart; x < xEnd; x++)
                         {
-                            int bz = (int)(heightMap[y, x] / epsilon);
-                            occupied.Add((bx, by, bz));
+                            float h = heightMap[y, x];
+                            int bz = (int)((h - minHeight) / zStep);
+                            // Защита от граничных случаев (h == maxHeight)
+                            if (bz >= zScale) bz = zScale - 1;
+
+                            // Упаковываем (bx, by, bz) в long (предполагаем, что каждая компонента < 2^21)
+                            long key = ((long)bx << 42) | ((long)by << 21) | (uint)bz;
+                            occupied.Add(key);
                         }
                     }
                 }
@@ -58,6 +107,8 @@ public static class FractalDimensionHelper
             Y = logN,
         };
     }
+
+    private static int EstimateCapacity(int min, int max) => (max - min) / 2 + 1;
 
     /// <summary>
     /// Метод дисперсий (размаха)

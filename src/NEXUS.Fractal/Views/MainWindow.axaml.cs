@@ -6,6 +6,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using DynamicData;
 using Microsoft.Extensions.DependencyInjection;
 using NEXUS.Extensions;
 using NEXUS.Fractal.Controls.Surface;
@@ -52,13 +53,21 @@ public partial class MainWindow : UrsaWindow
             fileTabs.Tabs =
                 new ObservableCollection<EntityNodeViewModel>(
                     fileTree?.SelectedNodes?.Cast<EntityNodeModel>().Select(node =>
-                        new EntityNodeViewModel
+                    {
+                        var viewModel = new EntityNodeViewModel
                         {
                             Name = Path.GetFileName(node.FullPath),
                             FullPath = node.FullPath,
                             IsDirectory = Directory.Exists(node.FullPath),
                             Extension = Path.GetExtension(node.FullPath)
-                        }) ?? []);
+                        };
+                        viewModel.CloseCommand = ReactiveCommand.Create(() =>
+                        {
+                            fileTabs.Tabs.Remove(viewModel);
+                            fileTree.SelectedNodes.Remove(node);
+                        });
+                        return viewModel;
+                    }) ?? []);
 
         }
     }

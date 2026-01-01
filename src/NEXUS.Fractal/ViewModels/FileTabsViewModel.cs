@@ -4,6 +4,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Windows.Input;
 using DynamicData;
 using NEXUS.Fractal.Models;
 using NEXUS.Fractal.Services;
@@ -22,7 +24,11 @@ public class FileTabsViewModel : ViewModelBase
 
         this.WhenAnyValue(vm => vm.SelectedTab)
             .Subscribe(OnTabChanged);
+
+        RemoveTabCommand = ReactiveCommand.Create<EntityNodeViewModel>(tab => Tabs?.Remove(tab));
     }
+
+    public ICommand RemoveTabCommand { get; }
 
     [Reactive]
     public EntityNodeViewModel? SelectedTab { get; set; }

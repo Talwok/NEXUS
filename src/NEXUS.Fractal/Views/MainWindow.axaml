@@ -281,7 +281,8 @@
             </Border>
             <GridSplitter Grid.Column="1" Background="Transparent" />
             <DockPanel Grid.Column="2">
-                <TabControl ItemsSource="{Binding FileTabs.Tabs}"
+                <TabControl Name="FileTabControl" 
+                            ItemsSource="{Binding FileTabs.Tabs}"
                             SelectedItem="{Binding FileTabs.SelectedTab}">
                     <TabControl.Styles>
                         <Style Selector="TabControl">
@@ -347,7 +348,8 @@
                                                   Icon="{avalonia:MaterialIconExt Kind=Close, IconSize=14}"
                                                   Theme="{StaticResource BorderlessIconButton}"
                                                   MinWidth="0"
-                                                  MinHeight="0"/>
+                                                  MinHeight="0"
+                                                  Command="{Binding CloseCommand}" />
                                 </Grid>
                                 
                             </Panel>
