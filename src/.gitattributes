@@ -1,5 +1,0 @@
-*.mdt filter=lfs diff=lfs merge=lfs -text
-*.bcr filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-*.pal filter=lfs diff=lfs merge=lfs -text
-*.nfproj filter=lfs diff=lfs merge=lfs -text
