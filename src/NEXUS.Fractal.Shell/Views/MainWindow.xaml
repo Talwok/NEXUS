@@ -1,0 +1,41 @@
+﻿<hc:Window x:Class="NEXUS.Fractal.Shell.Views.MainWindow"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:prism="http://prismlibrary.com/"
+           xmlns:hc="https://handyorg.github.io/handycontrol"
+           xmlns:explorer1="clr-namespace:NEXUS.Fractal.Explorer;assembly=NEXUS.Fractal.Explorer"
+           xmlns:menu="clr-namespace:NEXUS.Fractal.Menu;assembly=NEXUS.Fractal.Menu"
+           xmlns:viewer="clr-namespace:NEXUS.Fractal.Viewer;assembly=NEXUS.Fractal.Viewer"
+           xmlns:properties="clr-namespace:NEXUS.Fractal.Properties;assembly=NEXUS.Fractal.Properties"
+           xmlns:statusLine="clr-namespace:NEXUS.Fractal.StatusLine;assembly=NEXUS.Fractal.StatusLine"
+           prism:ViewModelLocator.AutoWireViewModel="True"
+           Height="1920" Width="1200"
+           ShowTitle="False">
+    <hc:Window.NonClientAreaContent>
+        <ContentControl prism:RegionManager.RegionName="{x:Static menu:MenuModule.RegionName}"/>
+    </hc:Window.NonClientAreaContent>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="4" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="4" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <ContentControl  Grid.Row="0" Grid.Column="0" prism:RegionManager.RegionName="{x:Static explorer1:ExplorerModule.RegionName}"/>
+        <GridSplitter Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      Grid.Row="0" Grid.Column="1" />
+        <ContentControl Grid.Row="0" Grid.Column="2" prism:RegionManager.RegionName="{x:Static viewer:ViewerModule.RegionName}"/>
+        <GridSplitter Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      Grid.Row="0" Grid.Column="3" />
+        <ContentControl Grid.Row="0" Grid.Column="4" prism:RegionManager.RegionName="{x:Static properties:PropertiesModule.RegionName}"/>
+        
+        <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" prism:RegionManager.RegionName="{x:Static statusLine:StatusLineModule.RegionName}"/>
+        
+    </Grid>
+</hc:Window>

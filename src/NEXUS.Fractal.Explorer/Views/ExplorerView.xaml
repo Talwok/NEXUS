@@ -1,0 +1,130 @@
+﻿<UserControl x:Class="NEXUS.Fractal.Explorer.Views.ExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:NEXUS.Fractal.Explorer.Views"
+             xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:viewModels="clr-namespace:NEXUS.Fractal.Explorer.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDark.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <DockPanel Background="Transparent">
+
+        <Grid DockPanel.Dock="Top">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ComboBox Grid.Column="0"
+                      ItemsSource="{Binding ExplorerTypes}"
+                      SelectedItem="{Binding SelectedExplorerTypePair}"
+                      Style="{StaticResource ComboBox.Small}"
+                      DisplayMemberPath="Name">
+            </ComboBox>
+            <ToolBar OverflowMode="Always" Grid.Column="1">
+                <ToolBar.Style>
+                    <Style TargetType="ToolBar" BasedOn="{StaticResource ToolBarBaseStyle}">
+                        <Setter Property="Opacity" Value="0" />
+                        <Setter Property="HorizontalAlignment" Value="Right" />
+                        <Style.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DockPanel}}"
+                                Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1"
+                                                             Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0"
+                                                             Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToolBar.Style>
+                <ToggleButton ToolTip="Поиск по всем элементам" Name="SearchToggle">
+                    <wpf:MaterialIcon Kind="Search" />
+                </ToggleButton>
+                <Button ToolTip="Найти выбранный элемент в дереве">
+                    <wpf:MaterialIcon Kind="TargetVariant" />
+                </Button>
+                <Button ToolTip="Развернуть выбранные элементы">
+                    <wpf:MaterialIcon Kind="ExpandHorizontal" />
+                </Button>
+                <Button ToolTip="Свернуть выбранные элементы">
+                    <wpf:MaterialIcon Kind="CollapseHorizontal" />
+                </Button>
+                <Button ToolTip="Опции">
+                    <wpf:MaterialIcon Kind="DotsVertical" />
+                </Button>
+
+            </ToolBar>
+        </Grid>
+
+        <hc:ElementGroup DockPanel.Dock="Top"
+                         Visibility="{Binding IsChecked, ElementName=SearchToggle, Converter={StaticResource Boolean2VisibilityConverter}}"
+                         Orientation="Horizontal" Layout="Stack">
+            <hc:ElementGroup.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </hc:ElementGroup.ItemsPanel>
+            <Button Grid.Column="0" ToolTip="Поиск">
+                <wpf:MaterialIcon Kind="Search" />
+            </Button>
+            <hc:TextBox Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        hc:InfoElement.Placeholder="Поиск по названию"
+                        Text="{Binding SearchText}" />
+            <Button Grid.Column="2" ToolTip="Перейти к следующему элементу">
+                <wpf:MaterialIcon Kind="ChevronDown" />
+            </Button>
+            <Button Grid.Column="3" ToolTip="Перейти к предыдущему элементу">
+                <wpf:MaterialIcon Kind="ChevronUp" />
+            </Button>
+        </hc:ElementGroup>
+
+        <Grid>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding !IsInitialized, Converter={StaticResource Boolean2VisibilityConverter}}">
+                <TextBlock Text="Не выбрана текущая рабочая директория" TextWrapping="Wrap" />
+                <Button Command="{Binding SelectFolderCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <wpf:MaterialIcon Kind="Folder"/>
+                        <TextBlock VerticalAlignment="Center" Margin="8 0" Text="Выбрать папку"/> 
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <TreeView Visibility="{Binding IsInitialized, Converter={StaticResource Boolean2VisibilityConverter}}">
+
+            </TreeView>
+        </Grid>
+    </DockPanel>
+</UserControl>
