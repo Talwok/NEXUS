@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:NEXUS.Fractal.Explorer.Views"
              xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:hc="https://handyorg.github.io/handycontrol"
-             xmlns:viewModels="clr-namespace:NEXUS.Fractal.Explorer.ViewModels"
+             xmlns:project="clr-namespace:NEXUS.Fractal.Core.ViewModels.Project;assembly=NEXUS.Fractal.Core"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:NEXUS.Fractal.Core.Behaviors;assembly=NEXUS.Fractal.Core"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
@@ -21,66 +22,51 @@
 
     <DockPanel Background="Transparent">
 
-        <Grid DockPanel.Dock="Top">
+        <ToolBar DockPanel.Dock="Top" OverflowMode="Always">
+            <!--<ToolBar.Style>
+                <Style TargetType="ToolBar" BasedOn="{StaticResource ToolBarBaseStyle}">
+                    <Setter Property="Opacity" Value="0" />
+                    <Style.Triggers>
+                        <DataTrigger
+                            Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DockPanel}}"
+                            Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1"
+                                                         Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0"
+                                                         Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ToolBar.Style>-->
+            <ToggleButton ToolTip="Поиск по всем элементам" Name="SearchToggle">
+                <wpf:MaterialIcon Kind="Search" />
+            </ToggleButton>
+            <Button ToolTip="Найти выбранный элемент в дереве">
+                <wpf:MaterialIcon Kind="TargetVariant" />
+            </Button>
+            <Button ToolTip="Добавить элементы" Command="{Binding ImportCommand}">
+                <wpf:MaterialIcon Kind="FileImport" />
+            </Button>
+            <Button ToolTip="Удалить выбранные элементы" Command="{Binding RemoveSelectedCommand}">
+                <wpf:MaterialIcon Kind="TrashCan" />
+            </Button>
+            <Button ToolTip="Опции">
+                <wpf:MaterialIcon Kind="DotsVertical" />
+            </Button>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <ComboBox Grid.Column="0"
-                      ItemsSource="{Binding ExplorerTypes}"
-                      SelectedItem="{Binding SelectedExplorerTypePair}"
-                      Style="{StaticResource ComboBox.Small}"
-                      DisplayMemberPath="Name">
-            </ComboBox>
-            <ToolBar OverflowMode="Always" Grid.Column="1">
-                <ToolBar.Style>
-                    <Style TargetType="ToolBar" BasedOn="{StaticResource ToolBarBaseStyle}">
-                        <Setter Property="Opacity" Value="0" />
-                        <Setter Property="HorizontalAlignment" Value="Right" />
-                        <Style.Triggers>
-                            <DataTrigger
-                                Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DockPanel}}"
-                                Value="True">
-                                <DataTrigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1"
-                                                             Duration="0:0:0.1" />
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.EnterActions>
-                                <DataTrigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0"
-                                                             Duration="0:0:0.1" />
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.ExitActions>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ToolBar.Style>
-                <ToggleButton ToolTip="Поиск по всем элементам" Name="SearchToggle">
-                    <wpf:MaterialIcon Kind="Search" />
-                </ToggleButton>
-                <Button ToolTip="Найти выбранный элемент в дереве">
-                    <wpf:MaterialIcon Kind="TargetVariant" />
-                </Button>
-                <Button ToolTip="Развернуть выбранные элементы">
-                    <wpf:MaterialIcon Kind="ExpandHorizontal" />
-                </Button>
-                <Button ToolTip="Свернуть выбранные элементы">
-                    <wpf:MaterialIcon Kind="CollapseHorizontal" />
-                </Button>
-                <Button ToolTip="Опции">
-                    <wpf:MaterialIcon Kind="DotsVertical" />
-                </Button>
-
-            </ToolBar>
-        </Grid>
+        </ToolBar>
 
         <hc:ElementGroup DockPanel.Dock="Top"
                          Visibility="{Binding IsChecked, ElementName=SearchToggle, Converter={StaticResource Boolean2VisibilityConverter}}"
@@ -113,18 +99,76 @@
         </hc:ElementGroup>
 
         <Grid>
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding !IsInitialized, Converter={StaticResource Boolean2VisibilityConverter}}">
-                <TextBlock Text="Не выбрана текущая рабочая директория" TextWrapping="Wrap" />
-                <Button Command="{Binding SelectFolderCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <wpf:MaterialIcon Kind="Folder"/>
-                        <TextBlock VerticalAlignment="Center" Margin="8 0" Text="Выбрать папку"/> 
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-            <TreeView Visibility="{Binding IsInitialized, Converter={StaticResource Boolean2VisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding !IsInitialized, Converter={StaticResource Boolean2VisibilityConverter}}">
+                <!-- <wpf:MaterialIcon Kind="FileDocumentError" Width="160" /> -->
+                <Image Width="160" Source="pack://application:,,,/NEXUS.Fractal.Core;component/Resources/FractalSurface.ico"/>
 
-            </TreeView>
+                <TextBlock Margin="0 16 0 16"
+                           HorizontalAlignment="Center" TextWrapping="Wrap" Width="200"
+                           Text="Для начала работы создайте проект или откройте уже существующий"  />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Command="{Binding CreateProjectCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <wpf:MaterialIcon Kind="FileDocumentAdd" />
+                            <TextBlock VerticalAlignment="Center" Margin="8 0" Text="Создать" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2" Command="{Binding OpenProjectCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <wpf:MaterialIcon Kind="FileDocument" />
+                            <TextBlock VerticalAlignment="Center" Margin="8 0" Text="Открыть" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                
+            </StackPanel>
+            
+            <ListBox Visibility="{Binding IsInitialized, Converter={StaticResource Boolean2VisibilityConverter}}"
+                     ItemsSource="{Binding ProjectService.Entities}"
+                     SelectedItem="{Binding SelectedEntity}"
+                     SelectionMode="Extended">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectionChanged">
+                        <b:InvokeCommandAction Command="{Binding SelectionChangedCommand}" PassEventArgsToCommand="True"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type project:ProjectEntityViewModel}">
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <wpf:MaterialIcon Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" 
+                                              Kind="MountainOutline"
+                                              Width="30"/>
+                            <Grid Grid.Column="2" Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" FontWeight="Bold" Text="{Binding Name}"/>
+                                <TextBlock Grid.Column="2" Foreground="SlateGray" Text="{Binding LastModified}"/>
+                            </Grid>
+                            <TextBlock Grid.Column="2" Foreground="SlateGray" Grid.Row="2" Text="{Binding Id}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>        
+            </ListBox>
+            
         </Grid>
     </DockPanel>
 </UserControl>

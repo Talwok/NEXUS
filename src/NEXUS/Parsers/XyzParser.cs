@@ -5,12 +5,12 @@ namespace NEXUS.Parsers;
 
 public static class XyzParser
 {
-    public static async Task<List<XyzFrame>> Parse(string filePath)
+    public static List<XyzFrame> Parse(string filePath)
     {
         if (!File.Exists(filePath))
             throw new FileNotFoundException($"XYZ file not found: {filePath}");
 
-        await using var stream = File.Open(filePath, FileMode.Open);
+        using var stream = File.Open(filePath, FileMode.Open);
         using var reader = new StreamReader(stream);
         return ParseStream(reader);
     }

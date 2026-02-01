@@ -9,7 +9,7 @@
            xmlns:properties="clr-namespace:NEXUS.Fractal.Properties;assembly=NEXUS.Fractal.Properties"
            xmlns:statusLine="clr-namespace:NEXUS.Fractal.StatusLine;assembly=NEXUS.Fractal.StatusLine"
            prism:ViewModelLocator.AutoWireViewModel="True"
-           Height="1920" Width="1200"
+           Height="700" Width="1280"
            ShowTitle="False">
     <hc:Window.NonClientAreaContent>
         <ContentControl prism:RegionManager.RegionName="{x:Static menu:MenuModule.RegionName}"/>

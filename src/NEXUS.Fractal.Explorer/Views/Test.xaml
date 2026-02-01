@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="NEXUS.Fractal.Explorer.Views.Test"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             mc:Ignorable="d"
+             d:DesignWidth="400">
+    <Grid Margin="4">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <wpf:MaterialIcon Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" 
+                          Kind="MountainOutline"
+                          Width="30"/>
+        <Grid Grid.Column="2" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" FontWeight="Bold" Text="3d Data File"/>
+            <TextBlock Grid.Column="2" Foreground="SlateGray" Text="30.01.2026 18:22:30"/>
+        </Grid>
+        <TextBlock Grid.Column="2" Foreground="SlateGray" Grid.Row="2" Text="6F9619FF-8B86-D011-B42D-00CF4FC964FF"/>
+    </Grid>
+</UserControl>

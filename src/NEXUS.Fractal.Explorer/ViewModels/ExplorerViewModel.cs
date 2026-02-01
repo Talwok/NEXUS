@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.MemoryMappedFiles;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables.Fluent;
-using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 using NEXUS.BaseClasses;
-using NEXUS.Fractal.Core.Models.EventPayloads;
+using NEXUS.Fractal.Core.Models.EventPayloads.Project;
+using NEXUS.Fractal.Core.Services.Project;
+using NEXUS.Fractal.Core.ViewModels.Project;
 using NEXUS.Fractal.Explorer.Models;
-using NEXUS.Fractal.Explorer.Services;
 using Prism.Commands;
 using Prism.Events;
 
@@ -18,9 +17,11 @@ namespace NEXUS.Fractal.Explorer.ViewModels;
 
 public partial class ExplorerViewModel : ObservableBaseObject
 {
-    private readonly ExplorerService _explorerService;
-        
-    private readonly PubSubEvent<SelectFolderEventPayload> _selectFolderEvent;
+    private readonly PubSubEvent<OpenProjectEventPayload> _openProjectEvent;
+    private readonly PubSubEvent<CreateProjectEventPayload> _createProjectEvent;
+    private readonly PubSubEvent<SelectProjectEntityEventPayload> _selectionEvent;
+    private readonly PubSubEvent<ImportProjectEntityEventPayload> _importProjectEntityEvent;
+    private readonly PubSubEvent<RemoveProjectEntityEventPayload> _removeProjectEntityEvent;
     
     [ObservableProperty]
     private ExplorerTypeRecord _selectedExplorerTypePair;
@@ -30,51 +31,91 @@ public partial class ExplorerViewModel : ObservableBaseObject
 
     [ObservableProperty]
     private bool _isInitialized;
-    
-    public ExplorerViewModel(ExplorerService explorerService, IEventAggregator eventAggregator)
+
+    [ObservableProperty]
+    private ProjectEntityViewModel? _selectedEntity;
+
+
+    public ExplorerViewModel(IEventAggregator eventAggregator, ProjectService projectService)
     {
-        _explorerService = explorerService;
+        ProjectService = projectService;
         
-        _selectFolderEvent = eventAggregator.GetEvent<PubSubEvent<SelectFolderEventPayload>>();
-        
-        eventAggregator
-            .GetEvent<PubSubEvent<OnFolderSelectedEventPayload>>()
-            .Subscribe(OnFolderSelected)
-            .DisposeWith(Disposable);
+        _openProjectEvent = eventAggregator.GetEvent<PubSubEvent<OpenProjectEventPayload>>();
+        _createProjectEvent = eventAggregator.GetEvent<PubSubEvent<CreateProjectEventPayload>>();
+        _selectionEvent = eventAggregator.GetEvent<PubSubEvent<SelectProjectEntityEventPayload>>();
+        _importProjectEntityEvent = eventAggregator.GetEvent<PubSubEvent<ImportProjectEntityEventPayload>>();
+        _removeProjectEntityEvent = eventAggregator.GetEvent<PubSubEvent<RemoveProjectEntityEventPayload>>();
         
         IsInitialized = false;
         
-        ExplorerTypes =
-        [
-            new ExplorerTypeRecord("Проект", ExplorerType.Project),
-            new ExplorerTypeRecord("Файлы", ExplorerType.Files)
-        ];
-            
-        SelectedExplorerTypePair = ExplorerTypes.First();
-
-        SelectFolderCommand = new DelegateCommand(SelectFolder);
-    }
-
-    private async void OnFolderSelected(OnFolderSelectedEventPayload obj)
-    {
-        try
-        {
-            await _explorerService.InitializeByFolder(obj.FolderPath);
-            IsInitialized = true;
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e);
-        }
-    }
-
-    private void SelectFolder()
-    {
-        _selectFolderEvent.Publish(new SelectFolderEventPayload());
-    }
-
-    public ICommand SelectFolderCommand { get; set; } 
+        eventAggregator.GetEvent<PubSubEvent<OnProjectOpenedEventPayload>>()
+            .Subscribe(_ => IsInitialized = true)
+            .DisposeWith(Disposable);
         
-    public IEnumerable<ExplorerTypeRecord> ExplorerTypes { get; }
+        OpenProjectCommand = new DelegateCommand(OpenProject);
+        CreateProjectCommand = new DelegateCommand(CreateProject);
+        ImportCommand = new DelegateCommand(Import);
+        RemoveSelectedCommand = new DelegateCommand(RemoveSelected);
+        SelectionChangedCommand = new DelegateCommand<SelectionChangedEventArgs>(OnSelectionChanged);
+    }
+
+    public ProjectService ProjectService { get; }
+    
+    public ICommand OpenProjectCommand { get; } 
+    public ICommand CreateProjectCommand { get; }
+    public ICommand ImportCommand { get; }
+    public ICommand RemoveSelectedCommand { get;  }
+    
+    public ICommand SelectionChangedCommand { get; }
+    
+    
+    private void OpenProject()
+    {
+        IsInitialized = false;
+        _openProjectEvent.Publish(new OpenProjectEventPayload());
+    }
+
+    private void CreateProject()
+    {
+        IsInitialized = false;
+        _createProjectEvent.Publish(new CreateProjectEventPayload());
+    }
+
+    private void Import() => 
+        _importProjectEntityEvent.Publish(new ImportProjectEntityEventPayload());
+
+    private void OnSelectionChanged(SelectionChangedEventArgs args)
+    {
+        if (SelectedEntity == null) 
+            return;
         
+        var alreadySelectedIds = ProjectService.SelectedEntities.Select(vm => vm.Id).ToList();
+        List<ProjectEntityViewModel> innerAddList = [];
+        foreach (var item in args.AddedItems.Cast<ProjectEntityViewModel>())
+        {
+            if (!alreadySelectedIds.Contains(item.Id))
+            {
+                innerAddList.Add(item);
+            }
+        } 
+        
+        ProjectService.SelectedEntities.AddRange(innerAddList);
+        
+        foreach (var item in args.RemovedItems.Cast<ProjectEntityViewModel>())
+        {
+            if (alreadySelectedIds.Contains(item.Id))
+            {
+                ProjectService.SelectedEntities.Remove(item);
+            }
+        } 
+        
+        _selectionEvent.Publish(new SelectProjectEntityEventPayload(SelectedEntity, ProjectService.SelectedEntities));
+    }
+    
+    private void RemoveSelected()
+    {
+        if (SelectedEntity == null) 
+            return;
+        _removeProjectEntityEvent.Publish(new RemoveProjectEntityEventPayload(ProjectService.SelectedEntities.Select(ent => ent.Id).ToList()));
+    }
 }

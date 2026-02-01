@@ -24,7 +24,13 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Button Grid.Column="0" 
+        <Label Grid.Column="0" Visibility="{Binding ProjectName, Converter={StaticResource Object2VisibilityConverter}}" >
+            <StackPanel Orientation="Horizontal">
+                <wpf:MaterialIcon Kind="FileDocument"/>
+                <TextBlock Margin="8 0 0 0" Text="{Binding ProjectName}"/>
+            </StackPanel>
+        </Label>
+        <Button Grid.Column="1" 
                 Background="Transparent" 
                 BorderThickness="0" 
                 Visibility="{Binding HasActions, Converter={StaticResource Boolean2VisibilityConverter}}">

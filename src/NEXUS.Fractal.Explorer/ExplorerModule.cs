@@ -1,5 +1,4 @@
-﻿using NEXUS.Fractal.Explorer.Services;
-using NEXUS.Fractal.Explorer.ViewModels;
+﻿using NEXUS.Fractal.Explorer.ViewModels;
 using NEXUS.Fractal.Explorer.Views;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -43,7 +42,7 @@ namespace NEXUS.Fractal.Explorer
         
         private void RegisterServices(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterSingleton<ExplorerService>();
+            //containerRegistry.RegisterSingleton<ExplorerService>();
         }
     }
 }

@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d" 
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:models="clr-namespace:NEXUS.Fractal.Menu.Models"
+             xmlns:wpf="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              prism:ViewModelLocator.AutoWireViewModel="True" >
     <UserControl.Resources>
         <ResourceDictionary>
@@ -20,17 +22,35 @@
                 <Image Width="20" Source="pack://application:,,,/NEXUS.Fractal.Core;component/Resources/FractalSurface.ico"/>
             </MenuItem.Header>
         </MenuItem>
-        <MenuItem Header="Файл">
-            <MenuItem Header="Выбрать папку" Command="{Binding SelectFolderCommand}" />
-            <MenuItem Header="Недавние" />
+        <MenuItem Header="Файл" Icon="{wpf:MaterialIconExt Kind=FileDocument}">
+            <MenuItem Header="Создать новый проект" Command="{Binding CreateProjectCommand}" Icon="{wpf:MaterialIconExt Kind=FileDocumentAdd}"/>
+            <MenuItem Header="Открыть проект" Command="{Binding OpenProjectCommand}" Icon="{wpf:MaterialIconExt Kind=FileDocument}"/>
+            <MenuItem Header="Недавние" ItemsSource="{Binding RecentProjectsService.Items}" Icon="{wpf:MaterialIconExt Kind=Recent}" >
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Header" Value="{Binding FolderPath}" />
+                        <Setter Property="Command" Value="{Binding DataContext.OpenRecentProjectCommand, RelativeSource={RelativeSource AncestorType=Menu}}" />
+                        <Setter Property="CommandParameter" Value="{Binding FolderPath}" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="Сохранить проект" Command="{Binding SaveProjectCommand}" Icon="{wpf:MaterialIconExt Kind=ContentSave}"/>
+            <MenuItem Header="Сохранить проект как" Command="{Binding SaveAsProjectCommand}" Icon="{wpf:MaterialIconExt Kind=ContentSaveEdit}"/>
+            <Separator/>
+            <MenuItem Header="Импорт" Command="{Binding ImportCommand}" Icon="{wpf:MaterialIconExt Kind=FileImport}"/>
+            <Separator/>
+            <MenuItem Header="Закрыть" Command="{Binding CloseAppCommand}" Icon="{wpf:MaterialIconExt Kind=ExitRun}"/>
         </MenuItem>
-        <MenuItem Header="Обработка">
+        <MenuItem Header="Обработка" Icon="{wpf:MaterialIconExt Kind=LayersEdit}">
             <MenuItem Header="Матричные фильтры" />
             <MenuItem Header="Выравнивание" />
         </MenuItem>
-        <MenuItem Header="Расчёты">
+        <MenuItem Header="Расчёты" Icon="{wpf:MaterialIconExt Kind=Summation}">
             <MenuItem Header="Фрактальная размерность" />
             <MenuItem Header="5 Высот и 5 глубин" />
+        </MenuItem>
+        <MenuItem Header="Инструменты" Icon="{wpf:MaterialIconExt Kind=Tools}">
         </MenuItem>
     </Menu>
 </UserControl>

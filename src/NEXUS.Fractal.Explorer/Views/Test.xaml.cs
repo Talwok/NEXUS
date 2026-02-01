@@ -2,9 +2,9 @@
 
 namespace NEXUS.Fractal.Explorer.Views;
 
-public partial class ExplorerView : UserControl
+public partial class Test : UserControl
 {
-    public ExplorerView()
+    public Test()
     {
         InitializeComponent();
     }

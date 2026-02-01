@@ -1,4 +1,5 @@
-﻿using NEXUS.Fractal.Menu.Views;
+﻿using NEXUS.Fractal.Menu.Services;
+using NEXUS.Fractal.Menu.Views;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
@@ -33,6 +34,7 @@ namespace NEXUS.Fractal.Menu
         
         private void RegisterServices(IContainerRegistry containerRegistry)
         {
+            containerRegistry.RegisterSingleton<RecentProjectsService>();
             // containerRegistry.RegisterSingleton<ExplorerService>();
         }
     }

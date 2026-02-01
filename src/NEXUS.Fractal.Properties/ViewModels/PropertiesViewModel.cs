@@ -3,24 +3,37 @@ using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables.Fluent;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using NEXUS.BaseClasses;
+using NEXUS.Fractal.Core.Models.EventPayloads.Project;
+using NEXUS.Fractal.Core.Services.Project;
+using NEXUS.Fractal.Core.ViewModels.Project;
+using Prism.Events;
 
 namespace NEXUS.Fractal.Properties.ViewModels
 {
-    public class PropertiesViewModel : BindableBase
+    public partial class PropertiesViewModel : ObservableBaseObject
     {
-        private string _message;
-
-        public string Message
+        [ObservableProperty]
+        private ProjectEntityViewModel? _selectedProjectEntity;
+        
+        public PropertiesViewModel(IEventAggregator eventAggregator, ProjectService projectService)
         {
-            get { return _message; }
-            set { SetProperty(ref _message, value); }
+            ProjectService = projectService;
+
+            eventAggregator.GetEvent<PubSubEvent<SelectProjectEntityEventPayload>>()
+                .Subscribe(SelectProjectEntity)
+                .DisposeWith(Disposable);
         }
-
-        public PropertiesViewModel()
+        
+        public ProjectService ProjectService { get; }
+        
+        private void SelectProjectEntity(SelectProjectEntityEventPayload payload)
         {
-            Message = "View A from your Prism Module";
+            SelectedProjectEntity = payload.ProjectEntity;
         }
     }
 }

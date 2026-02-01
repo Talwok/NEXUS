@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using NEXUS.Fractal.Core.Services.Project;
 using NEXUS.Fractal.Core.Windows;
 using NEXUS.Fractal.Explorer;
 using NEXUS.Fractal.Menu;
@@ -61,6 +62,7 @@ namespace NEXUS.Fractal.Shell
         
         private void RegisterServices(IContainerRegistry containerRegistry)
         {
+            containerRegistry.RegisterSingleton<ProjectService>();
             // containerRegistry.RegisterSingleton<ExplorerService>();
             // containerRegistry.RegisterSingleton<ViewerService>();
         }

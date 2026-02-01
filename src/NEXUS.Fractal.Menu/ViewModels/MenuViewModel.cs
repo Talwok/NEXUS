@@ -1,52 +1,62 @@
-﻿using Prism.Commands;
-using Prism.Mvvm;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Disposables.Fluent;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows;
+using Prism.Commands;
 using System.Windows.Input;
-using Microsoft.Win32;
 using NEXUS.BaseClasses;
-using NEXUS.Fractal.Core.Models.EventPayloads;
+using NEXUS.Fractal.Core.Models.EventPayloads.Project;
+using NEXUS.Fractal.Menu.Services;
 using Prism.Events;
 
 namespace NEXUS.Fractal.Menu.ViewModels
 {
     public class MenuViewModel : ObservableBaseObject
     {
-        private readonly PubSubEvent<OnFolderSelectedEventPayload> _onFolderSelectedEvent;
+        private readonly PubSubEvent<OpenProjectEventPayload> _openProjectEvent;
+        private readonly PubSubEvent<CreateProjectEventPayload> _createProjectEvent;
+        private readonly PubSubEvent<ImportProjectEntityEventPayload> _importProjectEntityEvent;
+        private readonly PubSubEvent<SaveProjectEventPayload> _saveProjectEvent;
 
-        public MenuViewModel(IEventAggregator eventAggregator)
+        public MenuViewModel(IEventAggregator eventAggregator, RecentProjectsService recentProjectsService)
         {
-            _onFolderSelectedEvent = eventAggregator.GetEvent<PubSubEvent<OnFolderSelectedEventPayload>>();
+            RecentProjectsService = recentProjectsService;
             
-            eventAggregator
-                .GetEvent<PubSubEvent<SelectFolderEventPayload>>()
-                .Subscribe(OnSelectFolderEvent)
-                .DisposeWith(Disposable);
+            _openProjectEvent = eventAggregator.GetEvent<PubSubEvent<OpenProjectEventPayload>>();
+            _createProjectEvent = eventAggregator.GetEvent<PubSubEvent<CreateProjectEventPayload>>();
+            _importProjectEntityEvent = eventAggregator.GetEvent<PubSubEvent<ImportProjectEntityEventPayload>>();
+            _saveProjectEvent = eventAggregator.GetEvent<PubSubEvent<SaveProjectEventPayload>>();
             
-            SelectFolderCommand = new DelegateCommand(SelectFolder);
+            CreateProjectCommand = new DelegateCommand(CreateProject);
+            OpenProjectCommand = new DelegateCommand(OpenProject);
+            OpenRecentProjectCommand = new DelegateCommand<string>(OpenProject);
+            SaveProjectCommand = new DelegateCommand(SaveProject);
+            ImportCommand = new DelegateCommand(Import);
+            CloseAppCommand = new DelegateCommand(CloseApp);
         }
         
-        public ICommand SelectFolderCommand { get; }
+        public ICommand CreateProjectCommand { get; }
+        public ICommand OpenProjectCommand { get; }
+        public ICommand OpenRecentProjectCommand { get; }
+        public ICommand SaveProjectCommand { get; }
         
-        private void OnSelectFolderEvent(SelectFolderEventPayload obj) 
-            => SelectFolder();
+        public ICommand ImportCommand { get; }
+        public ICommand CloseAppCommand { get; }
+        
+        public RecentProjectsService RecentProjectsService { get; }
+        
+        private void OpenProject() => OpenProject(null);
+        
+        private void OpenProject(string? initialPath) =>
+            _openProjectEvent.Publish(new OpenProjectEventPayload(initialPath));
 
-        private void SelectFolder()
-        {
-            var openFolderDialog = new OpenFolderDialog
-            {
-                AddToRecent = true,
-                Title = "Выберите рабочую папку",
-            };
+        private void CreateProject() => 
+            _createProjectEvent.Publish(new CreateProjectEventPayload());
+        
+        private void Import() => 
+            _importProjectEntityEvent.Publish(new ImportProjectEntityEventPayload());
+        
+        private void SaveProject() => 
+            _saveProjectEvent.Publish(new SaveProjectEventPayload());
 
-            if (openFolderDialog.ShowDialog() is true)
-            {
-                _onFolderSelectedEvent.Publish(new OnFolderSelectedEventPayload(openFolderDialog.FolderName));
-            }
-        }
+        private void CloseApp() => Application.Current.Shutdown();
+        
     }
 }

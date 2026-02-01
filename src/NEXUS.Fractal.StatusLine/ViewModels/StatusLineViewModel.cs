@@ -1,17 +1,14 @@
 ﻿#nullable enable
-using Prism.Commands;
-using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables.Fluent;
-using System.Text;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 using NEXUS.BaseClasses;
-using NEXUS.Fractal.Core.Models.EventPayloads;
+using NEXUS.Fractal.Core.Models.EventPayloads.MarqueeAction;
+using NEXUS.Fractal.Core.Models.EventPayloads.Project;
 using NEXUS.Fractal.StatusLine.Models;
 using Prism.Events;
 
@@ -30,6 +27,9 @@ namespace NEXUS.Fractal.StatusLine.ViewModels
         [ObservableProperty]
         private bool _hasActions;
 
+        [ObservableProperty]
+        private string _projectName;
+        
         public StatusLineViewModel(IEventAggregator eventAggregator)
         {
             _actionsSource = new SourceCache<ActionModel, Guid>(action => action.Id);
@@ -50,6 +50,16 @@ namespace NEXUS.Fractal.StatusLine.ViewModels
                 .GetEvent<PubSubEvent<MarqueeActionEndEventPayload>>()
                 .Subscribe(OnMarqueeActionEnd)
                 .DisposeWith(Disposable);
+            
+            eventAggregator
+                .GetEvent<PubSubEvent<OnProjectOpenedEventPayload>>()
+                .Subscribe(OnProjectOpened)
+                .DisposeWith(Disposable);
+        }
+
+        private void OnProjectOpened(OnProjectOpenedEventPayload payload)
+        {
+            ProjectName = Path.GetFileNameWithoutExtension(payload.ProjectPath);
         }
 
         private void OnMarqueeActionStart(MarqueeActionStartEventPayload payload)

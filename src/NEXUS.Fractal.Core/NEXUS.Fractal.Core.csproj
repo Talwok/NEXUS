@@ -6,6 +6,8 @@
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <SatelliteResourceLanguages>InvariantCulture</SatelliteResourceLanguages>
+        
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,17 +19,41 @@
       <PackageReference Include="HandyControl" Version="3.5.1" />
       <PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
       <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.2" />
+      <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
       <PackageReference Include="Prism.Wpf" Version="8.1.97" />
       <PackageReference Include="SQLite" Version="3.13.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NEXUS.Fractal.Project\NEXUS.Fractal.Project.csproj" />
       <ProjectReference Include="..\NEXUS\NEXUS.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ViewModels\" />
       <Folder Include="Views\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\data\Palletes\Default.pal">
+        <Link>Palletes\Default.pal</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\Palette.pal">
+        <Link>Palletes\Palette.pal</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\Rainbows.pal">
+        <Link>Palletes\Rainbows.pal</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\Stylish.pal">
+        <Link>Palletes\Stylish.pal</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\data\Palletes\TrueCol.pal">
+        <Link>Palletes\TrueCol.pal</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
